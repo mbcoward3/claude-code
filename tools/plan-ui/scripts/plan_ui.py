@@ -55,7 +55,7 @@ def cmd_stop(args):
 
 
 def cmd_playbook(args):
-    print((common.plugin_root() / "playbook.md").read_text())
+    print((common.plugin_root() / "references" / "playbook.md").read_text())
 
 
 def cmd_serve(args):

@@ -502,7 +502,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send_bytes(data, "text/html; charset=utf-8")
 
     def handle_asset(self, name):
-        p = common.web_dir() / name
+        p = common.assets_dir() / name
         if not p.is_file() or ".." in name:
             return self._err(404, "not found")
         ctype = {

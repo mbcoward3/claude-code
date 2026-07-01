@@ -1,18 +1,8 @@
 # plan-ui — plan authoring playbook
 
 You are writing a **plan** as a self-contained HTML artifact that a human will
-review and annotate in a browser. Optimize for fast, accurate review.
-
-## Loop
-
-1. Write the plan to an HTML file (e.g. `.plan-ui/<name>.html`).
-2. `plan-ui open <file>` — serves it and opens the browser.
-3. `plan-ui poll <file>` — blocks until the human annotates or messages. Never
-   kill a running poll; it waits silently.
-4. Apply the feedback to the file (it live-reloads).
-5. `plan-ui poll <file> --agent-reply "<what you changed>"` — show your response
-   and wait again.
-6. `plan-ui end <file>` — when the human approves or is done.
+review and annotate in a browser. Optimize for fast, accurate review. (The
+review workflow itself — open, poll, apply, reply, end — is in SKILL.md.)
 
 ## Content rules
 

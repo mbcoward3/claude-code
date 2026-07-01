@@ -34,8 +34,8 @@ def plugin_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-def web_dir() -> Path:
-    return plugin_root() / "web"
+def assets_dir() -> Path:
+    return plugin_root() / "assets"
 
 
 def canonical_file(path: str) -> str:

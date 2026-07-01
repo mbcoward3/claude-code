@@ -18,28 +18,33 @@ plugin runs in place.
 
 ## Layout
 
+The directory follows the [Agent Skills](https://agentskills.io) conventions —
+`SKILL.md` at the root with the workflow instructions, `scripts/` for
+executable code, `references/` for docs the agent loads as needed, `assets/`
+for files used in output:
+
 ```
 plan-ui/
-  .claude-plugin/plugin.json    Claude Code plugin manifest
-  agents/openai.yaml            Codex skill metadata (display name, invocation policy)
-  SKILL.md                      the trigger: when to use plan-ui + pointer to the playbook
-  bin/plan-ui                   launcher (added to PATH while the plugin is enabled)
+  SKILL.md                      the skill: trigger description + review workflow
+  references/playbook.md        plan authoring rules (content, layout, design language)
   scripts/
     plan_ui.py                  CLI: open / poll / end / stop / playbook / serve
     server.py                   stdlib HTTP server: sessions, SSE, long-poll, gate, watch
     common.py                   paths, session keys, server discovery, HTTP client
     install-codex.sh            one-command Codex install (symlink into ~/.agents/skills)
-  tests/smoke.sh                end-to-end test of the loop
-  web/
+  assets/
     sdk.js                      review layer injected into the plan document
     chrome.css                  styles for the injected review UI
-  playbook.md                   plan-authoring guidance (`plan-ui playbook`)
+  .claude-plugin/plugin.json    Claude Code plugin manifest
+  agents/openai.yaml            Codex skill metadata (display name, invocation policy)
+  bin/plan-ui                   launcher (added to PATH while the plugin is enabled)
+  tests/smoke.sh                end-to-end test of the loop
 ```
 
-`SKILL.md` sits at the directory root on purpose: Claude Code loads a
-single-skill plugin from a root `SKILL.md`, and a Codex skill is *defined* as a
-directory with `SKILL.md` at its root plus supporting files — so this one
-directory is simultaneously a valid Claude Code plugin and a valid Codex skill.
+Because a skill is *defined* as a directory with a root `SKILL.md` plus
+supporting files, and Claude Code loads a single-skill plugin from a root
+`SKILL.md`, this one directory is simultaneously a spec-shaped Agent Skill and
+a valid Claude Code plugin.
 
 ## Commands
 
