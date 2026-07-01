@@ -119,7 +119,7 @@
 
   function runGate() {
     showMask("checking", "Checking layout…", "Making sure the plan renders cleanly before review.");
-    // Let layout settle (fonts, tailwind JIT) before measuring.
+    // Let layout settle (fonts, late styles) before measuring.
     setTimeout(function () {
       var result = auditLayout();
       api("/gate", { warnings: result.warnings }).catch(function () {});

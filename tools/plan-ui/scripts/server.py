@@ -328,10 +328,8 @@ def stop_watch(key: str):
 # --- artifact rendering ------------------------------------------------------
 
 INJECT = """
-<!-- plan-ui: injected runtime (local, no CDN) -->
+<!-- plan-ui: injected runtime (local, no network) -->
 <script>window.__PLAN_UI__ = {{ key: "{key}", mode: "{mode}" }};</script>
-<script src="/assets/tailwind.js"></script>
-<link rel="stylesheet" href="/assets/daisyui.css">
 <link rel="stylesheet" href="/assets/chrome.css">
 <script defer src="/assets/sdk.js"></script>
 """

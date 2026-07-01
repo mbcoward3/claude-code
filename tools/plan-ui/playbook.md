@@ -45,5 +45,27 @@ The action id and label arrive in your next `poll` as a prompt.
 
 ## Design
 
-Tailwind (v4, JIT) and DaisyUI v5 are injected locally — use their utility
-classes freely. No CDN is required or available; everything renders offline.
+**No frameworks are injected or available — no Tailwind, no CDN.** Put all
+styling in one `<style>` block in your `<head>` so the file is fully
+self-contained and renders identically anywhere.
+
+Follow this design language so every plan looks crisp and consistent:
+
+- **Fonts:** `font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;`
+  code: `ui-monospace, 'SF Mono', Menlo, Consolas, monospace`.
+- **Page:** content in a centered column, `max-width: 820px`, generous padding
+  (`48px 32px`), `line-height: 1.6`, base size `16px`.
+- **Palette:** near-black text `#1c2230` on white; muted `#55606f`; borders
+  `#e6e8ec`; one accent `#e0771b` used sparingly (links, highlights, key
+  numbers); status colors — good `#2f8f4e`, risk `#b54708`, danger `#b42318`.
+- **Spacing:** stick to multiples of 8px. Separate sections with whitespace and
+  a light `border-top`, not heavy boxes.
+- **Structure:** number the steps; put risks / open questions in visually
+  distinct callouts (left border + tinted background, e.g.
+  `border-left: 3px solid #b54708; background: #fff8f1; padding: 12px 16px;`).
+- **Tables** for comparisons: minimal — `border-collapse: collapse`, a bottom
+  border per row, no vertical rules, header in muted small caps.
+- **Code:** dark blocks (`background: #0e1017; color: #e8ecf2; border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto;`).
+- Prefer clean typography and whitespace over decoration. No images or icon
+  fonts; if you need a small diagram, draw it with inline SVG.

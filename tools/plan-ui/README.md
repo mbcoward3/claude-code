@@ -29,13 +29,11 @@ plan-ui/
     hook.py                     ExitPlanMode entry: plan → review UI → decision
     mdrender.py                 dependency-free Markdown → HTML (for plan mode)
     common.py                   paths, session keys, server discovery, HTTP client
-    vendor-assets.sh            refresh the vendored Tailwind/DaisyUI (maintenance)
   tests/smoke.sh                end-to-end test of both modes
   web/
     shell.html                  review frame: artifact iframe + conversation/decision panel
     sdk.js                      annotation SDK injected into the artifact
     chrome.css                  styles for the injected SDK UI
-    tailwind.js / daisyui.css   vendored design system (served locally)
   playbook.md                   plan-authoring guidance (`plan-ui playbook`)
 ```
 
@@ -92,10 +90,12 @@ command. Point Codex at `scripts/plan_ui.py` (see `codex/`).
 - **Python 3.8+** (tested on 3.11). Standard library only — no pip installs.
 - A browser to view the review UI.
 
-Tailwind v4 (browser JIT) and DaisyUI v5 are vendored into `web/` and served
-locally, so agent-authored plans can use their utility classes with no CDN and
-no network. Refresh them with `scripts/vendor-assets.sh` (maintenance-time
-only). The background server exits on its own after 30 idle minutes.
+There are **no CSS frameworks** — no Tailwind, no CDN, no vendored bundles.
+Agents author plans as fully self-contained HTML with an embedded `<style>`
+block, following the compact design language in the playbook. This keeps the
+plugin tiny and means an artifact renders identically whether opened through
+plan-ui or directly from disk. The background server exits on its own after 30
+idle minutes.
 
 ## Tests
 
