@@ -51,11 +51,6 @@ def key_for_file(canonical: str) -> str:
     return hashlib.sha256(canonical.encode()).hexdigest()[:16]
 
 
-def key_for_label(label: str) -> str:
-    """Key for a non-file session (e.g. a plan-mode review) from arbitrary text."""
-    return hashlib.sha256(label.encode()).hexdigest()[:16]
-
-
 # --- server info -------------------------------------------------------------
 
 def read_server_info() -> dict | None:

@@ -21,7 +21,7 @@ import common
 
 
 def cmd_open(args):
-    resp = common.api_post("/api/session", {"file": args.file, "mode": "artifact"})
+    resp = common.api_post("/api/session", {"file": args.file})
     common.print_json(resp)
     if not args.no_open:
         url = resp.get("session", {}).get("url")

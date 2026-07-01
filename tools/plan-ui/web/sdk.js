@@ -6,25 +6,22 @@
        click a marker to edit or delete it before sending
      - floating toolbar: queued count, Send annotations / Approve plan, and a
        status line (sent → agent working → plan updated)
-   Two modes (window.__PLAN_UI__.mode):
-     - "artifact": Send posts feedback to the polling agent; the loop continues.
-     - "plan" (ExitPlanMode hook): Send = Request changes (deny + compiled
-       feedback) and Approve = allow; both are terminal.
-   All requests are same-origin to the local plan-ui server. */
+   Send posts feedback to the polling agent and the loop continues; Approve
+   signs the plan off. All requests are same-origin to the local plan-ui
+   server. */
 (function () {
   "use strict";
 
   var CFG = window.__PLAN_UI__ || {};
   var KEY = CFG.key;
   if (!KEY) return;
-  var MODE = CFG.mode === "plan" ? "plan" : "artifact";
   var API = "/api/" + KEY;
   var STORE_KEY = "plan-ui:" + KEY;
 
   // queue items: { id, text, action, target: {selector, quoted_text}, ts }
   var queue = [];
   var nextId = 1;
-  var terminal = false; // plan mode: decision made
+  var terminal = false; // plan approved or session ended
 
   // ---- utilities ------------------------------------------------------------
 
@@ -355,13 +352,6 @@
     });
   }
 
-  function compileFeedback() {
-    return queue.map(function (a) {
-      var loc = a.target && (a.target.quoted_text || a.target.selector);
-      return loc ? "- (re: " + loc + ") " + a.text : "- " + a.text;
-    }).join("\n");
-  }
-
   // ---- toolbar -------------------------------------------------------------------
 
   var toolbar, statusEl, agentEl, sendBtn, approveBtn;
@@ -392,8 +382,7 @@
   function renderToolbar() {
     if (!toolbar) return;
     var n = queue.length;
-    sendBtn.textContent = (MODE === "plan" ? "Request changes" : "Send annotations") +
-      (n ? " (" + n + ")" : "");
+    sendBtn.textContent = "Send annotations" + (n ? " (" + n + ")" : "");
     sendBtn.disabled = terminal || n === 0;
     approveBtn.disabled = terminal;
     if (terminal) return;
@@ -433,30 +422,20 @@
   function onSend() {
     if (queue.length === 0 || terminal) return;
     closeCard();
-    if (MODE === "plan") {
-      api("/decision", { decision: "deny", feedback: compileFeedback() });
-      finalize("Changes requested — the agent is revising the plan. You can close this tab.", "done");
-    } else {
-      api("/feedback", { prompts: serializeQueue() });
-      setMarkersSent();
-      sentItems = queue;
-      queue = [];
-      saveQueue();
-      setFlag("pending");
-      sentState = "sent";
-      renderToolbar();
-    }
+    api("/feedback", { prompts: serializeQueue() });
+    setMarkersSent();
+    sentItems = queue;
+    queue = [];
+    saveQueue();
+    setFlag("pending");
+    sentState = "sent";
+    renderToolbar();
   }
 
   function onApprove() {
     if (terminal) return;
-    if (MODE === "plan") {
-      api("/decision", { decision: "approve", feedback: "" });
-      finalize("Plan approved — you can close this tab.", "done");
-    } else {
-      api("/feedback", { prompts: [{ text: "Approved.", action: "approve", ts: new Date().toISOString() }] });
-      finalize("Approval sent to the agent.", "done");
-    }
+    api("/feedback", { prompts: [{ text: "Approved.", action: "approve", ts: new Date().toISOString() }] });
+    finalize("Approval sent to the agent.", "done");
   }
 
   // ---- layout gate ------------------------------------------------------------------
@@ -603,7 +582,7 @@
       location.reload();
     });
     es.addEventListener("presence", function (e) {
-      if (MODE === "plan" || terminal) return;
+      if (terminal) return;
       if (e.data === "working" && sentState === "sent") {
         sentState = "working";
         renderToolbar();

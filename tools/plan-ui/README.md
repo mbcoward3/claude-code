@@ -1,42 +1,40 @@
 # plan-ui
 
-A Claude Code / Codex plugin that gives agents and humans a **rich, browser-based
-surface to collaborate on a plan**. It has two entry paths into one review UI:
+A plugin that gives agents and humans a **rich, browser-based surface to
+collaborate on a plan**. The agent authors the plan as an HTML artifact and
+drives `plan-ui open / poll / end`; the human annotates specific steps or lines
+inline in the browser; the agent applies the feedback and the loop repeats until
+the plan is approved.
 
-1. **ExitPlanMode review** (Claude Code, automatic) — when the agent finishes
-   native plan mode, a hook intercepts it, renders the plan, and opens a review
-   UI. You **approve** or **request changes**, and the feedback goes back to the
-   model. (Inspired by [plannotator](https://github.com/backnotprop/plannotator).)
-2. **HTML artifact loop** (Claude Code **and** Codex, manual) — the agent authors
-   a plan as an HTML file and drives `plan-ui open / poll / end`; you annotate
-   specific steps or lines inline and it iterates. (Inspired by
-   [lavish-axi](https://github.com/kunchenguid/lavish-axi).)
+One skill triggers it everywhere: the same `SKILL.md` works natively in both
+**Claude Code** and **Codex** (both support the Agent Skills standard).
 
 Pure Python standard library — **no pip installs, no build step, no CDN**. The
 plugin runs in place.
+
+> Inspired by [lavish-axi](https://github.com/kunchenguid/lavish-axi)'s
+> artifact-review model and [plannotator](https://github.com/backnotprop/plannotator)'s
+> plan-review UX, rebuilt as a single skill-triggered tool.
 
 ## Layout
 
 ```
 plan-ui/
   .claude-plugin/plugin.json    plugin manifest
-  hooks/hooks.json              PermissionRequest → ExitPlanMode → hook.py
-  skills/plan-ui/SKILL.md       trigger + pointer to `plan-ui playbook`
+  skills/plan-ui/SKILL.md       the trigger: when to use plan-ui + pointer to the playbook
   bin/plan-ui                   launcher (added to PATH while the plugin is enabled)
   scripts/
     plan_ui.py                  CLI: open / poll / end / stop / playbook / serve
     server.py                   stdlib HTTP server: sessions, SSE, long-poll, gate, watch
-    hook.py                     ExitPlanMode entry: plan → review UI → decision
-    mdrender.py                 dependency-free Markdown → HTML (for plan mode)
     common.py                   paths, session keys, server discovery, HTTP client
-  tests/smoke.sh                end-to-end test of both modes
+  tests/smoke.sh                end-to-end test of the loop
   web/
     sdk.js                      review layer injected into the plan document
     chrome.css                  styles for the injected review UI
   playbook.md                   plan-authoring guidance (`plan-ui playbook`)
 ```
 
-## Commands (artifact loop)
+## Commands
 
 | Command | Purpose |
 | --- | --- |
@@ -56,30 +54,28 @@ The plan document is the whole UI — there is no sidebar. The reviewer:
 - **Clicks any element or selects text** to attach a comment to that exact spot.
   Every queued annotation stays **visibly marked in place** (highlight + numbered
   chip); clicking a marker reopens it to **edit or delete** before sending.
-- Uses the **floating toolbar** to act: *Send annotations* (or *Request changes*
-  in hook mode) ships everything back; *Approve plan* signs off. A status line
-  tracks the round-trip: queued count → "feedback sent" → "agent is working…" →
-  "plan updated — review the changes" when the revision live-reloads.
+- Uses the **floating toolbar** to act: *Send annotations* ships everything back
+  to the agent; *Approve plan* signs off. A status line tracks the round-trip:
+  queued count → "feedback sent" → "agent is working…" → "plan updated — review
+  the changes" when the revision live-reloads.
 - Unsent annotations survive reloads; agent replies appear above the toolbar.
 
 ## How it works
 
-Sessions are keyed by the plan file's canonical path (artifact mode) or the
-harness session id (hook mode). The first command spawns a background
-`server.py`; subsequent commands and the browser talk to it over HTTP. Feedback
-reaches a waiting `poll` through a long-poll; the browser gets live updates
-(reload, agent replies, presence, gate status) over Server-Sent Events. All
-state lives under `~/.plan-ui/`.
+Sessions are keyed by the plan file's canonical path — no session ids to track.
+The first command spawns a background `server.py`; subsequent commands and the
+browser talk to it over HTTP. Feedback reaches a waiting `poll` through a
+long-poll; the browser gets live updates (reload, agent replies, presence, gate
+status) over Server-Sent Events. All state lives under `~/.plan-ui/`.
 
 The **layout gate** masks the plan in the browser until an automated audit
 (horizontal overflow, clipped text) passes; failures are reported back to the
 agent as `layout_warnings`.
 
 **Harness-agnostic by design:** the core (server, CLI, review SDK) has no
-knowledge of any specific agent product. Harness integrations are thin adapters
-at the edges — `hooks/` wires the ExitPlanMode intercept for Claude Code,
-`codex/` wires the artifact loop for Codex, and any other harness that can run
-a shell command can drive `scripts/plan_ui.py` the same way.
+knowledge of any specific agent product, and the trigger is a standard
+Agent-Skills `SKILL.md`. Any harness that can run a shell command can drive
+`scripts/plan_ui.py` the same way.
 
 ## Install
 
@@ -96,12 +92,18 @@ or load locally for development:
 claude --plugin-dir ./tools/plan-ui
 ```
 
-Enabling the plugin puts `plan-ui` on `PATH`, registers the skill, and wires the
-ExitPlanMode hook (with a 4-day timeout so an unhurried review is never killed
-by the hook runner's default).
+Enabling the plugin puts `plan-ui` on `PATH` and registers the skill.
 
-**Codex** — the artifact loop works from any harness that can run a shell
-command. Point Codex at `scripts/plan_ui.py` (see `codex/`).
+**Codex** — Codex supports the same skills standard. Copy or symlink the plugin
+directory into your skills folder:
+
+```
+ln -s /path/to/plan-ui ~/.codex/skills/plan-ui
+```
+
+Codex discovers `skills/plan-ui/SKILL.md` and triggers it the same way. Since
+Codex does not manage `PATH`, the skill's fallback invocation
+(`python3 <plugin-root>/scripts/plan_ui.py …`) applies.
 
 ## Requirements
 
@@ -121,5 +123,5 @@ idle minutes.
 bash tests/smoke.sh
 ```
 
-Runs both modes end-to-end (session, SDK injection, feedback→poll delivery,
-layout-gate warnings, hook approve/deny decisions) against an isolated HOME.
+Runs the loop end-to-end (session, SDK injection, feedback→poll delivery,
+layout-gate warnings, approve action) against an isolated HOME.

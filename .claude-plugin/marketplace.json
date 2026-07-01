@@ -7,7 +7,7 @@
     {
       "name": "plan-ui",
       "source": "./tools/plan-ui",
-      "description": "Collaborate on plans in a rich, annotatable browser UI. Intercepts ExitPlanMode for plan review (Claude Code) and provides an HTML-artifact annotation loop that also works in Codex. Pure Python stdlib — no dependencies."
+      "description": "Collaborate on plans in a rich, annotatable browser UI. A skill-triggered HTML-artifact review loop: the agent authors the plan, the user annotates it inline, and they iterate to approval. Works in Claude Code and Codex. Pure Python stdlib — no dependencies."
     }
   ]
 }

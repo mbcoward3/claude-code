@@ -2,8 +2,8 @@
 """plan-ui local server — standard library only.
 
 Serves the review UI, injects the annotation SDK into the plan artifact, runs the
-long-poll feedback channel for agents, streams live updates to the browser over
-SSE, and (for the ExitPlanMode hook path) blocks on a human approve/deny decision.
+long-poll feedback channel for agents, and streams live updates to the browser
+over SSE.
 """
 
 from __future__ import annotations
@@ -17,7 +17,6 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
 import common
-from mdrender import md_to_html
 
 # --- status constants --------------------------------------------------------
 
@@ -66,25 +65,20 @@ class Store:
 
     # sessions ----------------------------------------------------------------
 
-    def upsert(self, key: str, file: str, url: str, mode: str, markdown: str | None) -> dict:
+    def upsert(self, key: str, file: str, url: str) -> dict:
         with self._cond:
             sess = self.sessions.get(key)
             if sess is None:
                 sess = {
-                    "key": key, "file": file, "url": url, "mode": mode,
+                    "key": key, "file": file, "url": url,
                     "status": STATUS_OPEN, "gate": GATE_PENDING, "presence": PRESENCE_WAITING,
                     "pending_prompts": [], "layout_warnings": [], "chat": [],
-                    "markdown": markdown, "decision": None,
                 }
                 self.sessions[key] = sess
             else:
                 sess["url"] = url
-                sess["mode"] = mode
                 sess["status"] = STATUS_OPEN
                 sess["gate"] = GATE_PENDING
-                sess["decision"] = None
-                if markdown is not None:
-                    sess["markdown"] = markdown
             sess["updated_at"] = now_ts()
             self._persist()
             self._cond.notify_all()
@@ -200,28 +194,6 @@ class Store:
                 self._cond.notify_all()
         self.broadcast(key, *notify)
 
-    # hook decision -----------------------------------------------------------
-
-    def set_decision(self, key: str, decision: str, feedback: str):
-        with self._cond:
-            sess = self.sessions.get(key)
-            if not sess:
-                return
-            sess["decision"] = {"decision": decision, "feedback": feedback, "ts": now_ts()}
-            sess["updated_at"] = now_ts()
-            self._persist()
-            self._cond.notify_all()
-        self.broadcast(key, "decision", decision)
-
-    def wait_decision(self, key: str, timeout: float | None) -> dict | None:
-        with self._cond:
-            sess = self.sessions.get(key)
-            if sess and sess.get("decision"):
-                return sess["decision"]
-            self._cond.wait(timeout=timeout)
-            sess = self.sessions.get(key)
-            return sess.get("decision") if sess else None
-
     # SSE ---------------------------------------------------------------------
 
     def subscribe(self, key: str) -> queue.Queue:
@@ -325,7 +297,7 @@ def stop_watch(key: str):
 
 INJECT = """
 <!-- plan-ui: injected runtime (local, no network) -->
-<script>window.__PLAN_UI__ = {{ key: "{key}", mode: "{mode}" }};</script>
+<script>window.__PLAN_UI__ = {{ key: "{key}" }};</script>
 <link rel="stylesheet" href="/assets/chrome.css">
 <script defer src="/assets/sdk.js"></script>
 """
@@ -335,7 +307,7 @@ def transform_artifact(sess: dict) -> bytes:
     """Inject the plan-ui runtime into an agent-authored HTML file."""
     with open(sess["file"], "r", encoding="utf-8") as f:
         html = f.read()
-    inject = INJECT.format(key=sess["key"], mode="artifact")
+    inject = INJECT.format(key=sess["key"])
     low = html.lower()
     i = low.find("<head")
     if i >= 0:
@@ -347,38 +319,6 @@ def transform_artifact(sess: dict) -> bytes:
         return (html[:i] + inject + html[i:]).encode()
     return ('<!doctype html><html><head><meta charset="utf-8">' + inject +
             "</head><body>" + html + "</body></html>").encode()
-
-
-PLAN_PROSE = """
-<style>
-  body { margin: 0; background: #fff; }
-  .plan-doc { max-width: 820px; margin: 0 auto; padding: 48px 32px 120px;
-    font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, sans-serif; color: #1c2230; }
-  .plan-doc h1 { font-size: 1.9em; margin: 0 0 .5em; }
-  .plan-doc h2 { font-size: 1.4em; margin: 1.6em 0 .5em; padding-bottom: .2em; border-bottom: 1px solid #e6e8ec; }
-  .plan-doc h3 { font-size: 1.15em; margin: 1.3em 0 .4em; }
-  .plan-doc p, .plan-doc li { margin: .5em 0; }
-  .plan-doc ul, .plan-doc ol { padding-left: 1.4em; }
-  .plan-doc code { background: #f2f3f5; padding: .12em .35em; border-radius: 4px; font-size: .9em; }
-  .plan-doc pre { background: #0e1017; color: #e8ecf2; padding: 14px 16px; border-radius: 8px; overflow-x: auto; }
-  .plan-doc pre code { background: none; padding: 0; color: inherit; }
-  .plan-doc a { color: #c15412; }
-  .plan-doc blockquote { margin: .6em 0; padding: .2em 1em; border-left: 3px solid #e0771b; color: #55606f; }
-  .plan-doc hr { border: none; border-top: 1px solid #e6e8ec; margin: 1.6em 0; }
-</style>
-"""
-
-
-def render_plan(sess: dict) -> bytes:
-    """Render a plan-mode session (markdown) to a reviewable HTML document."""
-    inject = INJECT.format(key=sess["key"], mode="plan")
-    body = md_to_html(sess.get("markdown") or "")
-    return (
-        '<!doctype html><html><head><meta charset="utf-8">'
-        '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        + inject + PLAN_PROSE +
-        '</head><body><article class="plan-doc">' + body + "</article></body></html>"
-    ).encode()
 
 
 # --- HTTP handler ------------------------------------------------------------
@@ -429,8 +369,6 @@ class Handler(BaseHTTPRequestHandler):
         parts = path.strip("/").split("/")
         if len(parts) == 3 and parts[0] == "api" and parts[2] == "state":
             return self.handle_state(parts[1])
-        if len(parts) == 3 and parts[0] == "api" and parts[2] == "await-decision":
-            return self.handle_await_decision(parts[1], q)
         if len(parts) == 2 and parts[0] == "s":
             return self.handle_view(parts[1])
         if len(parts) == 2 and parts[0] == "events":
@@ -457,8 +395,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self.handle_feedback(key)
             if action == "gate":
                 return self.handle_gate(key)
-            if action == "decision":
-                return self.handle_decision(key)
         self._err(404, "not found")
 
     # --- agent API ---
@@ -466,23 +402,15 @@ class Handler(BaseHTTPRequestHandler):
         touch()
         b = self._body()
         file = b.get("file")
-        markdown = b.get("markdown")
-        mode = b.get("mode", "artifact")
-        if mode == "plan":
-            label = b.get("label") or "plan-review"
-            key = common.key_for_label(label)
-            canonical = label
-        else:
-            if not file:
-                return self._err(400, "missing file")
-            canonical = common.canonical_file(file)
-            if not os.path.exists(canonical):
-                return self._err(400, "file does not exist: " + canonical)
-            key = common.key_for_file(canonical)
+        if not file:
+            return self._err(400, "missing file")
+        canonical = common.canonical_file(file)
+        if not os.path.exists(canonical):
+            return self._err(400, "file does not exist: " + canonical)
+        key = common.key_for_file(canonical)
         url = f"{BASE_URL}/s/{key}"
-        sess = STORE.upsert(key, canonical, url, mode, markdown)
-        if mode == "artifact":
-            start_watch(key, canonical)
+        sess = STORE.upsert(key, canonical, url)
+        start_watch(key, canonical)
         nxt = (f"Open {url} in a browser, then run `plan-ui poll {file}` to wait for "
                "feedback. The poll blocks silently until the human responds — never kill it.")
         self._json(200, {"session": _view(sess), "next_step": nxt})
@@ -557,29 +485,6 @@ class Handler(BaseHTTPRequestHandler):
             return self._err(404, "unknown session")
         self._json(200, _full_view(sess))
 
-    # --- hook decision ---
-    def handle_decision(self, key):
-        touch()
-        b = self._body()
-        STORE.set_decision(key, b.get("decision", "deny"), b.get("feedback", ""))
-        self._json(200, {"ok": True})
-
-    def handle_await_decision(self, key, q):
-        touch()
-        timeout_ms = int((q.get("timeout_ms") or ["0"])[0] or 0)
-        poll_begin()
-        try:
-            deadline = time.time() + timeout_ms / 1000 if timeout_ms > 0 else None
-            while True:
-                remaining = None if deadline is None else max(0, deadline - time.time())
-                d = STORE.wait_decision(key, remaining if remaining is None else min(remaining, 30))
-                if d:
-                    return self._json(200, d)
-                if deadline is not None and time.time() >= deadline:
-                    return self._json(200, {"decision": "timeout", "feedback": ""})
-        finally:
-            poll_end()
-
     def handle_stop(self):
         self._json(200, {"server": {"status": "stopping"}})
         threading.Thread(target=self.server.shutdown, daemon=True).start()
@@ -591,7 +496,7 @@ class Handler(BaseHTTPRequestHandler):
         if not sess:
             return self._err(404, "unknown session")
         try:
-            data = render_plan(sess) if sess["mode"] == "plan" else transform_artifact(sess)
+            data = transform_artifact(sess)
         except OSError as e:
             return self._err(500, f"cannot read artifact: {e}")
         self._send_bytes(data, "text/html; charset=utf-8")
@@ -642,7 +547,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def _view(sess: dict) -> dict:
-    return {k: sess[k] for k in ("key", "file", "url", "status", "gate", "presence", "mode")}
+    return {k: sess[k] for k in ("key", "file", "url", "status", "gate", "presence")}
 
 
 def _full_view(sess: dict) -> dict:

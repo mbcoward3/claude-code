@@ -26,8 +26,7 @@ key=$(echo "$out" | jget "d['session']['key']")
 port=$(python3 -c "import json,os;print(json.load(open(os.path.expanduser('~/.plan-ui/server.json')))['port'])")
 base="http://127.0.0.1:$port"
 
-curl -sf "$base/s/$key" | grep -q "__PLAN_UI__" || fail "SDK not injected"
-curl -sf "$base/s/$key" | grep -q 'mode: "artifact"' || fail "mode not injected"
+curl -sf "$base/s/$key" | grep -q "__PLAN_UI__ = { key: \"$key\" }" || fail "SDK not injected"
 curl -sf "$base/assets/sdk.js" >/dev/null || fail "assets not served"
 
 curl -sf -X POST "$base/api/$key/feedback" -H 'Content-Type: application/json' \
@@ -41,35 +40,15 @@ w=$(pu poll "$work/plan.html" --timeout-ms 3000 | jget "d['layout_warnings'][0][
 [ "$w" = "overflow" ] || fail "gate warnings not delivered to poll"
 
 [ "$(pu end "$work/plan.html" | jget "d['session']['status']")" = "ended" ] || fail "end"
-echo "artifact mode: OK"
+echo "artifact loop: OK"
 
-# --- plan (hook) mode ----------------------------------------------------------
+# --- approve action ------------------------------------------------------------
 
-hook_out="$work/hook_out.json"
-echo '{"session_id":"smoke","tool_name":"ExitPlanMode","tool_input":{"plan":"# Plan\n\n1. First step"}}' \
-  | python3 "$plugin/scripts/hook.py" > "$hook_out" 2>/dev/null &
-hook_pid=$!
-sleep 1
-pkey=$(python3 -c "import hashlib;print(hashlib.sha256(b'plan:smoke').hexdigest()[:16])")
-curl -sf "$base/s/$pkey" | grep -q "First step" || fail "plan not rendered"
-curl -sf "$base/s/$pkey" | grep -q 'mode: "plan"' || fail "plan mode not injected"
-curl -sf -X POST "$base/api/$pkey/decision" -H 'Content-Type: application/json' \
-  -d '{"decision":"deny","feedback":"Add a rollback step."}' >/dev/null
-wait "$hook_pid"
-behavior=$(jget "d['hookSpecificOutput']['decision']['behavior']" < "$hook_out")
-message=$(jget "d['hookSpecificOutput']['decision']['message']" < "$hook_out")
-[ "$behavior" = "deny" ] || fail "hook deny behavior"
-[ "$message" = "Add a rollback step." ] || fail "hook deny message"
-
-echo '{"session_id":"smoke2","tool_name":"ExitPlanMode","tool_input":{"plan":"# Plan\n\nShip it."}}' \
-  | python3 "$plugin/scripts/hook.py" > "$hook_out" 2>/dev/null &
-hook_pid=$!
-sleep 1
-akey=$(python3 -c "import hashlib;print(hashlib.sha256(b'plan:smoke2').hexdigest()[:16])")
-curl -sf -X POST "$base/api/$akey/decision" -H 'Content-Type: application/json' \
-  -d '{"decision":"approve"}' >/dev/null
-wait "$hook_pid"
-[ "$(jget "d['hookSpecificOutput']['decision']['behavior']" < "$hook_out")" = "allow" ] || fail "hook approve"
-echo "plan (hook) mode: OK"
+curl -sf -X POST "$base/api/$key/feedback" -H 'Content-Type: application/json' \
+  -d '{"prompts":[{"text":"Approved.","action":"approve"}]}' >/dev/null
+out=$(pu open "$work/plan.html" --no-open)  # reopen so poll works after end test ordering
+act=$(pu poll "$work/plan.html" --timeout-ms 3000 | jget "d['prompts'][0]['action']")
+[ "$act" = "approve" ] || fail "approve action not delivered"
+echo "approve action: OK"
 
 echo "ALL SMOKE TESTS PASSED"
