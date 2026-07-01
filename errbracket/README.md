@@ -1,91 +1,115 @@
 # errbracket
 
 A [golangci-lint **v2** module plugin](https://golangci-lint.run/docs/plugins/module-plugins/)
-(and standalone `go/analysis` tool) that enforces one house rule:
+that enforces one rule:
 
-> Every `%s` inside an `Errorf`-like call must be wrapped in square brackets.
+> Every `%s` inside `fmt.Errorf` must be wrapped in square brackets.
 
 ```go
 fmt.Errorf("cannot open %s", name)    // ✗ flagged
 fmt.Errorf("cannot open [%s]", name)  // ✓ ok
 ```
 
-It ships a **suggested fix**, so `--fix` rewrites offenders automatically. The
-targeted verbs and functions are configurable — `%s`/`fmt.Errorf` are just the
-defaults.
+It ships a suggested fix, so `golangci-lint run --fix` rewrites offenders for
+you. `%d`, `%v`, already-bracketed verbs, and non-`fmt.Errorf` calls are left
+alone. Renamed imports (`import f "fmt"; f.Errorf(...)`) are still caught,
+because the check resolves calls via type information rather than by name.
 
-## How it works
+The whole linter is two short files — [`analyzer.go`](./analyzer.go) (the check)
+and [`plugin.go`](./plugin.go) (golangci-lint registration).
 
-- Resolves the called function through **type information**, so renamed imports
-  (`import f "fmt"; f.Errorf(...)`) are still caught, and unrelated same-named
-  methods are not.
-- Only inspects the format argument when it is a **single string literal**.
-  Verbs come from variables, constants, or concatenated strings are skipped
-  (their source position can't be pinned precisely).
-- Understands `fmt` verb syntax: flags/width/precision (`%-10s`), `*` width, and
-  explicit argument indexes (`%[1]s`) are handled; `%%` is ignored.
-- Only the configured verbs are flagged — `%d`, `%v`, etc. are left untouched
-  unless you add them.
+---
 
-## Use it with golangci-lint
+## Integrating into your existing `.golangci.yml`
 
-golangci-lint's module plugins are compiled into a custom binary. From this
-directory:
+> **The one thing to know:** golangci-lint v2 can't load a plugin into the
+> stock binary. Module plugins are *compiled in*, so you build a small custom
+> golangci-lint binary once and run **that** instead of `golangci-lint`. Your
+> `.golangci.yml` is otherwise unchanged apart from the two additions below.
 
-```bash
-# 1. Build a golangci-lint binary with errbracket baked in (reads .custom-gcl.yml)
-golangci-lint custom      # -> ./bin/custom-gcl
+### 1. Add the linter to your config
 
-# 2. Point your project's .golangci.yml at it (see .golangci.example.yml)
-
-# 3. Lint (and optionally auto-fix)
-./bin/custom-gcl run ./...
-./bin/custom-gcl run --fix ./...
-```
-
-Minimal `.golangci.yml`:
+In your existing `.golangci.yml` (which must be `version: "2"`), enable the
+linter and register it as a custom module. Merge these two keys into what you
+already have:
 
 ```yaml
 version: "2"
+
 linters:
   enable:
+    # ...your existing linters...
     - errbracket
+
   settings:
     custom:
       errbracket:
         type: module
-        description: Enforce bracketed format verbs inside Errorf-like calls.
-        # settings omitted -> defaults: verbs [s], functions [fmt.Errorf@0]
+        description: Enforce bracketed %s inside fmt.Errorf, e.g. [%s].
 ```
 
-See [`.golangci.example.yml`](./.golangci.example.yml) for the full settings
-surface (custom verbs, extra functions like `errors.Wrapf`).
+There is no plugin-specific `settings:` block to fill in — the rule has no knobs.
 
-## Use it standalone (no golangci-lint)
+### 2. Tell `golangci-lint custom` how to build the binary
 
-A `go vet`-style binary is included — handy for editors and lightweight CI:
+Add a `.custom-gcl.yml` next to your `.golangci.yml` (one already lives in this
+repo you can copy). Set `version` to the golangci-lint version your team uses:
+
+```yaml
+version: v2.5.0        # match your golangci-lint version
+name: custom-gcl
+destination: ./bin
+plugins:
+  - module: github.com/mbcoward3/errbracket
+    version: v0.1.0    # a tagged release once you publish the module
+    # For local development against a checkout instead of a release, drop
+    # `version` and point at the path:
+    #   path: ../path/to/errbracket
+```
+
+### 3. Build the custom binary
 
 ```bash
-go run github.com/mbcoward3/errbracket/cmd/errbracket ./...
-go run github.com/mbcoward3/errbracket/cmd/errbracket -fix ./...
+golangci-lint custom     # reads .custom-gcl.yml -> ./bin/custom-gcl
 ```
 
-## Configuration
+### 4. Run `./bin/custom-gcl` wherever you run `golangci-lint`
 
-| Setting            | Type   | Default                              | Meaning                                                        |
-| ------------------ | ------ | ------------------------------------ | -------------------------------------------------------------- |
-| `verbs`            | `[]string` | `["s"]`                          | Single-letter format verbs that must be bracketed.             |
-| `functions`        | `[]object` | `[{name: "fmt.Errorf", formatArg: 0}]` | Errorf-like functions to inspect.                    |
-| `functions[].name` | `string`   | —                                | Import path + `.` + function name (e.g. `github.com/pkg/errors.Wrapf`). |
-| `functions[].formatArg` | `int` | —                                | Zero-based index of the format-string argument.               |
+It's a drop-in replacement — same flags, same config:
+
+```bash
+./bin/custom-gcl run ./...
+./bin/custom-gcl run --fix ./...     # auto-wrap offenders
+```
+
+Update the invocation in the places that call the linter:
+
+- **Makefile / scripts:** replace `golangci-lint run` with `./bin/custom-gcl run`.
+- **pre-commit:** point the hook's `entry` at `./bin/custom-gcl`.
+- **CI:** build it in a step (`golangci-lint custom`) and call `./bin/custom-gcl`,
+  or use the [`golangci-lint-custom` action](https://github.com/marketplace/actions/golangci-lint-custom).
+  Cache `./bin` keyed on the plugin version to skip rebuilds.
+
+---
+
+## Extending it (optional)
+
+To cover another `Errorf`-like wrapper, add one line to `checkedFuncs` in
+[`analyzer.go`](./analyzer.go) — the key is `importpath.FuncName`, the value is
+the zero-based index of the format-string argument:
+
+```go
+var checkedFuncs = map[string]int{
+	"fmt.Errorf":                     0,
+	"github.com/pkg/errors.Wrapf":    1, // Wrapf(err, format, ...)
+}
+```
 
 ## Develop
 
 ```bash
-make test          # unit tests: diagnostics + suggested-fix golden files
-make demo PKG=./...
-make fix  PKG=./...
+go test ./...   # analysistest: diagnostics (testdata/src/a) + autofix golden (testdata/src/fix)
 ```
 
-Adjust the module path (`github.com/mbcoward3/errbracket`) in `go.mod`,
-`cmd/errbracket/main.go`, and the config files if you host it elsewhere.
+If you host this somewhere other than `github.com/mbcoward3/errbracket`, update
+the module path in `go.mod`, `plugin.go`'s `URL`, and `.custom-gcl.yml`.
