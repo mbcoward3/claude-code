@@ -129,6 +129,7 @@ skill/
 
 ## For agents
 
-The `skill/SKILL.md` file describes when to use plan-ui and the exact command
-loop. In short: author an HTML plan, `open` it, `poll` for feedback, edit, reply
-and poll again, then `end`.
+The `skill/SKILL.md` file is a thin trigger: it tells an agent *when* to reach
+for plan-ui and points it at `plan-ui playbook`, which carries the full loop and
+authoring rules. In short: author an HTML plan, `open` it, `poll` for feedback,
+edit, reply and poll again, then `end`.
