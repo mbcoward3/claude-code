@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
@@ -14,18 +15,8 @@ import (
 	"time"
 )
 
-// cmdServer runs the HTTP server. With --foreground it blocks; otherwise it is
-// intended to be spawned detached by ensureServer.
-func cmdServer(args []string) error {
-	port := 0
-	for i := 0; i < len(args); i++ {
-		if args[i] == "--port" && i+1 < len(args) {
-			if n, err := strconv.Atoi(args[i+1]); err == nil {
-				port = n
-			}
-			i++
-		}
-	}
+// runServer runs the HTTP server in the foreground.
+func runServer(port int) error {
 	srv, ln, err := newServer(port)
 	if err != nil {
 		return err
@@ -33,14 +24,8 @@ func cmdServer(args []string) error {
 	return srv.serve(ln)
 }
 
-// cmdOpen creates/resumes a session and opens the browser.
-func cmdOpen(args []string) error {
-	if len(args) == 0 {
-		return fmt.Errorf("usage: plan-ui open <file> [--no-open]")
-	}
-	file := args[0]
-	noOpen := hasFlag(args, "--no-open")
-
+// runOpen creates/resumes a session and opens the browser.
+func runOpen(file string, noOpen bool) error {
 	if err := ensureServer(); err != nil {
 		return err
 	}
@@ -60,15 +45,8 @@ func cmdOpen(args []string) error {
 	return nil
 }
 
-// cmdPoll long-polls for human feedback.
-func cmdPoll(args []string) error {
-	if len(args) == 0 {
-		return fmt.Errorf("usage: plan-ui poll <file> [--agent-reply \"...\"] [--timeout-ms N]")
-	}
-	file := args[0]
-	agentReply := flagValue(args, "--agent-reply")
-	timeoutMs := flagValue(args, "--timeout-ms")
-
+// runPoll long-polls for human feedback.
+func runPoll(file, agentReply string, timeoutMs int) error {
 	if err := ensureServer(); err != nil {
 		return err
 	}
@@ -76,8 +54,8 @@ func cmdPoll(args []string) error {
 	if agentReply != "" {
 		q += "&agent_reply=" + urlQueryEscape(agentReply)
 	}
-	if timeoutMs != "" {
-		q += "&timeout_ms=" + urlQueryEscape(timeoutMs)
+	if timeoutMs > 0 {
+		q += "&timeout_ms=" + strconv.Itoa(timeoutMs)
 	}
 	resp, err := apiGet("/api/poll" + q)
 	if err != nil {
@@ -87,14 +65,11 @@ func cmdPoll(args []string) error {
 	return nil
 }
 
-func cmdEnd(args []string) error {
-	if len(args) == 0 {
-		return fmt.Errorf("usage: plan-ui end <file>")
-	}
+func runEnd(file string) error {
 	if err := ensureServer(); err != nil {
 		return err
 	}
-	resp, err := apiPost("/api/end", map[string]any{"file": args[0]})
+	resp, err := apiPost("/api/end", map[string]any{"file": file})
 	if err != nil {
 		return err
 	}
@@ -102,7 +77,7 @@ func cmdEnd(args []string) error {
 	return nil
 }
 
-func cmdStop(args []string) error {
+func runStop() error {
 	info, err := readServerInfo()
 	if err != nil {
 		printJSON(map[string]any{"server": map[string]any{"status": "not-running"}})
@@ -116,7 +91,7 @@ func cmdStop(args []string) error {
 	return nil
 }
 
-func cmdPlaybook(args []string) error {
+func runPlaybook() error {
 	fmt.Println(mustAsset("playbook.md"))
 	return nil
 }
@@ -235,46 +210,8 @@ func printJSON(v any) {
 	fmt.Println(string(data))
 }
 
-func hasFlag(args []string, name string) bool {
-	for _, a := range args {
-		if a == name {
-			return true
-		}
-	}
-	return false
-}
-
-func flagValue(args []string, name string) string {
-	for i := 0; i < len(args); i++ {
-		if args[i] == name && i+1 < len(args) {
-			return args[i+1]
-		}
-	}
-	return ""
-}
-
 func urlQueryEscape(s string) string {
-	// Minimal escaping sufficient for file paths and short messages.
-	var b bytes.Buffer
-	for _, r := range s {
-		switch {
-		case r == ' ':
-			b.WriteString("%20")
-		case r == '&':
-			b.WriteString("%26")
-		case r == '?':
-			b.WriteString("%3F")
-		case r == '#':
-			b.WriteString("%23")
-		case r == '=':
-			b.WriteString("%3D")
-		case r == '%':
-			b.WriteString("%25")
-		default:
-			b.WriteRune(r)
-		}
-	}
-	return b.String()
+	return url.QueryEscape(s)
 }
 
 func openBrowser(url string) error {
