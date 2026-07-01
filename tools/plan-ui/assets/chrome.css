@@ -1,0 +1,149 @@
+/* plan-ui chrome — styles injected into the artifact iframe for the annotation
+   SDK (highlight, annotation card, toolbar, layout-gate mask). Scoped under
+   .plan-ui- prefixes so they never collide with the artifact's own styles. */
+
+.plan-ui-hover-outline {
+  outline: 2px solid #f4c95d !important;
+  outline-offset: 2px;
+  cursor: crosshair;
+}
+
+.plan-ui-selected-outline {
+  outline: 2px solid #e0771b !important;
+  outline-offset: 2px;
+}
+
+.plan-ui-card {
+  position: fixed;
+  z-index: 2147483000;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  background: #1f2430;
+  color: #f5f5f5;
+  border: 1px solid #3a4150;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.plan-ui-card__head {
+  padding: 8px 12px;
+  background: #171b24;
+  border-bottom: 1px solid #3a4150;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plan-ui-card__target {
+  padding: 6px 12px;
+  color: #9aa4b2;
+  font-size: 11px;
+  border-bottom: 1px solid #2a3140;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plan-ui-card__body {
+  padding: 10px 12px;
+}
+
+.plan-ui-card textarea {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  background: #12151d;
+  color: #f5f5f5;
+  border: 1px solid #3a4150;
+  border-radius: 6px;
+  padding: 8px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.plan-ui-card__foot {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  border-top: 1px solid #2a3140;
+}
+
+.plan-ui-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.plan-ui-btn--primary { background: #e0771b; color: #fff; }
+.plan-ui-btn--ghost { background: transparent; color: #9aa4b2; }
+.plan-ui-btn--send { background: #2f8f4e; color: #fff; }
+
+.plan-ui-hint {
+  padding: 0 12px 10px;
+  color: #7b8494;
+  font-size: 11px;
+}
+
+/* Queued-annotation pins in the corner. */
+.plan-ui-queue {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.plan-ui-queue__count {
+  background: #e0771b;
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+/* Layout-gate mask that hides the artifact until the audit passes. */
+.plan-ui-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482000;
+  background: #0e1017;
+  color: #cbd3df;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  text-align: center;
+  padding: 24px;
+}
+
+.plan-ui-mask__spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #3a4150;
+  border-top-color: #e0771b;
+  border-radius: 50%;
+  animation: plan-ui-spin 0.8s linear infinite;
+}
+
+.plan-ui-mask__title { font-size: 16px; font-weight: 700; color: #f5f5f5; }
+.plan-ui-mask__detail { font-size: 13px; max-width: 460px; }
+.plan-ui-mask--error .plan-ui-mask__spinner { display: none; }
+
+@keyframes plan-ui-spin { to { transform: rotate(360deg); } }

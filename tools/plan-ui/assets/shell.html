@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>plan-ui</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    body { display: grid; grid-template-columns: 1fr 360px; background: #0e1017; color: #e8ecf2; }
+
+    .artifact { border: none; width: 100%; height: 100vh; background: #fff; }
+
+    .panel { display: flex; flex-direction: column; height: 100vh; border-left: 1px solid #232a36; background: #12151d; }
+    .panel__head {
+      padding: 12px 14px; border-bottom: 1px solid #232a36;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .brand { font-weight: 700; letter-spacing: .3px; }
+    .badges { display: flex; gap: 6px; }
+    .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: #1c2230; color: #9aa4b2; }
+    .badge[data-presence="listening"] { background: #123524; color: #57d98a; }
+    .badge[data-presence="working"] { background: #3a2a12; color: #f3b95f; }
+    .badge[data-gate="passed"] { background: #123524; color: #57d98a; }
+    .badge[data-gate="failed"] { background: #3a1518; color: #f07a7a; }
+    .badge[data-gate="pending"] { background: #1c2230; color: #9aa4b2; }
+
+    .chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .msg { padding: 9px 11px; border-radius: 10px; font-size: 13px; line-height: 1.45; max-width: 92%; white-space: pre-wrap; word-wrap: break-word; }
+    .msg--agent { background: #1b2431; align-self: flex-start; border: 1px solid #263241; }
+    .msg--human { background: #2a2013; align-self: flex-end; border: 1px solid #3a2c15; }
+    .msg__meta { font-size: 10px; color: #7b8494; margin-bottom: 3px; }
+    .msg__target { font-size: 10px; color: #8a93a2; margin-top: 4px; font-style: italic; }
+
+    .composer { border-top: 1px solid #232a36; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .composer textarea {
+      width: 100%; min-height: 60px; resize: vertical; background: #0c0f16; color: #e8ecf2;
+      border: 1px solid #263241; border-radius: 8px; padding: 8px; font: inherit;
+    }
+    .composer__row { display: flex; gap: 8px; justify-content: flex-end; }
+    button { border: none; border-radius: 8px; padding: 7px 13px; font: inherit; font-weight: 600; cursor: pointer; }
+    .btn--send { background: #e0771b; color: #fff; }
+    .btn--approve { background: #2f8f4e; color: #fff; }
+    .empty { color: #6c7688; font-size: 12px; text-align: center; margin-top: 24px; }
+    .hint { color: #6c7688; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <iframe id="artifact" class="artifact" src="/artifact/__PLAN_UI_KEY__" title="plan"></iframe>
+
+  <aside class="panel" data-plan-ui>
+    <div class="panel__head">
+      <span class="brand">plan-ui</span>
+      <div class="badges">
+        <span class="badge" id="gate" data-gate="pending">layout: pending</span>
+        <span class="badge" id="presence" data-presence="waiting">agent: waiting</span>
+      </div>
+    </div>
+
+    <div class="chat" id="chat">
+      <div class="empty" id="empty">
+        Click any element or select text in the plan to annotate it,
+        or write a message below.
+      </div>
+    </div>
+
+    <div class="composer">
+      <textarea id="composer" placeholder="Message the agent about the plan…"></textarea>
+      <div class="composer__row">
+        <button class="btn--approve" id="approve">Approve plan</button>
+        <button class="btn--send" id="send">Send</button>
+      </div>
+      <span class="hint">Enter to send · Shift+Enter for newline</span>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      var KEY = "__PLAN_UI_KEY__";
+      var API = "/api/" + KEY;
+      var chat = document.getElementById("chat");
+      var empty = document.getElementById("empty");
+      var iframe = document.getElementById("artifact");
+
+      function ts(s) { try { return new Date(s).toLocaleTimeString(); } catch (e) { return ""; } }
+
+      function addMsg(role, content, meta, target) {
+        if (empty) { empty.remove(); empty = null; }
+        var el = document.createElement("div");
+        el.className = "msg msg--" + role;
+        var inner = '<div class="msg__meta">' + (meta || role) + " · " + ts(new Date()) + "</div>";
+        inner += escapeHtml(content);
+        if (target && (target.selector || target.quoted_text)) {
+          inner += '<div class="msg__target">re: ' + escapeHtml(target.quoted_text || target.selector) + "</div>";
+        }
+        el.innerHTML = inner;
+        chat.appendChild(el);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+
+      function setPresence(p) {
+        var b = document.getElementById("presence");
+        b.dataset.presence = p; b.textContent = "agent: " + p;
+      }
+      function setGate(g) {
+        var b = document.getElementById("gate");
+        b.dataset.gate = g; b.textContent = "layout: " + g;
+      }
+
+      // Initial render from stored state.
+      fetch(API + "/state").then(function (r) { return r.json(); }).then(function (s) {
+        if (!s) return;
+        setPresence(s.presence || "waiting");
+        setGate(s.gate || "pending");
+        (s.chat || []).forEach(function (m) {
+          addMsg(m.role === "agent" ? "agent" : "human", m.content, m.role, m.target);
+        });
+      }).catch(function () {});
+
+      // Live updates.
+      var es = new EventSource("/events/" + KEY);
+      es.addEventListener("agent-reply", function (e) { addMsg("agent", e.data, "agent"); });
+      es.addEventListener("presence", function (e) { setPresence(e.data); });
+      es.addEventListener("gate", function (e) { setGate(e.data); });
+      es.addEventListener("reload", function () { iframe.contentWindow.location.reload(); });
+      es.addEventListener("ended", function () { setPresence("ended"); });
+
+      function send(action) {
+        var ta = document.getElementById("composer");
+        var text = ta.value.trim();
+        if (!text && action !== "approve") return;
+        var prompt = {
+          text: text || "Approved.",
+          action: action || "comment",
+          ts: new Date().toISOString(),
+        };
+        addMsg("human", prompt.text, "you");
+        ta.value = "";
+        fetch(API + "/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompts: [prompt] }),
+        }).catch(function () {});
+      }
+
+      document.getElementById("send").onclick = function () { send("comment"); };
+      document.getElementById("approve").onclick = function () { send("approve"); };
+      document.getElementById("composer").addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send("comment"); }
+      });
+    })();
+  </script>
+</body>
+</html>
