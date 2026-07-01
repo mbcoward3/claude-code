@@ -3,17 +3,23 @@
 A [golangci-lint **v2** module plugin](https://golangci-lint.run/docs/plugins/module-plugins/)
 that enforces one rule:
 
-> Every `%s` inside `fmt.Errorf` must be wrapped in square brackets.
+> Every string-formatting verb inside `fmt.Errorf` must be written as `[%s]`.
 
 ```go
-fmt.Errorf("cannot open %s", name)    // ✗ flagged
+fmt.Errorf("cannot open %s", name)    // ✗ -> [%s]
+fmt.Errorf("cannot open %q", name)    // ✗ -> [%s]
+fmt.Errorf("cannot open [%q]", name)  // ✗ -> [%s]
 fmt.Errorf("cannot open [%s]", name)  // ✓ ok
 ```
 
 It ships a suggested fix, so `golangci-lint run --fix` rewrites offenders for
-you. `%d`, `%v`, already-bracketed verbs, and non-`fmt.Errorf` calls are left
-alone. Renamed imports (`import f "fmt"; f.Errorf(...)`) are still caught,
-because the check resolves calls via type information rather than by name.
+you — adding the brackets **and** normalizing the verb (`%q` → `%s`). `%d`,
+`%v`, and non-`fmt.Errorf` calls are left alone. Renamed imports
+(`import f "fmt"; f.Errorf(...)`) are still caught, because the check resolves
+calls via type information rather than by name.
+
+`%v` is deliberately not rewritten: it formats any type, so turning it into
+`%s` would be an unsafe fix (`%s` on a non-`Stringer` value prints `%!s(...)`).
 
 The whole linter is two short files — [`analyzer.go`](./analyzer.go) (the check)
 and [`plugin.go`](./plugin.go) (golangci-lint registration).
@@ -45,7 +51,7 @@ linters:
     custom:
       errbracket:
         type: module
-        description: Enforce bracketed %s inside fmt.Errorf, e.g. [%s].
+        description: Standardize string verbs inside fmt.Errorf as [%s].
 ```
 
 There is no plugin-specific `settings:` block to fill in — the rule has no knobs.
@@ -94,14 +100,27 @@ Update the invocation in the places that call the linter:
 
 ## Extending it (optional)
 
-To cover another `Errorf`-like wrapper, add one line to `checkedFuncs` in
-[`analyzer.go`](./analyzer.go) — the key is `importpath.FuncName`, the value is
-the zero-based index of the format-string argument:
+Both knobs are single-line edits in [`analyzer.go`](./analyzer.go).
+
+To cover another `Errorf`-like wrapper, add to `checkedFuncs` — key is
+`importpath.FuncName`, value is the zero-based index of the format argument:
 
 ```go
 var checkedFuncs = map[string]int{
-	"fmt.Errorf":                     0,
-	"github.com/pkg/errors.Wrapf":    1, // Wrapf(err, format, ...)
+	"fmt.Errorf":                  0,
+	"github.com/pkg/errors.Wrapf": 1, // Wrapf(err, format, ...)
+}
+```
+
+To treat another verb as a string verb (normalized to `[%s]`), add to
+`stringVerbs`. Only do this for verbs that always format a string in your code
+— e.g. adding `'v'` would rewrite `%v` to `%s`, which breaks non-`Stringer`
+arguments:
+
+```go
+var stringVerbs = map[byte]bool{
+	's': true,
+	'q': true,
 }
 ```
 

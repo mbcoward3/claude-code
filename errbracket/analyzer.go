@@ -1,14 +1,17 @@
-// Package errbracket is a golangci-lint analyzer that enforces one rule:
-// every %s inside fmt.Errorf must be wrapped in square brackets.
+// Package errbracket is a golangci-lint analyzer that standardizes string
+// formatting inside fmt.Errorf: every string verb must be written as [%s].
 //
-//	fmt.Errorf("cannot open %s", name)    // flagged
+//	fmt.Errorf("cannot open %s", name)    // -> [%s]
+//	fmt.Errorf("cannot open %q", name)    // -> [%s]
+//	fmt.Errorf("cannot open [%q]", name)  // -> [%s]
 //	fmt.Errorf("cannot open [%s]", name)  // ok
 //
-// It offers a suggested fix, so `golangci-lint run --fix` wraps offenders
-// automatically.
+// It offers a suggested fix, so `golangci-lint run --fix` rewrites offenders
+// automatically (adding brackets and normalizing the verb to s).
 package errbracket
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -19,7 +22,7 @@ import (
 // Analyzer is the errbracket check.
 var Analyzer = &analysis.Analyzer{
 	Name: "errbracket",
-	Doc:  "checks that %s inside fmt.Errorf is wrapped in brackets, e.g. [%s]",
+	Doc:  "checks that string verbs inside fmt.Errorf are written as [%s]",
 	URL:  "https://github.com/mbcoward3/errbracket",
 	Run:  run,
 }
@@ -29,6 +32,15 @@ var Analyzer = &analysis.Analyzer{
 // here — e.g. "github.com/pkg/errors.Wrapf": 1.
 var checkedFuncs = map[string]int{
 	"fmt.Errorf": 0,
+}
+
+// stringVerbs are the format verbs treated as string formatting and normalized
+// to [%s]. %v is intentionally excluded: it prints any type, so rewriting it to
+// %s would be an unsafe fix. Add a verb here only if it always formats a string
+// in your codebase.
+var stringVerbs = map[byte]bool{
+	's': true,
+	'q': true,
 }
 
 func run(pass *analysis.Pass) (any, error) {
@@ -66,10 +78,12 @@ func calleeName(pass *analysis.Pass, call *ast.CallExpr) string {
 	return fn.Pkg().Path() + "." + fn.Name()
 }
 
-// check reports every %s verb in the format literal that isn't already [%s].
+// check reports every string verb in the format literal that isn't already
+// written as [%s], and offers a fix to normalize it.
 func check(pass *analysis.Pass, lit *ast.BasicLit) {
-	// lit.Value keeps the surrounding quotes; %, [, ], and s are single-byte
-	// ASCII, so byte offsets in it map straight onto source positions.
+	// lit.Value keeps the surrounding quotes; %, [, ], and verb letters are
+	// single-byte ASCII, so byte offsets in it map straight onto source
+	// positions.
 	s := lit.Value
 	for i := 0; i < len(s); i++ {
 		if s[i] != '%' {
@@ -90,25 +104,39 @@ func check(pass *analysis.Pass, lit *ast.BasicLit) {
 			break
 		}
 		i = j // resume scanning after this verb
-		if s[j] != 's' {
+		verb := s[j]
+		if !stringVerbs[verb] {
 			continue
 		}
-		if start > 0 && s[start-1] == '[' && j+1 < len(s) && s[j+1] == ']' {
+		bracketed := start > 0 && s[start-1] == '[' && j+1 < len(s) && s[j+1] == ']'
+		if bracketed && verb == 's' {
 			continue // already [%s]
 		}
 
 		startPos := lit.Pos() + token.Pos(start) // at '%'
-		afterPos := lit.Pos() + token.Pos(j+1)   // just past 's'
+		verbPos := lit.Pos() + token.Pos(j)      // at the verb letter
+		afterPos := lit.Pos() + token.Pos(j+1)   // just past the verb letter
+
+		// Build the minimal set of edits to reach [%s]: add brackets if
+		// missing, and rewrite the verb letter to s if it isn't already.
+		var edits []analysis.TextEdit
+		if !bracketed {
+			edits = append(edits,
+				analysis.TextEdit{Pos: startPos, End: startPos, NewText: []byte("[")},
+				analysis.TextEdit{Pos: afterPos, End: afterPos, NewText: []byte("]")},
+			)
+		}
+		if verb != 's' {
+			edits = append(edits, analysis.TextEdit{Pos: verbPos, End: afterPos, NewText: []byte("s")})
+		}
+
 		pass.Report(analysis.Diagnostic{
 			Pos:     startPos,
 			End:     afterPos,
-			Message: "%s in fmt.Errorf must be wrapped in brackets, e.g. [%s]",
+			Message: fmt.Sprintf("string verb %%%c in fmt.Errorf must be written as [%%s]", verb),
 			SuggestedFixes: []analysis.SuggestedFix{{
-				Message: "wrap in brackets",
-				TextEdits: []analysis.TextEdit{
-					{Pos: startPos, End: startPos, NewText: []byte("[")},
-					{Pos: afterPos, End: afterPos, NewText: []byte("]")},
-				},
+				Message:   "standardize as [%s]",
+				TextEdits: edits,
 			}},
 		})
 	}
