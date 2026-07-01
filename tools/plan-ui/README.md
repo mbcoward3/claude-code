@@ -31,9 +31,8 @@ plan-ui/
     common.py                   paths, session keys, server discovery, HTTP client
   tests/smoke.sh                end-to-end test of both modes
   web/
-    shell.html                  review frame: artifact iframe + conversation/decision panel
-    sdk.js                      annotation SDK injected into the artifact
-    chrome.css                  styles for the injected SDK UI
+    sdk.js                      review layer injected into the plan document
+    chrome.css                  styles for the injected review UI
   playbook.md                   plan-authoring guidance (`plan-ui playbook`)
 ```
 
@@ -50,10 +49,23 @@ plan-ui/
 Every agent-facing command prints JSON with a `next_step` field, so the loop is
 self-describing.
 
+## Reviewing a plan (the human side)
+
+The plan document is the whole UI — there is no sidebar. The reviewer:
+
+- **Clicks any element or selects text** to attach a comment to that exact spot.
+  Every queued annotation stays **visibly marked in place** (highlight + numbered
+  chip); clicking a marker reopens it to **edit or delete** before sending.
+- Uses the **floating toolbar** to act: *Send annotations* (or *Request changes*
+  in hook mode) ships everything back; *Approve plan* signs off. A status line
+  tracks the round-trip: queued count → "feedback sent" → "agent is working…" →
+  "plan updated — review the changes" when the revision live-reloads.
+- Unsent annotations survive reloads; agent replies appear above the toolbar.
+
 ## How it works
 
 Sessions are keyed by the plan file's canonical path (artifact mode) or the
-Claude session id (plan mode). The first command spawns a background
+harness session id (hook mode). The first command spawns a background
 `server.py`; subsequent commands and the browser talk to it over HTTP. Feedback
 reaches a waiting `poll` through a long-poll; the browser gets live updates
 (reload, agent replies, presence, gate status) over Server-Sent Events. All
@@ -62,6 +74,12 @@ state lives under `~/.plan-ui/`.
 The **layout gate** masks the plan in the browser until an automated audit
 (horizontal overflow, clipped text) passes; failures are reported back to the
 agent as `layout_warnings`.
+
+**Harness-agnostic by design:** the core (server, CLI, review SDK) has no
+knowledge of any specific agent product. Harness integrations are thin adapters
+at the edges — `hooks/` wires the ExitPlanMode intercept for Claude Code,
+`codex/` wires the artifact loop for Codex, and any other harness that can run
+a shell command can drive `scripts/plan_ui.py` the same way.
 
 ## Install
 

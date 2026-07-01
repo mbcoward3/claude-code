@@ -26,9 +26,9 @@ key=$(echo "$out" | jget "d['session']['key']")
 port=$(python3 -c "import json,os;print(json.load(open(os.path.expanduser('~/.plan-ui/server.json')))['port'])")
 base="http://127.0.0.1:$port"
 
-curl -sf "$base/artifact/$key" | grep -q "__PLAN_UI__" || fail "SDK not injected"
+curl -sf "$base/s/$key" | grep -q "__PLAN_UI__" || fail "SDK not injected"
+curl -sf "$base/s/$key" | grep -q 'mode: "artifact"' || fail "mode not injected"
 curl -sf "$base/assets/sdk.js" >/dev/null || fail "assets not served"
-curl -sf "$base/s/$key" | grep -q "/artifact/$key" || fail "shell not keyed"
 
 curl -sf -X POST "$base/api/$key/feedback" -H 'Content-Type: application/json' \
   -d '{"prompts":[{"text":"tighten step 1","action":"comment","target":{"selector":"p"}}]}' >/dev/null
@@ -51,7 +51,8 @@ echo '{"session_id":"smoke","tool_name":"ExitPlanMode","tool_input":{"plan":"# P
 hook_pid=$!
 sleep 1
 pkey=$(python3 -c "import hashlib;print(hashlib.sha256(b'plan:smoke').hexdigest()[:16])")
-curl -sf "$base/artifact/$pkey" | grep -q "First step" || fail "plan not rendered"
+curl -sf "$base/s/$pkey" | grep -q "First step" || fail "plan not rendered"
+curl -sf "$base/s/$pkey" | grep -q 'mode: "plan"' || fail "plan mode not injected"
 curl -sf -X POST "$base/api/$pkey/decision" -H 'Content-Type: application/json' \
   -d '{"decision":"deny","feedback":"Add a rollback step."}' >/dev/null
 wait "$hook_pid"

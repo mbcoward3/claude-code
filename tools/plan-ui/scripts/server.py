@@ -126,10 +126,6 @@ class Store:
             sess["updated_at"] = now_ts()
             self._persist()
             self._cond.notify_all()
-        # Mirror each annotation to the browser so the shell can display it and,
-        # in plan mode, fold it into the review decision.
-        for p in prompts:
-            self.broadcast(key, "human", json.dumps(p))
 
     def has_feedback(self, key: str) -> bool:
         sess = self.sessions.get(key)
@@ -436,9 +432,7 @@ class Handler(BaseHTTPRequestHandler):
         if len(parts) == 3 and parts[0] == "api" and parts[2] == "await-decision":
             return self.handle_await_decision(parts[1], q)
         if len(parts) == 2 and parts[0] == "s":
-            return self.handle_shell(parts[1])
-        if len(parts) == 2 and parts[0] == "artifact":
-            return self.handle_artifact(parts[1])
+            return self.handle_view(parts[1])
         if len(parts) == 2 and parts[0] == "events":
             return self.handle_events(parts[1])
         if len(parts) == 2 and parts[0] == "assets":
@@ -591,14 +585,8 @@ class Handler(BaseHTTPRequestHandler):
         threading.Thread(target=self.server.shutdown, daemon=True).start()
 
     # --- browser surfaces ---
-    def handle_shell(self, key):
-        sess = STORE.get(key)
-        if not sess:
-            return self._err(404, "unknown session")
-        shell = (common.web_dir() / "shell.html").read_text().replace("__PLAN_UI_KEY__", key)
-        self._send_bytes(shell.encode(), "text/html; charset=utf-8")
-
-    def handle_artifact(self, key):
+    def handle_view(self, key):
+        """Serve the plan document itself — the SDK renders all review UI in-page."""
         sess = STORE.get(key)
         if not sess:
             return self._err(404, "unknown session")
