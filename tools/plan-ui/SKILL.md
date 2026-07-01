@@ -6,6 +6,11 @@ description: >-
   the user will want to review and sign off on: author it as an HTML file, the
   user annotates and comments inline in the browser, and you iterate until they
   approve.
+license: MIT
+compatibility: Requires Python 3.8+ and a local browser to open the review UI. No network access or third-party packages needed.
+metadata:
+  author: mbcoward3
+  version: "0.2.0"
 ---
 
 # plan-ui
