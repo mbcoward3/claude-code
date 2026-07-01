@@ -1,135 +1,87 @@
 # plan-ui
 
-A small CLI that gives agents and humans a **rich, browser-based surface to
-collaborate on a plan**. The agent authors a plan as an HTML artifact; the human
-opens it in a browser, annotates specific steps or lines inline, and sends
-feedback; the agent polls for that feedback and iterates until the plan is
-approved.
+A Claude Code / Codex plugin that gives agents and humans a **rich, browser-based
+surface to collaborate on a plan**. It has two entry paths into one review UI:
 
-Think of it as a richer replacement for plain-text "plan mode": instead of a
-wall of prose, the plan is a document the human can mark up part-by-part.
+1. **ExitPlanMode review** (Claude Code, automatic) — when the agent finishes
+   native plan mode, a hook intercepts it, renders the plan, and opens a review
+   UI. You **approve** or **request changes**, and the feedback goes back to the
+   model. (Inspired by [plannotator](https://github.com/backnotprop/plannotator).)
+2. **HTML artifact loop** (Claude Code **and** Codex, manual) — the agent authors
+   a plan as an HTML file and drives `plan-ui open / poll / end`; you annotate
+   specific steps or lines inline and it iterates. (Inspired by
+   [lavish-axi](https://github.com/kunchenguid/lavish-axi).)
 
-> Inspired by the artifact-review model of
-> [lavish-axi](https://github.com/kunchenguid/lavish-axi), narrowed to the single
-> job of collaborating on a plan, and rebuilt as a self-contained Go binary.
+Pure Python standard library — **no pip installs, no build step, no CDN**. The
+plugin runs in place.
 
-## How it works
+## Layout
 
 ```
-agent writes plan.html
-        │
-        ▼
-  plan-ui open plan.html ──▶ local HTTP server (embedded assets, no CDN)
-        │                          │
-        │                          ├─ serves the plan in an iframe + chat panel
-        │                          ├─ injects the annotation SDK + Tailwind/DaisyUI
-        │                          └─ runs a layout gate (masks until it renders cleanly)
-        ▼
-  human annotates in the browser  ──▶  queued as feedback
-        │
-        ▼
-  plan-ui poll plan.html ──▶ returns { prompts[], layout_warnings[], next_step }
-        │
-        ▼
-  agent edits plan.html (live-reloads) ──▶ poll --agent-reply "…" ──▶ repeat
-        │
-        ▼
-  plan-ui end plan.html
+plan-ui/
+  .claude-plugin/plugin.json    plugin manifest
+  hooks/hooks.json              PermissionRequest → ExitPlanMode → hook.py
+  skills/plan-ui/SKILL.md       trigger + pointer to `plan-ui playbook`
+  bin/plan-ui                   launcher (added to PATH while the plugin is enabled)
+  scripts/
+    plan_ui.py                  CLI: open / poll / end / stop / playbook / serve
+    server.py                   stdlib HTTP server: sessions, SSE, long-poll, gate, watch
+    hook.py                     ExitPlanMode entry: plan → review UI → decision
+    mdrender.py                 dependency-free Markdown → HTML (for plan mode)
+    common.py                   paths, session keys, server discovery, HTTP client
+  web/
+    shell.html                  review frame: artifact iframe + conversation/decision panel
+    sdk.js                      annotation SDK injected into the artifact
+    chrome.css                  styles for the injected SDK UI
+    tailwind.js / daisyui.css   vendored design system (served locally)
+  playbook.md                   plan-authoring guidance (`plan-ui playbook`)
 ```
 
-Sessions are keyed by the plan file's canonical path — there are no session ids
-to track. Every command just takes the file.
-
-## Commands
+## Commands (artifact loop)
 
 | Command | Purpose |
 | --- | --- |
 | `plan-ui open <file> [--no-open]` | Serve a plan artifact and open it in the browser |
-| `plan-ui poll <file> [--agent-reply TEXT] [--timeout-ms N]` | Long-poll for human feedback (blocks silently; never kill it) |
+| `plan-ui poll <file> [--agent-reply T] [--timeout-ms N]` | Long-poll for feedback (blocks; never kill it) |
 | `plan-ui end <file>` | End a session |
 | `plan-ui stop` | Shut down the background server |
 | `plan-ui playbook` | Print the plan-authoring playbook |
 
 Every agent-facing command prints JSON with a `next_step` field, so the loop is
-self-describing — the tool tells the agent what to do next.
+self-describing.
 
-### Feedback shape
+## How it works
 
-```json
-{
-  "prompts": [
-    { "text": "make this concrete",
-      "action": "comment",
-      "target": { "selector": "li:nth-of-type(2)", "quoted_text": "do the thing" } }
-  ],
-  "layout_warnings": [],
-  "next_step": "Apply the feedback to the plan file, then run `plan-ui poll …`"
-}
-```
+Sessions are keyed by the plan file's canonical path (artifact mode) or the
+Claude session id (plan mode). The first command spawns a background
+`server.py`; subsequent commands and the browser talk to it over HTTP. Feedback
+reaches a waiting `poll` through a long-poll; the browser gets live updates
+(reload, agent replies, presence, gate status) over Server-Sent Events. All
+state lives under `~/.plan-ui/`.
 
-`target` locates exactly which element or text the comment refers to, so edits
-can be precise. `action` is `comment`, `approve`, `request-changes`, or a custom
-id from a `data-plan-action` button in the plan.
+The **layout gate** masks the plan in the browser until an automated audit
+(horizontal overflow, clipped text) passes; failures are reported back to the
+agent as `layout_warnings`.
 
-## Layout gate
+## Install
 
-The browser runs an automated layout audit (horizontal overflow, clipped text)
-and the plan stays **masked until it passes**. Failures are reported back to the
-agent on the next `poll` as `layout_warnings`, so a broken layout never reaches
-the human silently.
-
-## Design system
-
-Tailwind CSS v4 (in-browser JIT via `@tailwindcss/browser`) and DaisyUI v5 are
-**vendored into the binary** and served locally. No CDN is required or contacted
-at runtime — the plan renders fully offline, and identically whether opened
-directly in a browser or through plan-ui (the SDK is injected at serve time, not
-saved into the file).
-
-## Build
+**Claude Code** — load locally for development:
 
 ```
-go build -o plan-ui .
+claude --plugin-dir ./tools/plan-ui
 ```
 
-Requirements:
+or install from a marketplace once published. Enabling the plugin puts `plan-ui`
+on `PATH`, registers the skill, and wires the ExitPlanMode hook.
 
-- **Runtime:** none beyond the binary itself and a browser to view the UI. The
-  only Go module dependency is [`kong`](https://github.com/alecthomas/kong) for
-  CLI parsing; everything else is the standard library.
-- **Build-time (assets):** Node/npm is used **once** to vendor
-  `@tailwindcss/browser` and `daisyui` into `assets/` (see
-  `scripts/vendor-assets.sh`). This is not needed to run the tool, only to
-  refresh those two files.
+**Codex** — the artifact loop works from any harness that can run a shell
+command. Point Codex at `scripts/plan_ui.py` (see `codex/`).
 
-## Layout of the source
+## Requirements
 
-```
-main.go            Kong CLI definition (commands, flags)
-commands.go        client-side command implementations + server discovery/spawn
-server.go          HTTP server: session API, SSE, long-poll, file watching, lifecycle
-session.go         session model + persisted store (~/.plan-ui/state.json)
-coordination.go    in-memory poll waiters + SSE fan-out
-gate.go            layout-gate state machine
-transform.go       injects the SDK + styles into the served artifact
-assets.go          go:embed of the browser assets
-paths.go           ~/.plan-ui paths, canonical file resolution, session keys
-httputil.go        JSON / SSE helpers
-detach_*.go        platform-specific detached-process spawn
-assets/
-  shell.html       outer frame: artifact iframe + conversation/reply panel
-  sdk.js           annotation SDK injected into the artifact iframe
-  chrome.css       styles for the injected SDK UI
-  playbook.md      plan-authoring guidance (printed by `plan-ui playbook`)
-  tailwind.js      vendored Tailwind JIT runtime
-  daisyui.css      vendored DaisyUI
-skill/
-  SKILL.md         the agent-facing skill that triggers plan-ui use
-```
+- **Python 3.8+** (tested on 3.11). Standard library only.
+- A browser to view the review UI.
 
-## For agents
-
-The `skill/SKILL.md` file is a thin trigger: it tells an agent *when* to reach
-for plan-ui and points it at `plan-ui playbook`, which carries the full loop and
-authoring rules. In short: author an HTML plan, `open` it, `poll` for feedback,
-edit, reply and poll again, then `end`.
+`tailwind.js` and `daisyui.css` are placeholders pending a one-time vendor step;
+plan mode renders without them (it ships its own prose styles), and artifact mode
+works with whatever styles the agent's HTML brings.

@@ -44,6 +44,9 @@
     .btn--approve { background: #2f8f4e; color: #fff; }
     .empty { color: #6c7688; font-size: 12px; text-align: center; margin-top: 24px; }
     .hint { color: #6c7688; font-size: 11px; }
+    .banner { padding: 12px 14px; margin: 0; font-size: 13px; font-weight: 600; text-align: center; }
+    .banner--approved { background: #123524; color: #57d98a; }
+    .banner--changes { background: #3a2a12; color: #f3b95f; }
   </style>
 </head>
 <body>
@@ -65,13 +68,15 @@
       </div>
     </div>
 
-    <div class="composer">
+    <div class="banner" id="banner" hidden></div>
+
+    <div class="composer" id="composer-box">
       <textarea id="composer" placeholder="Message the agent about the plan…"></textarea>
       <div class="composer__row">
         <button class="btn--approve" id="approve">Approve plan</button>
         <button class="btn--send" id="send">Send</button>
       </div>
-      <span class="hint">Enter to send · Shift+Enter for newline</span>
+      <span class="hint" id="hint">Enter to send · Shift+Enter for newline</span>
     </div>
   </aside>
 
@@ -82,6 +87,8 @@
       var chat = document.getElementById("chat");
       var empty = document.getElementById("empty");
       var iframe = document.getElementById("artifact");
+      var MODE = "artifact";
+      var annotations = []; // human feedback collected this session (for plan-mode decisions)
 
       function ts(s) { try { return new Date(s).toLocaleTimeString(); } catch (e) { return ""; } }
 
@@ -114,9 +121,30 @@
         b.dataset.gate = g; b.textContent = "layout: " + g;
       }
 
+      function applyMode(mode) {
+        MODE = mode || "artifact";
+        if (MODE === "plan") {
+          document.getElementById("send").textContent = "Request changes";
+          document.getElementById("hint").textContent =
+            "Annotate the plan or write a note, then Approve or Request changes.";
+          document.getElementById("presence").hidden = true; // no polling agent in hook mode
+        }
+      }
+
+      function finalize(kind, text) {
+        var banner = document.getElementById("banner");
+        banner.hidden = false;
+        banner.className = "banner banner--" + (kind === "approve" ? "approved" : "changes");
+        banner.textContent = kind === "approve"
+          ? "Plan approved — you can close this tab."
+          : "Changes requested — Claude will revise the plan.";
+        document.getElementById("composer-box").style.display = "none";
+      }
+
       // Initial render from stored state.
       fetch(API + "/state").then(function (r) { return r.json(); }).then(function (s) {
         if (!s) return;
+        applyMode(s.mode);
         setPresence(s.presence || "waiting");
         setGate(s.gate || "pending");
         (s.chat || []).forEach(function (m) {
@@ -131,29 +159,64 @@
       es.addEventListener("gate", function (e) { setGate(e.data); });
       es.addEventListener("reload", function () { iframe.contentWindow.location.reload(); });
       es.addEventListener("ended", function () { setPresence("ended"); });
+      es.addEventListener("human", function (e) {
+        try {
+          var p = JSON.parse(e.data);
+          annotations.push(p);
+          addMsg("human", p.text, "you", p.target);
+        } catch (err) {}
+      });
 
-      function send(action) {
-        var ta = document.getElementById("composer");
-        var text = ta.value.trim();
-        if (!text && action !== "approve") return;
-        var prompt = {
-          text: text || "Approved.",
-          action: action || "comment",
-          ts: new Date().toISOString(),
-        };
-        addMsg("human", prompt.text, "you");
-        ta.value = "";
-        fetch(API + "/feedback", {
+      function post(path, body) {
+        return fetch(API + path, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompts: [prompt] }),
+          body: JSON.stringify(body),
         }).catch(function () {});
       }
 
-      document.getElementById("send").onclick = function () { send("comment"); };
-      document.getElementById("approve").onclick = function () { send("approve"); };
+      // Compile the composer note + all collected annotations into one feedback blob.
+      function compileFeedback(note) {
+        var parts = [];
+        if (note) parts.push(note);
+        annotations.forEach(function (a) {
+          var loc = a.target && (a.target.quoted_text || a.target.selector);
+          parts.push(loc ? "- (re: " + loc + ") " + a.text : "- " + a.text);
+        });
+        return parts.join("\n");
+      }
+
+      function onApprove() {
+        var note = document.getElementById("composer").value.trim();
+        if (MODE === "plan") {
+          post("/decision", { decision: "approve", feedback: note });
+          finalize("approve");
+        } else {
+          addMsg("human", note || "Approved.", "you");
+          document.getElementById("composer").value = "";
+          post("/feedback", { prompts: [{ text: note || "Approved.", action: "approve" }] });
+        }
+      }
+
+      function onSend() {
+        var note = document.getElementById("composer").value.trim();
+        if (MODE === "plan") {
+          var feedback = compileFeedback(note);
+          if (!feedback) return;
+          post("/decision", { decision: "deny", feedback: feedback });
+          finalize("changes");
+        } else {
+          if (!note) return;
+          addMsg("human", note, "you");
+          document.getElementById("composer").value = "";
+          post("/feedback", { prompts: [{ text: note, action: "comment" }] });
+        }
+      }
+
+      document.getElementById("send").onclick = onSend;
+      document.getElementById("approve").onclick = onApprove;
       document.getElementById("composer").addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send("comment"); }
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(); }
       });
     })();
   </script>
