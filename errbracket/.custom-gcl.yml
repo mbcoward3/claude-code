@@ -1,0 +1,20 @@
+# Build config for `golangci-lint custom`, which produces a golangci-lint
+# binary with errbracket compiled in.
+#
+# Run:   golangci-lint custom
+# Result: ./bin/custom-gcl  (use it exactly like golangci-lint)
+#
+# `version` must match the golangci-lint version you build against (v2+).
+version: v2.5.0
+name: custom-gcl
+destination: ./bin
+
+plugins:
+  # Local checkout (this repo). `path` makes golangci-lint hash the source and
+  # rebuild automatically when you edit the plugin.
+  - module: github.com/mbcoward3/errbracket
+    path: .
+
+  # Published usage instead of a local path — pin a tag and drop `path`:
+  # - module: github.com/mbcoward3/errbracket
+  #   version: v0.1.0
