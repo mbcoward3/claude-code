@@ -1,0 +1,13 @@
+{
+  "name": "plan-ui",
+  "owner": {
+    "name": "mbcoward3"
+  },
+  "plugins": [
+    {
+      "name": "plan-ui",
+      "source": "./tools/plan-ui",
+      "description": "Collaborate on plans in a rich, annotatable browser UI. Intercepts ExitPlanMode for plan review (Claude Code) and provides an HTML-artifact annotation loop that also works in Codex. Pure Python stdlib — no dependencies."
+    }
+  ]
+}

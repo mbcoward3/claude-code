@@ -18,21 +18,20 @@ import common
 
 
 def emit(behavior: str, message: str = ""):
-    """Print the PermissionRequest decision and exit."""
+    """Print the PermissionRequest decision and exit.
+
+    On deny, `decision.message` carries the human's feedback to the model —
+    this matches what plannotator ships in production.
+    """
     decision = {"behavior": behavior}
     if message:
-        # Deliver the human's feedback to the model. Field names vary across
-        # Claude Code versions; set the documented one plus common fallbacks.
         decision["message"] = message
-    out = {
+    print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PermissionRequest",
             "decision": decision,
         }
-    }
-    if message:
-        out["systemMessage"] = message
-    print(json.dumps(out))
+    }))
     sys.exit(0)
 
 

@@ -257,6 +257,44 @@ STORE = Store()
 WATCHERS: dict[str, threading.Event] = {}
 _watch_lock = threading.Lock()
 
+# Idle tracking: the server exits after IDLE_AFTER seconds with no API activity,
+# no connected browsers, and no agent poll blocked waiting.
+IDLE_AFTER = 30 * 60
+_activity_lock = threading.Lock()
+_last_active = time.time()
+_active_polls = 0
+
+
+def touch():
+    global _last_active
+    with _activity_lock:
+        _last_active = time.time()
+
+
+def poll_begin():
+    global _active_polls
+    with _activity_lock:
+        _active_polls += 1
+
+
+def poll_end():
+    global _active_polls, _last_active
+    with _activity_lock:
+        _active_polls -= 1
+        _last_active = time.time()
+
+
+def is_idle() -> bool:
+    with _activity_lock:
+        if _active_polls > 0:
+            return False
+        if time.time() - _last_active < IDLE_AFTER:
+            return False
+    with STORE._lock:
+        if any(STORE.sse.values()):
+            return False
+    return True
+
 
 def start_watch(key: str, canonical: str):
     """Broadcast a reload when the artifact file changes (mtime poll, stdlib only)."""
@@ -273,12 +311,18 @@ def start_watch(key: str, canonical: str):
                 m = os.path.getmtime(canonical)
             except OSError:
                 continue
-            nonlocal_last = last
-            if m > nonlocal_last:
+            if m > last:
                 last = m
                 STORE.broadcast(key, "reload", "")
 
     threading.Thread(target=loop, daemon=True).start()
+
+
+def stop_watch(key: str):
+    with _watch_lock:
+        stop = WATCHERS.pop(key, None)
+    if stop:
+        stop.set()
 
 
 # --- artifact rendering ------------------------------------------------------
@@ -427,6 +471,7 @@ class Handler(BaseHTTPRequestHandler):
 
     # --- agent API ---
     def handle_session(self):
+        touch()
         b = self._body()
         file = b.get("file")
         markdown = b.get("markdown")
@@ -459,10 +504,12 @@ class Handler(BaseHTTPRequestHandler):
         sess = STORE.end(key) if key else None
         if not sess:
             return self._err(404, "no session")
+        stop_watch(key)
         STORE.broadcast(key, "ended", "")
         self._json(200, {"session": _view(sess), "next_step": "Session ended."})
 
     def handle_poll(self, q):
+        touch()
         file = (q.get("file") or [""])[0]
         if not file:
             return self._err(400, "missing file")
@@ -475,30 +522,35 @@ class Handler(BaseHTTPRequestHandler):
         timeout_ms = int((q.get("timeout_ms") or ["0"])[0] or 0)
         STORE.set_presence(key, PRESENCE_LISTENING)
 
-        deadline = time.time() + timeout_ms / 1000 if timeout_ms > 0 else None
-        while True:
-            remaining = None if deadline is None else max(0, deadline - time.time())
-            got = STORE.wait_feedback(key, remaining if remaining is None else min(remaining, 30))
-            if got:
-                STORE.set_presence(key, PRESENCE_WORKING)
-                prompts, warnings = STORE.take_feedback(key)
-                sess = STORE.get(key)
-                return self._json(200, {
-                    "prompts": prompts, "layout_warnings": warnings,
-                    "session": _view(sess), "next_step": _poll_next(sess, file),
-                })
-            if deadline is not None and time.time() >= deadline:
-                STORE.set_presence(key, PRESENCE_WAITING)
-                return self._json(200, {
-                    "prompts": [], "layout_warnings": [], "timed_out": True,
-                    "next_step": "No feedback yet. Poll again to keep waiting.",
-                })
+        poll_begin()
+        try:
+            deadline = time.time() + timeout_ms / 1000 if timeout_ms > 0 else None
+            while True:
+                remaining = None if deadline is None else max(0, deadline - time.time())
+                got = STORE.wait_feedback(key, remaining if remaining is None else min(remaining, 30))
+                if got:
+                    STORE.set_presence(key, PRESENCE_WORKING)
+                    prompts, warnings = STORE.take_feedback(key)
+                    sess = STORE.get(key)
+                    return self._json(200, {
+                        "prompts": prompts, "layout_warnings": warnings,
+                        "session": _view(sess), "next_step": _poll_next(sess, file),
+                    })
+                if deadline is not None and time.time() >= deadline:
+                    STORE.set_presence(key, PRESENCE_WAITING)
+                    return self._json(200, {
+                        "prompts": [], "layout_warnings": [], "timed_out": True,
+                        "next_step": "No feedback yet. Poll again to keep waiting.",
+                    })
+        finally:
+            poll_end()
 
     def handle_agent_reply(self, key):
         STORE.add_agent_reply(key, self._body().get("text", ""))
         self._json(200, {"ok": True})
 
     def handle_feedback(self, key):
+        touch()
         prompts = self._body().get("prompts", [])
         STORE.queue_prompts(key, prompts)
         self._json(200, {"ok": True, "queued": len(prompts)})
@@ -515,20 +567,26 @@ class Handler(BaseHTTPRequestHandler):
 
     # --- hook decision ---
     def handle_decision(self, key):
+        touch()
         b = self._body()
         STORE.set_decision(key, b.get("decision", "deny"), b.get("feedback", ""))
         self._json(200, {"ok": True})
 
     def handle_await_decision(self, key, q):
+        touch()
         timeout_ms = int((q.get("timeout_ms") or ["0"])[0] or 0)
-        deadline = time.time() + timeout_ms / 1000 if timeout_ms > 0 else None
-        while True:
-            remaining = None if deadline is None else max(0, deadline - time.time())
-            d = STORE.wait_decision(key, remaining if remaining is None else min(remaining, 30))
-            if d:
-                return self._json(200, d)
-            if deadline is not None and time.time() >= deadline:
-                return self._json(200, {"decision": "timeout", "feedback": ""})
+        poll_begin()
+        try:
+            deadline = time.time() + timeout_ms / 1000 if timeout_ms > 0 else None
+            while True:
+                remaining = None if deadline is None else max(0, deadline - time.time())
+                d = STORE.wait_decision(key, remaining if remaining is None else min(remaining, 30))
+                if d:
+                    return self._json(200, d)
+                if deadline is not None and time.time() >= deadline:
+                    return self._json(200, {"decision": "timeout", "feedback": ""})
+        finally:
+            poll_end()
 
     def handle_stop(self):
         self._json(200, {"server": {"status": "stopping"}})
@@ -623,6 +681,15 @@ def main():
     port = httpd.server_address[1]
     BASE_URL = f"http://127.0.0.1:{port}"
     common.write_server_info({"pid": os.getpid(), "port": port, "url": BASE_URL})
+
+    def idle_loop():
+        while True:
+            time.sleep(60)
+            if is_idle():
+                httpd.shutdown()
+                return
+
+    threading.Thread(target=idle_loop, daemon=True).start()
     try:
         httpd.serve_forever()
     finally:

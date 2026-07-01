@@ -29,6 +29,8 @@ plan-ui/
     hook.py                     ExitPlanMode entry: plan → review UI → decision
     mdrender.py                 dependency-free Markdown → HTML (for plan mode)
     common.py                   paths, session keys, server discovery, HTTP client
+    vendor-assets.sh            refresh the vendored Tailwind/DaisyUI (maintenance)
+  tests/smoke.sh                end-to-end test of both modes
   web/
     shell.html                  review frame: artifact iframe + conversation/decision panel
     sdk.js                      annotation SDK injected into the artifact
@@ -65,23 +67,41 @@ agent as `layout_warnings`.
 
 ## Install
 
-**Claude Code** — load locally for development:
+**Claude Code** — from this repo's marketplace:
+
+```
+/plugin marketplace add mbcoward3/claude-code
+/plugin install plan-ui@plan-ui
+```
+
+or load locally for development:
 
 ```
 claude --plugin-dir ./tools/plan-ui
 ```
 
-or install from a marketplace once published. Enabling the plugin puts `plan-ui`
-on `PATH`, registers the skill, and wires the ExitPlanMode hook.
+Enabling the plugin puts `plan-ui` on `PATH`, registers the skill, and wires the
+ExitPlanMode hook (with a 4-day timeout so an unhurried review is never killed
+by the hook runner's default).
 
 **Codex** — the artifact loop works from any harness that can run a shell
 command. Point Codex at `scripts/plan_ui.py` (see `codex/`).
 
 ## Requirements
 
-- **Python 3.8+** (tested on 3.11). Standard library only.
+- **Python 3.8+** (tested on 3.11). Standard library only — no pip installs.
 - A browser to view the review UI.
 
-`tailwind.js` and `daisyui.css` are placeholders pending a one-time vendor step;
-plan mode renders without them (it ships its own prose styles), and artifact mode
-works with whatever styles the agent's HTML brings.
+Tailwind v4 (browser JIT) and DaisyUI v5 are vendored into `web/` and served
+locally, so agent-authored plans can use their utility classes with no CDN and
+no network. Refresh them with `scripts/vendor-assets.sh` (maintenance-time
+only). The background server exits on its own after 30 idle minutes.
+
+## Tests
+
+```
+bash tests/smoke.sh
+```
+
+Runs both modes end-to-end (session, SDK injection, feedback→poll delivery,
+layout-gate warnings, hook approve/deny decisions) against an isolated HOME.
