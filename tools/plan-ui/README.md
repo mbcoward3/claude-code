@@ -20,19 +20,25 @@ plugin runs in place.
 
 ```
 plan-ui/
-  .claude-plugin/plugin.json    plugin manifest
-  skills/plan-ui/SKILL.md       the trigger: when to use plan-ui + pointer to the playbook
+  .claude-plugin/plugin.json    Claude Code plugin manifest
+  SKILL.md                      the trigger: when to use plan-ui + pointer to the playbook
   bin/plan-ui                   launcher (added to PATH while the plugin is enabled)
   scripts/
     plan_ui.py                  CLI: open / poll / end / stop / playbook / serve
     server.py                   stdlib HTTP server: sessions, SSE, long-poll, gate, watch
     common.py                   paths, session keys, server discovery, HTTP client
+    install-codex.sh            one-command Codex install (symlink into ~/.codex/skills)
   tests/smoke.sh                end-to-end test of the loop
   web/
     sdk.js                      review layer injected into the plan document
     chrome.css                  styles for the injected review UI
   playbook.md                   plan-authoring guidance (`plan-ui playbook`)
 ```
+
+`SKILL.md` sits at the directory root on purpose: Claude Code loads a
+single-skill plugin from a root `SKILL.md`, and a Codex skill is *defined* as a
+directory with `SKILL.md` at its root plus supporting files — so this one
+directory is simultaneously a valid Claude Code plugin and a valid Codex skill.
 
 ## Commands
 
@@ -94,16 +100,19 @@ claude --plugin-dir ./tools/plan-ui
 
 Enabling the plugin puts `plan-ui` on `PATH` and registers the skill.
 
-**Codex** — Codex supports the same skills standard. Copy or symlink the plugin
-directory into your skills folder:
+**Codex** — Codex supports the same Agent Skills standard, and this directory
+*is* a valid Codex skill (root `SKILL.md` + `scripts/`). Install with one
+command:
 
 ```
-ln -s /path/to/plan-ui ~/.codex/skills/plan-ui
+bash scripts/install-codex.sh
 ```
 
-Codex discovers `skills/plan-ui/SKILL.md` and triggers it the same way. Since
-Codex does not manage `PATH`, the skill's fallback invocation
-(`python3 <plugin-root>/scripts/plan_ui.py …`) applies.
+which symlinks the directory to `~/.codex/skills/plan-ui` (respects
+`CODEX_HOME`). Codex then triggers the skill implicitly when a task matches its
+description, or explicitly via `$plan-ui`. Since Codex does not manage `PATH`,
+the skill instructs the agent to call `python3 <skill-dir>/scripts/plan_ui.py …`
+directly.
 
 ## Requirements
 

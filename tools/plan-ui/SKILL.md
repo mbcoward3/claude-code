@@ -13,6 +13,9 @@ When you're about to present a plan, approach, or design the user will review
 before you implement, collaborate on it with plan-ui instead of prose.
 
 Run `plan-ui playbook` and follow it — the playbook has the full loop and the
-authoring rules. If `plan-ui` is not on `PATH`, run
-`python3 <plugin-root>/scripts/plan_ui.py playbook` instead (this skill's
-directory sits inside the plugin root).
+authoring rules.
+
+If `plan-ui` is not on `PATH` (for example when running as a Codex skill),
+invoke the CLI directly from this skill's own directory instead:
+`python3 <this-skill-directory>/scripts/plan_ui.py playbook` — every `plan-ui`
+command in the playbook maps onto `plan_ui.py` the same way.
