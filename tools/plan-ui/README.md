@@ -21,13 +21,14 @@ plugin runs in place.
 ```
 plan-ui/
   .claude-plugin/plugin.json    Claude Code plugin manifest
+  agents/openai.yaml            Codex skill metadata (display name, invocation policy)
   SKILL.md                      the trigger: when to use plan-ui + pointer to the playbook
   bin/plan-ui                   launcher (added to PATH while the plugin is enabled)
   scripts/
     plan_ui.py                  CLI: open / poll / end / stop / playbook / serve
     server.py                   stdlib HTTP server: sessions, SSE, long-poll, gate, watch
     common.py                   paths, session keys, server discovery, HTTP client
-    install-codex.sh            one-command Codex install (symlink into ~/.codex/skills)
+    install-codex.sh            one-command Codex install (symlink into ~/.agents/skills)
   tests/smoke.sh                end-to-end test of the loop
   web/
     sdk.js                      review layer injected into the plan document
@@ -101,18 +102,24 @@ claude --plugin-dir ./tools/plan-ui
 Enabling the plugin puts `plan-ui` on `PATH` and registers the skill.
 
 **Codex** — Codex supports the same Agent Skills standard, and this directory
-*is* a valid Codex skill (root `SKILL.md` + `scripts/`). Install with one
-command:
+*is* a valid Codex skill: root `SKILL.md` (the only required file) plus the
+optional `agents/openai.yaml` metadata (display name, brand color, implicit
+invocation policy). Install with one command:
 
 ```
 bash scripts/install-codex.sh
 ```
 
-which symlinks the directory to `~/.codex/skills/plan-ui` (respects
-`CODEX_HOME`). Codex then triggers the skill implicitly when a task matches its
-description, or explicitly via `$plan-ui`. Since Codex does not manage `PATH`,
-the skill instructs the agent to call `python3 <skill-dir>/scripts/plan_ui.py …`
-directly.
+which symlinks the directory to `~/.agents/skills/plan-ui` — the user-scope
+skills location per the Codex docs (set `SKILLS_DIR` to override, e.g.
+`.agents/skills` for a repo-scoped install). Codex then triggers the skill
+implicitly when a task matches its description, or explicitly via `$plan-ui`.
+Since Codex does not manage `PATH`, the skill instructs the agent to call
+`python3 <skill-dir>/scripts/plan_ui.py …` directly.
+
+(The `agents/` directory name is also used by Claude Code plugins for custom
+agent definitions, but those are `.md` files — the lone `openai.yaml` is
+ignored by Claude Code.)
 
 ## Requirements
 

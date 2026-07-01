@@ -2,12 +2,14 @@
 # Install plan-ui as a Codex skill.
 #
 # The plugin directory doubles as an Agent-Skills skill (SKILL.md at its root,
-# scripts/ alongside), so installation is one symlink into Codex's skills dir.
-# Respects CODEX_HOME if set; defaults to ~/.codex.
+# scripts/ and agents/openai.yaml alongside), so installation is one symlink
+# into the user skills directory — ~/.agents/skills per the Codex docs
+# (https://developers.openai.com/codex/skills). Override with SKILLS_DIR for a
+# repo-scoped install (.agents/skills) or a nonstandard location.
 set -euo pipefail
 
 plugin="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-skills_dir="${CODEX_HOME:-$HOME/.codex}/skills"
+skills_dir="${SKILLS_DIR:-$HOME/.agents/skills}"
 dest="$skills_dir/plan-ui"
 
 mkdir -p "$skills_dir"

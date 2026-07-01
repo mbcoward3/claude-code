@@ -1,0 +1,11 @@
+# Codex skill metadata (optional; SKILL.md alone is sufficient).
+# Schema: https://developers.openai.com/codex/skills
+
+interface:
+  display_name: "plan-ui"
+  short_description: "Review and annotate agent-authored plans in a rich browser UI."
+  brand_color: "#E0771B"
+
+policy:
+  # Let Codex select the skill automatically when a task matches its description.
+  allow_implicit_invocation: true
