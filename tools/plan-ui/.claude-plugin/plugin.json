@@ -1,0 +1,8 @@
+{
+  "name": "plan-ui",
+  "description": "Collaborate on plans in a rich, annotatable browser UI. A skill-triggered HTML-artifact review loop: the agent authors the plan, the user annotates it inline, and they iterate to approval. Works in Claude Code and Codex. Pure Python, no dependencies.",
+  "version": "0.2.0",
+  "author": { "name": "mbcoward3" },
+  "license": "MIT",
+  "homepage": "https://github.com/mbcoward3/claude-code/tree/main/tools/plan-ui"
+}

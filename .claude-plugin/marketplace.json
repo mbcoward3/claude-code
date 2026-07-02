@@ -1,0 +1,13 @@
+{
+  "name": "plan-ui",
+  "owner": {
+    "name": "mbcoward3"
+  },
+  "plugins": [
+    {
+      "name": "plan-ui",
+      "source": "./tools/plan-ui",
+      "description": "Collaborate on plans in a rich, annotatable browser UI. A skill-triggered HTML-artifact review loop: the agent authors the plan, the user annotates it inline, and they iterate to approval. Works in Claude Code and Codex. Pure Python stdlib — no dependencies."
+    }
+  ]
+}
