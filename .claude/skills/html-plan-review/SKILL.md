@@ -85,19 +85,29 @@ user's mental map (and any unsent draft anchors) survive revisions.
 }
 ```
 
-Provide `sections`, or top-level `bodyHtml`, or both. **Sections are not
-required** — a free-form `bodyHtml` document (with its own `h3`/`h4`
-headings, tabs, tables) is a first-class plan; every part of it is
-annotatable by selection. Sections buy the user per-section
-comment/needs-changes chips; use them when the plan has clear phases.
+**Default to a free-form `bodyHtml` document** — one flowing page with
+`h3` headings and rich components, like a well-designed product doc.
+Every part of it is annotatable by selection. Only reach for `sections`
+when the user explicitly wants per-section comment/flag controls; they
+render as headings with hover tools, not boxes. See
+`examples/plan.json` for the house style.
 
 Authoring rules: never include scripts or event handlers
 in `bodyHtml`. Base tags: `p ul ol li pre code kbd table tr td th thead
 tbody strong em h3 h4 details summary`. The page also enhances these
 **rich components — use them**, they are the point of this skill:
 
-- **Tables** — plain `<table>`, auto-styled (zebra rows, header band).
-  Use for file-change lists, API matrices, config diffs.
+- **Stat tiles** — lead with the plan's shape at a glance:
+
+      <div class="stats">
+        <div class="stat"><div class="v">14</div><div class="l">files touched</div></div>
+        <div class="stat"><div class="v">~2 wk</div><div class="l">to full rollout</div></div>
+      </div>
+
+- **Steps** — `<ol class="steps"><li><strong>Title</strong>detail…</li>…</ol>`
+  renders a numbered timeline; ideal for the approach/phases.
+- **Tables** — plain `<table>`, auto-styled (header band, row hover).
+  Use for migrations, file-change lists, API matrices.
 - **Tabs** — for alternatives, trade-offs, per-platform variants:
 
       <div class="tabs">
@@ -106,11 +116,18 @@ tbody strong em h3 h4 details summary`. The page also enhances these
       </div>
 
 - **Callouts** — `<div class="callout info|warn|risk|success">…</div>`
-  for risks, caveats, and wins.
+  for risks, caveats, and wins (icon added automatically).
+- **File tree** — `<ul class="file-tree"><li class="dir">src/auth/</li>
+  <ul><li class="add">oauth.ts</li><li class="mod">session.ts</li></ul></ul>`
+  (`add` = new file, `mod` = modified).
+- **Diff blocks** — `<pre class="diff"><code>@@ file @@\n-old\n+new</code></pre>`
+  gets +/- line coloring automatically.
+- **Pills** — `<span class="pill info|ok|warn|danger">label</span>` for
+  inline status like flag names or reversibility.
 - **Collapsibles** — `<details><summary>Label</summary>…</details>` for
   long detail that would bloat the page.
 - **Columns** — `<div class="cols"><div class="col">…</div>…</div>` for
-  side-by-side comparison.
+  side-by-side comparison (pros/cons inside tabs work well).
 
 Every part of the plan is annotatable: the user can select any text —
 in the summary, a table cell, a tab panel — and comment on it or cross
