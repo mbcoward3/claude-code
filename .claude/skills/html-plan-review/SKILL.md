@@ -74,6 +74,7 @@ user's mental map (and any unsent draft anchors) survive revisions.
   "round": 1,
   "updatedAt": "2026-07-11 14:03",
   "summaryHtml": "<p>One-paragraph overview. Optional.</p>",
+  "bodyHtml": "<p>Optional free-form document — use INSTEAD of sections when the plan doesn't decompose naturally.</p>",
   "sections": [
     {
       "id": "db",
@@ -84,7 +85,13 @@ user's mental map (and any unsent draft anchors) survive revisions.
 }
 ```
 
-Authoring rules: 3–10 sections; never include scripts or event handlers
+Provide `sections`, or top-level `bodyHtml`, or both. **Sections are not
+required** — a free-form `bodyHtml` document (with its own `h3`/`h4`
+headings, tabs, tables) is a first-class plan; every part of it is
+annotatable by selection. Sections buy the user per-section
+comment/needs-changes chips; use them when the plan has clear phases.
+
+Authoring rules: never include scripts or event handlers
 in `bodyHtml`. Base tags: `p ul ol li pre code kbd table tr td th thead
 tbody strong em h3 h4 details summary`. The page also enhances these
 **rich components — use them**, they are the point of this skill:
@@ -125,9 +132,12 @@ it out.
 }
 ```
 
-`quote` non-null means the annotation targets that exact phrase in the
-section; null means it applies to the section as a whole. A `sectionId`
-of `"_summary"` targets the plan summary. `type: "strike"` means the
-user **crossed the quoted text out — remove or eliminate that element
-from the plan** (the `text`, if present, is their reason). Untouched
-sections carry no entry anywhere — treat them as approved.
+`quote` non-null means the annotation targets that exact phrase; null
+means it applies to the section as a whole. `sectionId` is `"_summary"`
+for the plan summary and `"_doc"` for a free-form `bodyHtml` document.
+`type: "strike"` means the user **crossed the quoted text out — remove
+or eliminate that element from the plan** (the `text`, if present, is
+their reason). Anything untouched carries no entry anywhere — treat it
+as approved. (In the UI, staged annotations live in a drawer opened
+from the footer bar, not inline — the document stays clean apart from
+the highlights themselves.)

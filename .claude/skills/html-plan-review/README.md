@@ -8,9 +8,12 @@ page** where you can
   and either **💬 comment** on that exact phrase or **✗ cross it out**
   (strike-through = "remove this", with an optional reason); highlights
   and strikes stay visible in the document,
-- comment on a whole section (click **💬 Comment**),
-- flag a section **✗ Needs changes**,
-- approve the plan or request changes from a sticky bottom bar.
+- comment on or flag a whole section when the plan uses sections
+  (sections are optional — free-form documents are fully annotatable),
+- review everything you've staged in a **drawer** popped up from the
+  footer bar ("N staged"), where each annotation can be edited, deleted,
+  or jumped to — the document itself stays clean apart from highlights,
+- approve the plan or request changes from the same sticky bottom bar.
 
 Plans render with rich components, not just prose: auto-styled tables,
 **multi-tab sections** for alternatives, callouts for risks, collapsible
