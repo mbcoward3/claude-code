@@ -1,0 +1,53 @@
+{
+  "title": "Add OAuth login to the web app",
+  "round": 2,
+  "updatedAt": "2026-07-11 14:03",
+  "summaryHtml": "<p>Replace the homegrown password flow with OAuth (Google + GitHub). Round 2 keeps the <code>sessions</code> table per review feedback and drops the risky data migration.</p>",
+  "sections": [
+    {
+      "id": "db",
+      "heading": "1. Database changes",
+      "bodyHtml": "<p>Add an <code>identities</code> table linking users to providers:</p><pre><code>CREATE TABLE identities (\n  id BIGINT PRIMARY KEY,\n  user_id BIGINT REFERENCES users(id),\n  provider TEXT NOT NULL,\n  provider_uid TEXT NOT NULL,\n  UNIQUE (provider, provider_uid)\n);</code></pre><p>The existing <strong>sessions table stays as-is</strong>; we only add a nullable <code>identity_id</code> column.</p>"
+    },
+    {
+      "id": "api",
+      "heading": "2. Auth endpoints",
+      "bodyHtml": "<p>New routes in <code>src/auth/oauth.ts</code>:</p><ul><li><code>GET /auth/:provider</code> — redirect to provider consent screen</li><li><code>GET /auth/:provider/callback</code> — exchange code, upsert identity, mint session</li><li><code>POST /auth/logout</code> — unchanged</li></ul><p>State parameter is a signed nonce stored in a short-lived cookie to block CSRF.</p>"
+    },
+    {
+      "id": "ui",
+      "heading": "3. Login UI",
+      "bodyHtml": "<p>Replace the password form with provider buttons; keep the password form behind a <em>“use legacy login”</em> toggle for one release while accounts migrate.</p>"
+    },
+    {
+      "id": "rollout",
+      "heading": "4. Rollout & testing",
+      "bodyHtml": "<p>Feature-flagged (<code>oauth_login</code>). Integration tests hit a mock provider; canary to 5% of traffic for 48h before full rollout.</p>"
+    }
+  ],
+  "threads": [
+    {
+      "id": "d1752240001111",
+      "sectionId": "db",
+      "quote": "sessions table",
+      "status": "resolved",
+      "messages": [
+        { "author": "user", "round": 1, "text": "Do NOT drop sessions — the analytics job reads it nightly." },
+        { "author": "agent", "round": 2, "text": "Kept the table unchanged and added only a nullable identity_id column; the analytics job is unaffected." }
+      ]
+    },
+    {
+      "id": "d1752240002222",
+      "sectionId": "ui",
+      "quote": null,
+      "status": "open",
+      "messages": [
+        { "author": "user", "round": 1, "text": "How long do we keep the legacy password form around?" },
+        { "author": "agent", "round": 2, "text": "Proposed one release cycle (~4 weeks). Happy to extend if support tickets spike — flag your preference on this thread." }
+      ]
+    }
+  ],
+  "history": [
+    { "round": 1, "verdict": "request_changes" }
+  ]
+}

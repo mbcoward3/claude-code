@@ -1,0 +1,489 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan Review</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --panel: #ffffff; --ink: #1a1a18; --muted: #6b6b66;
+    --line: #e3e2dd; --accent: #4a6fa5; --accent-ink: #ffffff;
+    --ok: #2e7d4f; --ok-soft: #e3f2e9; --warn: #b3591a; --warn-soft: #fdeee1;
+    --pending: #8a6d00; --pending-soft: #fff6d6;
+    --hl: #ffe9a8; --hl-pending: #ffd6e0; --resolved: #9a9a94;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16161a; --panel: #1f1f24; --ink: #e8e8e4; --muted: #9b9b94;
+      --line: #33333a; --accent: #7da2d4; --accent-ink: #10131a;
+      --ok: #6fbf8f; --ok-soft: #1d3327; --warn: #e09154; --warn-soft: #3a2718;
+      --pending: #d9b53c; --pending-soft: #34300f;
+      --hl: #5a4d1a; --hl-pending: #57303c; --resolved: #6e6e68;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding-bottom: 96px;
+  }
+  header {
+    max-width: 860px; margin: 0 auto; padding: 28px 20px 8px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: -.01em; }
+  #meta { color: var(--muted); font-size: 13px; }
+  #history { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+  main { max-width: 860px; margin: 0 auto; padding: 8px 20px 20px; }
+  .summary {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 18px; margin: 12px 0 20px; box-shadow: var(--shadow);
+  }
+  .section {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    margin: 0 0 18px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .sec-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 18px 0;
+  }
+  .sec-head h2 { margin: 0; font-size: 17px; flex: 1 1 auto; min-width: 0; }
+  .chip {
+    border: 1px solid var(--line); background: transparent; color: var(--muted);
+    border-radius: 999px; padding: 3px 10px; font-size: 12px; cursor: pointer;
+    font-family: inherit;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--ink); }
+  .chip.ok-on { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+  .chip.warn-on { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .sec-body { padding: 6px 18px 14px; overflow-x: auto; }
+  .sec-body pre {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; overflow-x: auto; font-size: 13px;
+  }
+  .sec-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+  .sec-body table { border-collapse: collapse; }
+  .sec-body td, .sec-body th { border: 1px solid var(--line); padding: 4px 10px; }
+  mark.hl { background: var(--hl); color: inherit; border-radius: 2px; cursor: pointer; padding: 0 1px; }
+  mark.hl.pending { background: var(--hl-pending); }
+  .threads { padding: 0 18px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .thread {
+    border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 10px 12px; background: var(--bg); font-size: 13.5px;
+  }
+  .thread.pending { border-left-color: var(--pending); }
+  .thread.resolved { border-left-color: var(--resolved); opacity: .85; }
+  .thread .quote {
+    border-left: 3px solid var(--line); margin: 0 0 8px; padding: 2px 10px;
+    color: var(--muted); font-style: italic; white-space: pre-wrap;
+  }
+  .msg { margin: 6px 0; white-space: pre-wrap; }
+  .who {
+    font-weight: 600; font-size: 12px; margin-right: 6px;
+    padding: 1px 7px; border-radius: 999px;
+  }
+  .who.user { background: var(--pending-soft); color: var(--pending); }
+  .who.agent { background: var(--ok-soft); color: var(--ok); }
+  .rnd { color: var(--muted); font-size: 11.5px; }
+  .badge {
+    float: right; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600;
+  }
+  .badge.open { background: var(--warn-soft); color: var(--warn); }
+  .badge.resolved { background: var(--ok-soft); color: var(--ok); }
+  .badge.pend { background: var(--pending-soft); color: var(--pending); }
+  .t-actions { margin-top: 6px; display: flex; gap: 8px; }
+  .t-actions button, .composer button, #bar button {
+    font: inherit; font-size: 12.5px; border-radius: 7px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+    padding: 4px 12px;
+  }
+  .t-actions button:hover { border-color: var(--accent); }
+  textarea.cbox {
+    width: 100%; min-height: 64px; font: inherit; font-size: 13.5px;
+    background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 7px; padding: 8px 10px; resize: vertical;
+  }
+  .composer { margin-top: 8px; }
+  .composer .row { display: flex; gap: 8px; margin-top: 6px; }
+  .composer .save { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  #selbtn {
+    position: absolute; z-index: 30; background: var(--accent); color: var(--accent-ink);
+    border: none; border-radius: 8px; padding: 5px 12px; font: inherit; font-size: 13px;
+    cursor: pointer; box-shadow: var(--shadow);
+  }
+  #bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: var(--panel); border-top: 1px solid var(--line);
+    box-shadow: 0 -4px 16px rgba(0,0,0,.07);
+  }
+  #bar .inner {
+    max-width: 860px; margin: 0 auto; padding: 10px 20px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  #counts { font-size: 13px; color: var(--muted); flex: 0 0 auto; }
+  #overall {
+    flex: 1 1 200px; min-width: 140px; font: inherit; font-size: 13.5px;
+    background: var(--bg); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 7px; padding: 7px 10px;
+  }
+  #btn-changes { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); font-weight: 600; }
+  #btn-approve { background: var(--ok); color: #fff; border-color: var(--ok); font-weight: 600; }
+  #bar button { padding: 7px 16px; }
+  #overlay[hidden] { display: none; }
+  #overlay {
+    position: fixed; inset: 0; z-index: 40; display: flex; align-items: center;
+    justify-content: center; background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(3px); text-align: center; padding: 20px;
+  }
+  #overlay .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 28px 32px; box-shadow: var(--shadow); max-width: 420px;
+  }
+  #overlay h2 { margin: 0 0 8px; font-size: 18px; }
+  #overlay p { margin: 0; color: var(--muted); font-size: 14px; }
+  .spin {
+    display: inline-block; width: 16px; height: 16px; margin-right: 8px;
+    border: 2px solid var(--line); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 1s linear infinite; vertical-align: -3px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { color: var(--muted); text-align: center; padding: 60px 0; }
+  .flash { animation: flash 1.2s ease-out; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: none; } }
+</style>
+
+<header>
+  <h1 id="title">Plan Review</h1>
+  <div id="meta"></div>
+  <div id="history"></div>
+</header>
+<main id="main"><div class="empty"><span class="spin"></span>Waiting for Claude to publish a plan…</div></main>
+<button id="selbtn" hidden>&#128172; Comment</button>
+<footer id="bar" hidden>
+  <div class="inner">
+    <span id="counts"></span>
+    <input id="overall" placeholder="Overall note to Claude (optional)">
+    <button id="btn-changes">Request changes</button>
+    <button id="btn-approve">Approve plan</button>
+  </div>
+</footer>
+<div id="overlay" hidden>
+  <div class="card">
+    <h2 id="ov-title"></h2>
+    <p id="ov-body"></p>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = (s, el) => (el || document).querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const state = { plan: null, draft: null, submitted: false, editing: null };
+let saveTimer = null;
+
+function freshDraft(round) {
+  return { round, newThreads: [], replies: [], sectionVerdicts: {}, overallComment: '', verdict: null };
+}
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(path + ' -> ' + r.status);
+  return r.json();
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    api('/api/draft', { method: 'POST', body: JSON.stringify(state.draft) }).catch(() => {});
+  }, 400);
+}
+
+/* ---------- rendering ---------- */
+
+function render() {
+  const p = state.plan;
+  if (!p) return;
+  document.title = 'Plan Review — ' + p.title;
+  $('#title').textContent = p.title;
+  const open = (p.threads || []).filter(t => t.status !== 'resolved').length;
+  $('#meta').textContent =
+    `Round ${p.round}` +
+    (p.updatedAt ? ` · updated ${p.updatedAt}` : '') +
+    (p.threads?.length ? ` · ${open} open / ${p.threads.length} total threads` : '');
+  $('#history').textContent = (p.history || [])
+    .map(h => `Round ${h.round}: ${h.verdict === 'approve' ? 'approved' : 'changes requested'}`)
+    .join('  ·  ');
+
+  const main = $('#main');
+  main.innerHTML = '';
+  if (p.summaryHtml) {
+    const d = document.createElement('div');
+    d.className = 'summary';
+    d.innerHTML = p.summaryHtml;
+    main.appendChild(d);
+  }
+  for (const sec of p.sections || []) main.appendChild(renderSection(sec));
+  $('#bar').hidden = false;
+  $('#overall').value = state.draft.overallComment || '';
+  renderCounts();
+  applyOverlay();
+}
+
+function renderSection(sec) {
+  const wrap = document.createElement('div');
+  wrap.className = 'section';
+  wrap.dataset.sec = sec.id;
+  const v = state.draft.sectionVerdicts[sec.id];
+  wrap.innerHTML =
+    `<div class="sec-head"><h2>${esc(sec.heading)}</h2>` +
+    `<button class="chip ${v === 'approved' ? 'ok-on' : ''}" data-act="verdict-ok">&#10003; Looks good</button>` +
+    `<button class="chip ${v === 'needs_changes' ? 'warn-on' : ''}" data-act="verdict-warn">&#9998; Needs changes</button>` +
+    `<button class="chip" data-act="comment">&#128172; Comment</button></div>` +
+    `<div class="sec-body"></div><div class="threads"></div>`;
+  $('.sec-body', wrap).innerHTML = sec.bodyHtml || '';
+
+  const threadsEl = $('.threads', wrap);
+  const existing = (state.plan.threads || []).filter(t => t.sectionId === sec.id);
+  for (const t of existing) threadsEl.appendChild(renderThread(t, sec, wrap));
+  for (const d of state.draft.newThreads.filter(t => t.sectionId === sec.id))
+    threadsEl.appendChild(renderDraft(d, wrap));
+  return wrap;
+}
+
+function renderThread(t, sec, secEl) {
+  const el = document.createElement('div');
+  el.className = 'thread ' + (t.status === 'resolved' ? 'resolved' : 'open');
+  el.dataset.tid = t.id;
+  let html = `<span class="badge ${t.status === 'resolved' ? 'resolved' : 'open'}">${t.status === 'resolved' ? '&#10003; resolved' : 'open'}</span>`;
+  if (t.quote) html += `<div class="quote">${esc(t.quote)}</div>`;
+  for (const m of t.messages || [])
+    html += `<div class="msg"><span class="who ${m.author}">${m.author === 'agent' ? 'Claude' : 'You'}</span>` +
+            `<span class="rnd">round ${m.round}</span><br>${esc(m.text)}</div>`;
+  const draftReply = state.draft.replies.find(r => r.threadId === t.id);
+  if (draftReply)
+    html += `<div class="msg"><span class="who user">You</span><span class="badge pend">pending</span><br>${esc(draftReply.text)}</div>`;
+  el.innerHTML = html;
+
+  if (state.editing === 'reply:' + t.id) {
+    el.appendChild(composer(draftReply ? draftReply.text : '', text => {
+      state.draft.replies = state.draft.replies.filter(r => r.threadId !== t.id);
+      if (text) state.draft.replies.push({ threadId: t.id, text });
+      state.editing = null; scheduleSave(); render();
+    }));
+  } else {
+    const act = document.createElement('div');
+    act.className = 't-actions';
+    act.innerHTML = `<button data-act="reply">${draftReply ? 'Edit reply' : 'Reply'}</button>` +
+      (draftReply ? '<button data-act="del-reply">Discard reply</button>' : '');
+    el.appendChild(act);
+  }
+  if (t.quote) highlight($('.sec-body', secEl), t.quote, t.id, '');
+  return el;
+}
+
+function renderDraft(d, secEl) {
+  const el = document.createElement('div');
+  el.className = 'thread pending';
+  el.dataset.tid = d.id;
+  let html = `<span class="badge pend">pending — not sent</span>`;
+  if (d.quote) html += `<div class="quote">${esc(d.quote)}</div>`;
+  el.innerHTML = html;
+  if (state.editing === d.id) {
+    el.appendChild(composer(d.text, text => {
+      if (text) { d.text = text; state.editing = null; }
+      else { state.draft.newThreads = state.draft.newThreads.filter(x => x.id !== d.id); state.editing = null; }
+      scheduleSave(); render();
+    }));
+  } else {
+    el.insertAdjacentHTML('beforeend',
+      `<div class="msg"><span class="who user">You</span><br>${esc(d.text)}</div>` +
+      `<div class="t-actions"><button data-act="edit-draft">Edit</button><button data-act="del-draft">Delete</button></div>`);
+  }
+  if (d.quote) highlight($('.sec-body', secEl), d.quote, d.id, 'pending');
+  return el;
+}
+
+function composer(initial, onDone) {
+  const box = document.createElement('div');
+  box.className = 'composer';
+  box.innerHTML = `<textarea class="cbox" placeholder="Write a comment…"></textarea>` +
+    `<div class="row"><button class="save">Save</button><button class="cancel">Cancel</button></div>`;
+  const ta = $('textarea', box);
+  ta.value = initial || '';
+  $('.save', box).onclick = () => onDone(ta.value.trim());
+  $('.cancel', box).onclick = () => { state.editing = null; render(); };
+  setTimeout(() => ta.focus(), 0);
+  return box;
+}
+
+function renderCounts() {
+  const n = state.draft.newThreads.length, r = state.draft.replies.length;
+  const parts = [];
+  if (n) parts.push(n + ' new comment' + (n > 1 ? 's' : ''));
+  if (r) parts.push(r + ' repl' + (r > 1 ? 'ies' : 'y'));
+  const sv = Object.keys(state.draft.sectionVerdicts).length;
+  if (sv) parts.push(sv + ' section verdict' + (sv > 1 ? 's' : ''));
+  $('#counts').textContent = parts.length ? parts.join(' · ') : 'No annotations yet';
+}
+
+/* Wrap the first occurrence of `quote` inside `bodyEl` in <mark> elements,
+   even when it spans multiple text nodes. */
+function highlight(bodyEl, quote, tid, cls) {
+  if (!bodyEl || !quote) return;
+  if ($(`mark[data-tid="${CSS.escape(tid)}"]`, bodyEl)) return;
+  const walker = document.createTreeWalker(bodyEl, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let full = '';
+  while (walker.nextNode()) {
+    nodes.push({ n: walker.currentNode, start: full.length });
+    full += walker.currentNode.data;
+  }
+  const idx = full.indexOf(quote);
+  if (idx < 0) return;
+  const end = idx + quote.length;
+  for (const { n, start } of nodes) {
+    const nEnd = start + n.data.length;
+    if (nEnd <= idx || start >= end) continue;
+    const range = document.createRange();
+    range.setStart(n, Math.max(idx, start) - start);
+    range.setEnd(n, Math.min(end, nEnd) - start);
+    const mark = document.createElement('mark');
+    mark.className = ('hl ' + cls).trim();
+    mark.dataset.tid = tid;
+    try { range.surroundContents(mark); } catch (e) { /* skip un-wrappable segment */ }
+  }
+}
+
+/* ---------- events ---------- */
+
+document.addEventListener('click', ev => {
+  const btn = ev.target.closest('[data-act]');
+  if (btn) {
+    const secEl = btn.closest('.section');
+    const secId = secEl && secEl.dataset.sec;
+    const threadEl = btn.closest('.thread');
+    const act = btn.dataset.act;
+    if (act === 'verdict-ok' || act === 'verdict-warn') {
+      const val = act === 'verdict-ok' ? 'approved' : 'needs_changes';
+      if (state.draft.sectionVerdicts[secId] === val) delete state.draft.sectionVerdicts[secId];
+      else state.draft.sectionVerdicts[secId] = val;
+      scheduleSave(); render();
+    } else if (act === 'comment') {
+      newDraftComment(secId, null);
+    } else if (act === 'reply') {
+      state.editing = 'reply:' + threadEl.dataset.tid; render();
+    } else if (act === 'del-reply') {
+      state.draft.replies = state.draft.replies.filter(r => r.threadId !== threadEl.dataset.tid);
+      scheduleSave(); render();
+    } else if (act === 'edit-draft') {
+      state.editing = threadEl.dataset.tid; render();
+    } else if (act === 'del-draft') {
+      state.draft.newThreads = state.draft.newThreads.filter(x => x.id !== threadEl.dataset.tid);
+      scheduleSave(); render();
+    }
+    return;
+  }
+  const mark = ev.target.closest('mark.hl');
+  if (mark) {
+    const card = $(`.thread[data-tid="${CSS.escape(mark.dataset.tid)}"]`);
+    if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.classList.add('flash');
+      setTimeout(() => card.classList.remove('flash'), 1300); }
+  }
+});
+
+function newDraftComment(sectionId, quote) {
+  const d = { id: 'd' + Date.now() + Math.floor(Math.random() * 1e4), sectionId, quote, text: '' };
+  state.draft.newThreads.push(d);
+  state.editing = d.id;
+  render();
+  const card = $(`.thread[data-tid="${CSS.escape(d.id)}"]`);
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* text-selection commenting */
+const selbtn = $('#selbtn');
+let pendingSel = null;
+document.addEventListener('mouseup', () => {
+  setTimeout(() => {
+    const sel = window.getSelection();
+    const text = sel && sel.toString().trim();
+    if (!text || text.length < 3) { selbtn.hidden = true; return; }
+    const anchor = sel.anchorNode && sel.anchorNode.parentElement;
+    const body = anchor && anchor.closest('.sec-body');
+    const focusBody = sel.focusNode && sel.focusNode.parentElement && sel.focusNode.parentElement.closest('.sec-body');
+    if (!body || body !== focusBody) { selbtn.hidden = true; return; }
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    pendingSel = { sectionId: body.closest('.section').dataset.sec, quote: text };
+    selbtn.style.left = (window.scrollX + rect.left + rect.width / 2 - 45) + 'px';
+    selbtn.style.top = (window.scrollY + rect.bottom + 8) + 'px';
+    selbtn.hidden = false;
+  }, 0);
+});
+selbtn.addEventListener('mousedown', ev => {
+  ev.preventDefault();
+  selbtn.hidden = true;
+  if (pendingSel) newDraftComment(pendingSel.sectionId, pendingSel.quote);
+  pendingSel = null;
+});
+
+$('#overall').addEventListener('input', ev => {
+  state.draft.overallComment = ev.target.value;
+  scheduleSave();
+});
+
+async function submit(verdict) {
+  clearTimeout(saveTimer);
+  const payload = { ...state.draft, verdict, round: state.plan.round };
+  if (verdict === 'approve' &&
+      (payload.newThreads.length || payload.replies.length) &&
+      !confirm('Approve with ' + (payload.newThreads.length + payload.replies.length) +
+               ' comment(s) attached? Claude will treat them as non-blocking notes.')) return;
+  if (verdict === 'request_changes' &&
+      !payload.newThreads.length && !payload.replies.length && !payload.overallComment &&
+      !confirm('Request changes without any comments?')) return;
+  await api('/api/submit', { method: 'POST', body: JSON.stringify(payload) });
+  state.submitted = true;
+  applyOverlay();
+}
+$('#btn-approve').onclick = () => submit('approve');
+$('#btn-changes').onclick = () => submit('request_changes');
+
+function applyOverlay() {
+  const ov = $('#overlay');
+  if (state.submitted) {
+    $('#ov-title').innerHTML = '<span class="spin"></span>Round ' + state.plan.round + ' sent to Claude';
+    $('#ov-body').textContent = 'Keep this tab open — the page will update automatically when the revised plan (or implementation go-ahead) is ready.';
+    ov.hidden = false;
+  } else {
+    ov.hidden = true;
+  }
+}
+
+/* ---------- state sync ---------- */
+
+async function load(first) {
+  let s;
+  try { s = await api('/api/state'); } catch (e) { return; }
+  const newPlan = s.plan;
+  if (!newPlan) return;
+  const roundChanged = !state.plan || newPlan.round !== state.plan.round;
+  if (!roundChanged && !first) {
+    // Only overlay state can change server-side mid-round.
+    state.submitted = (s.submittedRounds || []).includes(newPlan.round);
+    applyOverlay();
+    return;
+  }
+  state.plan = newPlan;
+  state.submitted = (s.submittedRounds || []).includes(newPlan.round);
+  const draft = s.draft;
+  state.draft = (draft && draft.round === newPlan.round)
+    ? { ...freshDraft(newPlan.round), ...draft }
+    : freshDraft(newPlan.round);
+  state.editing = null;
+  render();
+}
+
+load(true);
+setInterval(() => load(false), 3000);
+</script>
