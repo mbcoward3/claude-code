@@ -1,8 +1,8 @@
 {
   "title": "Add OAuth login to the web app",
-  "round": 2,
+  "round": 1,
   "updatedAt": "2026-07-11 14:03",
-  "summaryHtml": "<p>Replace the homegrown password flow with OAuth (Google + GitHub). Round 2 keeps the <code>sessions</code> table per review feedback and drops the risky data migration.</p>",
+  "summaryHtml": "<p>Replace the homegrown password flow with OAuth (Google + GitHub), feature-flagged with a staged rollout.</p>",
   "sections": [
     {
       "id": "db",
@@ -24,30 +24,5 @@
       "heading": "4. Rollout & testing",
       "bodyHtml": "<p>Feature-flagged (<code>oauth_login</code>). Integration tests hit a mock provider; canary to 5% of traffic for 48h before full rollout.</p>"
     }
-  ],
-  "threads": [
-    {
-      "id": "d1752240001111",
-      "sectionId": "db",
-      "quote": "sessions table",
-      "status": "resolved",
-      "messages": [
-        { "author": "user", "round": 1, "text": "Do NOT drop sessions — the analytics job reads it nightly." },
-        { "author": "agent", "round": 2, "text": "Kept the table unchanged and added only a nullable identity_id column; the analytics job is unaffected." }
-      ]
-    },
-    {
-      "id": "d1752240002222",
-      "sectionId": "ui",
-      "quote": null,
-      "status": "open",
-      "messages": [
-        { "author": "user", "round": 1, "text": "How long do we keep the legacy password form around?" },
-        { "author": "agent", "round": 2, "text": "Proposed one release cycle (~4 weeks). Happy to extend if support tickets spike — flag your preference on this thread." }
-      ]
-    }
-  ],
-  "history": [
-    { "round": 1, "verdict": "request_changes" }
   ]
 }

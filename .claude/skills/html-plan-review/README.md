@@ -7,16 +7,19 @@ page** where you can
 - comment on any plan section (click **💬 Comment**),
 - select any text span and comment on exactly that phrase — the highlight
   stays visible in the document,
-- mark each section **✓ Looks good** / **✗ Needs changes**,
+- flag a section **✗ Needs changes**,
 - approve the plan or request changes from a sticky bottom bar.
 
-Your annotations auto-save as you type (reload-safe, always visible with a
+The review is **critique-only**: anything you don't touch counts as
+approved, so a plan you like is a single click of **Approve plan**. Your
+annotations auto-save as you type (reload-safe, always visible with a
 "pending — not sent" badge until you submit). When you hit **Request
 changes**, the feedback is delivered straight back into the Claude Code
-session through a tiny local web server; Claude revises the plan, replies
-to each of your comments PR-review-style (open/resolved threads), and the
-page refreshes itself with the new round. **Approve plan** ends the loop
-and Claude proceeds to implementation.
+session through a tiny local web server and the page shows a
+"waiting for Claude to make changes…" spinner. When the revision is ready
+the page replaces itself with the clean latest version — revision counter
+incremented, "awaiting your review" banner, no inline change-tracking.
+**Approve plan** ends the loop and Claude proceeds to implementation.
 
 ## Install
 
@@ -52,7 +55,7 @@ Claude                          plan_review_server.py            your browser
   │  wait --round N (background)                                   │ annotate
   │        ▲                                                       │ auto-saves draft
   │        └── feedback-round-N.json ◄── POST /api/submit ◄────────┘ Send/Approve
-  │  wakes, revises plan.json (threads + replies), round N+1 …
+  │  wakes, revises plan.json (clean latest version), round N+1 …
 ```
 
 State lives in `.claude/plan-review/<slug>/` — gitignore it, or commit it
