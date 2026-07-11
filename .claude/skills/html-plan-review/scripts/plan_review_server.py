@@ -97,8 +97,18 @@ def make_handler(state_dir: Path, server_ref):
                     for p in state_dir.glob("feedback-round-*.json")
                     if p.stem.split("-")[-1].isdigit()
                 )
+                plan = read_json(state_dir / "plan.json")
+                # The plan body lives in a raw HTML sidecar so agents can
+                # author and revise it with targeted edits, free of JSON
+                # string escaping. plan.json stays a tiny metadata file.
+                body_file = state_dir / "plan.html"
+                if plan is not None and body_file.exists():
+                    try:
+                        plan["bodyHtml"] = body_file.read_text(encoding="utf-8")
+                    except OSError:
+                        pass
                 self._json({
-                    "plan": read_json(state_dir / "plan.json"),
+                    "plan": plan,
                     "draft": read_json(state_dir / "annotations.json"),
                     "submittedRounds": submitted,
                 })

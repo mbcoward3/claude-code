@@ -78,19 +78,32 @@ as a decision record of what was proposed, challenged, and approved.
   reachable; the skill falls back to a normal markdown plan.
 - The server binds `127.0.0.1` only and serves a single review directory.
 
+## Token efficiency
+
+The plan body is authored as **raw multi-line HTML in `plan.html`** —
+no JSON string escaping — with a ~6-line `plan.json` for metadata.
+Revisions are targeted `Edit` calls on `plan.html` plus a round bump,
+not whole-plan regeneration, so each review round costs a few hundred
+output tokens instead of thousands. Feedback returns as compact
+structured JSON (cheaper and less ambiguous than parsing prose
+comments about a markdown plan). The component vocabulary lives in
+`reference.md`, read only when authoring.
+
 ## Files
 
 ```
-SKILL.md                        agent protocol + JSON schemas
+SKILL.md                        lean agent protocol + feedback schema
+reference.md                    component vocabulary + house style
 scripts/plan_review_server.py   stdlib HTTP server: serve / wait / stop
 assets/app.html                 the review UI (vanilla JS, light/dark)
-examples/plan.json              sample plan for a quick demo
+examples/plan.html              sample plan body (the house style)
+examples/plan.json              sample metadata
 ```
 
 Quick demo without Claude:
 
 ```sh
 python3 scripts/plan_review_server.py serve --dir /tmp/demo-review &
-cp examples/plan.json /tmp/demo-review/
+cp examples/plan.html examples/plan.json /tmp/demo-review/
 open http://127.0.0.1:4173
 ```
