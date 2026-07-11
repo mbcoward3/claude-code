@@ -84,9 +84,30 @@ user's mental map (and any unsent draft anchors) survive revisions.
 }
 ```
 
-Authoring rules: 3–10 sections; `bodyHtml` uses simple tags only
-(`p ul ol li pre code table tr td th strong em h3 h4`) — never scripts or
-event handlers.
+Authoring rules: 3–10 sections; never include scripts or event handlers
+in `bodyHtml`. Base tags: `p ul ol li pre code kbd table tr td th thead
+tbody strong em h3 h4 details summary`. The page also enhances these
+**rich components — use them**, they are the point of this skill:
+
+- **Tables** — plain `<table>`, auto-styled (zebra rows, header band).
+  Use for file-change lists, API matrices, config diffs.
+- **Tabs** — for alternatives, trade-offs, per-platform variants:
+
+      <div class="tabs">
+        <section data-tab="Option A — cookies">…</section>
+        <section data-tab="Option B — JWT">…</section>
+      </div>
+
+- **Callouts** — `<div class="callout info|warn|risk|success">…</div>`
+  for risks, caveats, and wins.
+- **Collapsibles** — `<details><summary>Label</summary>…</details>` for
+  long detail that would bloat the page.
+- **Columns** — `<div class="cols"><div class="col">…</div>…</div>` for
+  side-by-side comparison.
+
+Every part of the plan is annotatable: the user can select any text —
+in the summary, a table cell, a tab panel — and comment on it or cross
+it out.
 
 ## Feedback schema (what `wait` prints)
 
@@ -96,13 +117,17 @@ event handlers.
   "verdict": "approve | request_changes",
   "overallComment": "free text, may be empty",
   "newThreads": [
-    { "id": "d…", "sectionId": "db", "quote": "exact selected text or null", "text": "…" }
+    { "id": "d…", "sectionId": "db", "quote": "exact selected text or null",
+      "type": "comment | strike", "text": "…" }
   ],
   "sectionVerdicts": { "api": "needs_changes" },
   "submittedAt": "…"
 }
 ```
 
-`quote` non-null means the comment targets that exact phrase in the
-section; null means it applies to the section as a whole. Untouched
+`quote` non-null means the annotation targets that exact phrase in the
+section; null means it applies to the section as a whole. A `sectionId`
+of `"_summary"` targets the plan summary. `type: "strike"` means the
+user **crossed the quoted text out — remove or eliminate that element
+from the plan** (the `text`, if present, is their reason). Untouched
 sections carry no entry anywhere — treat them as approved.

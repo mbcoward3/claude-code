@@ -25,7 +25,7 @@
     font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     padding-bottom: 96px;
   }
-  header { max-width: 860px; margin: 0 auto; padding: 28px 20px 8px; }
+  header { max-width: 880px; margin: 0 auto; padding: 28px 20px 8px; }
   header h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: -.01em; }
   #meta { color: var(--muted); font-size: 13px; }
   #revbanner {
@@ -34,11 +34,7 @@
     border: 1px solid var(--ok);
   }
   #revbanner.show { display: block; }
-  main { max-width: 860px; margin: 0 auto; padding: 8px 20px 20px; }
-  .summary {
-    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-    padding: 14px 18px; margin: 12px 0 20px; box-shadow: var(--shadow);
-  }
+  main { max-width: 880px; margin: 0 auto; padding: 8px 20px 20px; }
   .section {
     background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
     margin: 0 0 18px; box-shadow: var(--shadow); overflow: hidden;
@@ -57,28 +53,73 @@
   .chip:hover { border-color: var(--accent); color: var(--ink); }
   .chip.warn-on { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
   .sec-body { padding: 6px 18px 14px; overflow-x: auto; }
+  .sec-body > :first-child { margin-top: 8px; }
   .sec-body pre {
     background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
     padding: 10px 12px; overflow-x: auto; font-size: 13px;
   }
   .sec-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
-  .sec-body table { border-collapse: collapse; }
-  .sec-body td, .sec-body th { border: 1px solid var(--line); padding: 4px 10px; }
+  .sec-body kbd {
+    font-family: ui-monospace, monospace; font-size: .85em; border: 1px solid var(--line);
+    border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; background: var(--bg);
+  }
+
+  /* ---- rich components ---- */
+  .sec-body table {
+    border-collapse: collapse; margin: 10px 0; font-size: 13.5px;
+    border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  .sec-body th, .sec-body td { border: 1px solid var(--line); padding: 6px 12px; text-align: left; }
+  .sec-body th { background: var(--bg); font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .sec-body tr:nth-child(even) td { background: color-mix(in srgb, var(--bg) 55%, transparent); }
+  .callout {
+    border: 1px solid var(--line); border-left-width: 4px; border-radius: 8px;
+    padding: 10px 14px; margin: 12px 0; font-size: 14px;
+  }
+  .callout.info { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
+  .callout.warn, .callout.risk { border-left-color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, var(--panel)); }
+  .callout.success { border-left-color: var(--ok); background: color-mix(in srgb, var(--ok) 8%, var(--panel)); }
+  .tab-bar { display: flex; gap: 4px; margin: 12px 0 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .tab-bar button {
+    font: inherit; font-size: 13px; padding: 6px 14px; cursor: pointer;
+    border: 1px solid transparent; border-bottom: none; background: transparent;
+    color: var(--muted); border-radius: 8px 8px 0 0; position: relative; top: 1px;
+  }
+  .tab-bar button.active {
+    background: var(--bg); border-color: var(--line); color: var(--ink); font-weight: 600;
+  }
+  .tabs > section { display: none; padding: 12px 14px; border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 12px; }
+  .tabs > section.active { display: block; }
+  .sec-body details { border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; margin: 12px 0; }
+  .sec-body details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 12px 0; }
+  .col { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+  .col h4 { margin: 2px 0 6px; font-size: 13.5px; }
+
+  /* ---- annotations ---- */
   mark.hl { background: var(--hl-pending); color: inherit; border-radius: 2px; cursor: pointer; padding: 0 1px; }
+  mark.hl.strike {
+    background: color-mix(in srgb, var(--warn) 14%, transparent);
+    text-decoration: line-through; text-decoration-thickness: 2px;
+    text-decoration-color: var(--warn);
+  }
   .threads { padding: 0 18px 14px; display: flex; flex-direction: column; gap: 10px; }
   .thread {
     border: 1px solid var(--line); border-left: 3px solid var(--pending);
     border-radius: 8px; padding: 10px 12px; background: var(--bg); font-size: 13.5px;
   }
+  .thread.strike { border-left-color: var(--warn); }
   .thread .quote {
     border-left: 3px solid var(--line); margin: 0 0 8px; padding: 2px 10px;
     color: var(--muted); font-style: italic; white-space: pre-wrap;
   }
+  .thread.strike .quote { text-decoration: line-through; text-decoration-color: var(--warn); }
   .msg { margin: 6px 0; white-space: pre-wrap; }
   .badge {
     float: right; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600;
     background: var(--pending-soft); color: var(--pending);
   }
+  .thread.strike .badge { background: var(--warn-soft); color: var(--warn); }
   .t-actions { margin-top: 6px; display: flex; gap: 8px; }
   .t-actions button, .composer button, #bar button {
     font: inherit; font-size: 12.5px; border-radius: 7px; cursor: pointer;
@@ -94,18 +135,23 @@
   .composer { margin-top: 8px; }
   .composer .row { display: flex; gap: 8px; margin-top: 6px; }
   .composer .save { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-  #selbtn {
-    position: absolute; z-index: 30; background: var(--accent); color: var(--accent-ink);
-    border: none; border-radius: 8px; padding: 5px 12px; font: inherit; font-size: 13px;
-    cursor: pointer; box-shadow: var(--shadow);
+  #seltools[hidden] { display: none; }
+  #seltools {
+    position: absolute; z-index: 30; display: flex; gap: 1px; border-radius: 8px;
+    overflow: hidden; box-shadow: var(--shadow);
   }
+  #seltools button {
+    background: var(--accent); color: var(--accent-ink); border: none;
+    padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  #seltools button:hover { filter: brightness(1.1); }
   #bar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
     background: var(--panel); border-top: 1px solid var(--line);
     box-shadow: 0 -4px 16px rgba(0,0,0,.07);
   }
   #bar .inner {
-    max-width: 860px; margin: 0 auto; padding: 10px 20px;
+    max-width: 880px; margin: 0 auto; padding: 10px 20px;
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   }
   #counts { font-size: 13px; color: var(--muted); flex: 0 0 auto; }
@@ -146,7 +192,10 @@
   <div id="revbanner"></div>
 </header>
 <main id="main"><div class="empty"><span class="spin"></span>Waiting for Claude to publish a plan…</div></main>
-<button id="selbtn" hidden>&#128172; Comment</button>
+<div id="seltools" hidden>
+  <button id="sel-comment">&#128172; Comment</button>
+  <button id="sel-strike">&#10007; Cross out</button>
+</div>
 <footer id="bar" hidden>
   <div class="inner">
     <span id="counts"></span>
@@ -168,7 +217,7 @@ const $ = (s, el) => (el || document).querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g,
   c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-const state = { plan: null, draft: null, submitted: false, editing: null };
+const state = { plan: null, draft: null, submitted: false, editing: null, activeTabs: {} };
 let saveTimer = null;
 
 function freshDraft(round) {
@@ -209,12 +258,8 @@ function render() {
 
   const main = $('#main');
   main.innerHTML = '';
-  if (p.summaryHtml) {
-    const d = document.createElement('div');
-    d.className = 'summary';
-    d.innerHTML = p.summaryHtml;
-    main.appendChild(d);
-  }
+  if (p.summaryHtml)
+    main.appendChild(renderSection({ id: '_summary', heading: null, bodyHtml: p.summaryHtml }));
   for (const sec of p.sections || []) main.appendChild(renderSection(sec));
   $('#bar').hidden = false;
   $('#overall').value = state.draft.overallComment || '';
@@ -228,12 +273,14 @@ function renderSection(sec) {
   wrap.dataset.sec = sec.id;
   const flagged = state.draft.sectionVerdicts[sec.id] === 'needs_changes';
   if (flagged) wrap.classList.add('flagged');
-  wrap.innerHTML =
+  const head = sec.heading === null ? '' :
     `<div class="sec-head"><h2>${esc(sec.heading)}</h2>` +
     `<button class="chip" data-act="comment">&#128172; Comment</button>` +
-    `<button class="chip ${flagged ? 'warn-on' : ''}" data-act="flag">&#9998; Needs changes</button></div>` +
-    `<div class="sec-body"></div><div class="threads"></div>`;
-  $('.sec-body', wrap).innerHTML = sec.bodyHtml || '';
+    `<button class="chip ${flagged ? 'warn-on' : ''}" data-act="flag">&#9998; Needs changes</button></div>`;
+  wrap.innerHTML = head + `<div class="sec-body"></div><div class="threads"></div>`;
+  const body = $('.sec-body', wrap);
+  body.innerHTML = sec.bodyHtml || '';
+  enhanceTabs(body, sec.id);
 
   const threadsEl = $('.threads', wrap);
   for (const d of state.draft.newThreads.filter(t => t.sectionId === sec.id))
@@ -241,53 +288,85 @@ function renderSection(sec) {
   return wrap;
 }
 
+/* Progressive enhancement: <div class="tabs"><section data-tab="Label">…</section>…</div> */
+function enhanceTabs(bodyEl, secId) {
+  bodyEl.querySelectorAll('.tabs').forEach((group, gi) => {
+    const panels = [...group.querySelectorAll(':scope > section[data-tab]')];
+    if (!panels.length) return;
+    const key = secId + ':' + gi;
+    const active = Math.min(state.activeTabs[key] || 0, panels.length - 1);
+    const bar = document.createElement('div');
+    bar.className = 'tab-bar';
+    panels.forEach((panel, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = panel.dataset.tab;
+      if (i === active) { b.classList.add('active'); panel.classList.add('active'); }
+      b.addEventListener('click', () => {
+        state.activeTabs[key] = i;
+        bar.querySelectorAll('button').forEach((x, j) => x.classList.toggle('active', j === i));
+        panels.forEach((x, j) => x.classList.toggle('active', j === i));
+      });
+      bar.appendChild(b);
+    });
+    group.insertBefore(bar, panels[0]);
+  });
+}
+
 function renderDraft(d, secEl) {
+  const isStrike = d.type === 'strike';
   const el = document.createElement('div');
-  el.className = 'thread';
+  el.className = 'thread' + (isStrike ? ' strike' : '');
   el.dataset.tid = d.id;
-  let html = `<span class="badge">pending — not sent</span>`;
+  let html = `<span class="badge">${isStrike ? 'cross out — not sent' : 'pending — not sent'}</span>`;
   if (d.quote) html += `<div class="quote">${esc(d.quote)}</div>`;
   el.innerHTML = html;
   if (state.editing === d.id) {
-    el.appendChild(composer(d.text, text => {
-      if (text) { d.text = text; state.editing = null; }
+    el.appendChild(composer(d, text => {
+      if (text || isStrike) { d.text = text; state.editing = null; }
       else { state.draft.newThreads = state.draft.newThreads.filter(x => x.id !== d.id); state.editing = null; }
       scheduleSave(); render();
     }));
   } else {
     el.insertAdjacentHTML('beforeend',
-      `<div class="msg">${esc(d.text)}</div>` +
+      (d.text ? `<div class="msg">${esc(d.text)}</div>` : '') +
       `<div class="t-actions"><button data-act="edit-draft">Edit</button><button data-act="del-draft">Delete</button></div>`);
   }
-  if (d.quote) highlight($('.sec-body', secEl), d.quote, d.id);
+  if (d.quote) highlight($('.sec-body', secEl), d.quote, d.id, isStrike);
   return el;
 }
 
-function composer(initial, onDone) {
+function composer(d, onDone) {
+  const isStrike = d.type === 'strike';
   const box = document.createElement('div');
   box.className = 'composer';
-  box.innerHTML = `<textarea class="cbox" placeholder="What should change here?"></textarea>` +
+  box.innerHTML = `<textarea class="cbox" placeholder="${isStrike ? 'Why cross this out? (optional)' : 'What should change here?'}"></textarea>` +
     `<div class="row"><button class="save">Save</button><button class="cancel">Cancel</button></div>`;
   const ta = $('textarea', box);
-  ta.value = initial || '';
+  ta.value = d.text || '';
   $('.save', box).onclick = () => onDone(ta.value.trim());
-  $('.cancel', box).onclick = () => { state.editing = null; render(); };
+  $('.cancel', box).onclick = () => {
+    if (!d.text && !isStrike) state.draft.newThreads = state.draft.newThreads.filter(x => x.id !== d.id);
+    state.editing = null; render();
+  };
   setTimeout(() => ta.focus(), 0);
   return box;
 }
 
 function renderCounts() {
-  const n = state.draft.newThreads.length;
+  const c = state.draft.newThreads.filter(t => t.type !== 'strike').length;
+  const x = state.draft.newThreads.filter(t => t.type === 'strike').length;
   const f = Object.keys(state.draft.sectionVerdicts).length;
   const parts = [];
-  if (n) parts.push(n + ' comment' + (n > 1 ? 's' : ''));
+  if (c) parts.push(c + ' comment' + (c > 1 ? 's' : ''));
+  if (x) parts.push(x + ' cross-out' + (x > 1 ? 's' : ''));
   if (f) parts.push(f + ' section' + (f > 1 ? 's' : '') + ' flagged');
   $('#counts').textContent = parts.length ? parts.join(' · ') : 'No critiques — silence means approval';
 }
 
 /* Wrap the first occurrence of `quote` inside `bodyEl` in <mark> elements,
    even when it spans multiple text nodes. */
-function highlight(bodyEl, quote, tid) {
+function highlight(bodyEl, quote, tid, isStrike) {
   if (!bodyEl || !quote) return;
   if ($(`mark[data-tid="${CSS.escape(tid)}"]`, bodyEl)) return;
   const walker = document.createTreeWalker(bodyEl, NodeFilter.SHOW_TEXT);
@@ -307,7 +386,7 @@ function highlight(bodyEl, quote, tid) {
     range.setStart(n, Math.max(idx, start) - start);
     range.setEnd(n, Math.min(end, nEnd) - start);
     const mark = document.createElement('mark');
-    mark.className = 'hl';
+    mark.className = 'hl' + (isStrike ? ' strike' : '');
     mark.dataset.tid = tid;
     try { range.surroundContents(mark); } catch (e) { /* skip un-wrappable segment */ }
   }
@@ -327,7 +406,7 @@ document.addEventListener('click', ev => {
       else state.draft.sectionVerdicts[secId] = 'needs_changes';
       scheduleSave(); render();
     } else if (act === 'comment') {
-      newDraftComment(secId, null);
+      newDraftAnnotation(secId, null, 'comment');
     } else if (act === 'edit-draft') {
       state.editing = threadEl.dataset.tid; render();
     } else if (act === 'del-draft') {
@@ -344,40 +423,45 @@ document.addEventListener('click', ev => {
   }
 });
 
-function newDraftComment(sectionId, quote) {
-  const d = { id: 'd' + Date.now() + Math.floor(Math.random() * 1e4), sectionId, quote, text: '' };
+function newDraftAnnotation(sectionId, quote, type) {
+  const d = { id: 'd' + Date.now() + Math.floor(Math.random() * 1e4), sectionId, quote, type, text: '' };
   state.draft.newThreads.push(d);
   state.editing = d.id;
+  if (type === 'strike') scheduleSave(); // strikes are valid with no text
   render();
   const card = $(`.thread[data-tid="${CSS.escape(d.id)}"]`);
   if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-/* text-selection commenting */
-const selbtn = $('#selbtn');
+/* text-selection annotation: works in any section body, including the summary */
+const seltools = $('#seltools');
 let pendingSel = null;
-document.addEventListener('mouseup', () => {
+document.addEventListener('mouseup', ev => {
+  if (ev.target instanceof Element && ev.target.closest('#seltools')) return;
   setTimeout(() => {
     const sel = window.getSelection();
     const text = sel && sel.toString().trim();
-    if (!text || text.length < 3) { selbtn.hidden = true; return; }
-    const anchor = sel.anchorNode && sel.anchorNode.parentElement;
-    const body = anchor && anchor.closest('.sec-body');
-    const focusBody = sel.focusNode && sel.focusNode.parentElement && sel.focusNode.parentElement.closest('.sec-body');
-    if (!body || body !== focusBody) { selbtn.hidden = true; return; }
+    if (!text || text.length < 3 || sel.rangeCount === 0) { seltools.hidden = true; return; }
+    const bodyOf = node => {
+      const el = node && (node.nodeType === 1 ? node : node.parentElement);
+      return el && el.closest('.sec-body');
+    };
+    const body = bodyOf(sel.anchorNode);
+    if (!body || body !== bodyOf(sel.focusNode)) { seltools.hidden = true; return; }
     const rect = sel.getRangeAt(0).getBoundingClientRect();
     pendingSel = { sectionId: body.closest('.section').dataset.sec, quote: text };
-    selbtn.style.left = (window.scrollX + rect.left + rect.width / 2 - 45) + 'px';
-    selbtn.style.top = (window.scrollY + rect.bottom + 8) + 'px';
-    selbtn.hidden = false;
+    seltools.style.left = Math.max(8, window.scrollX + rect.left + rect.width / 2 - 90) + 'px';
+    seltools.style.top = (window.scrollY + rect.bottom + 8) + 'px';
+    seltools.hidden = false;
   }, 0);
 });
-selbtn.addEventListener('mousedown', ev => {
-  ev.preventDefault();
-  selbtn.hidden = true;
-  if (pendingSel) newDraftComment(pendingSel.sectionId, pendingSel.quote);
+function selAction(type) {
+  seltools.hidden = true;
+  if (pendingSel) newDraftAnnotation(pendingSel.sectionId, pendingSel.quote, type);
   pendingSel = null;
-});
+}
+$('#sel-comment').addEventListener('mousedown', ev => { ev.preventDefault(); selAction('comment'); });
+$('#sel-strike').addEventListener('mousedown', ev => { ev.preventDefault(); selAction('strike'); });
 
 $('#overall').addEventListener('input', ev => {
   state.draft.overallComment = ev.target.value;
@@ -429,6 +513,7 @@ async function load(first) {
     ? { ...freshDraft(newPlan.round), ...draft }
     : freshDraft(newPlan.round);
   state.editing = null;
+  state.activeTabs = {};
   render();
 }
 

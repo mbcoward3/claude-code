@@ -4,11 +4,17 @@ An alternative to reviewing Claude Code plans as walls of markdown: this
 skill has the agent publish its plan to an **interactive local HTML review
 page** where you can
 
-- comment on any plan section (click **💬 Comment**),
-- select any text span and comment on exactly that phrase — the highlight
-  stays visible in the document,
+- select **any text anywhere** — summary, a table cell, inside a tab —
+  and either **💬 comment** on that exact phrase or **✗ cross it out**
+  (strike-through = "remove this", with an optional reason); highlights
+  and strikes stay visible in the document,
+- comment on a whole section (click **💬 Comment**),
 - flag a section **✗ Needs changes**,
 - approve the plan or request changes from a sticky bottom bar.
+
+Plans render with rich components, not just prose: auto-styled tables,
+**multi-tab sections** for alternatives, callouts for risks, collapsible
+detail blocks, and side-by-side comparison columns.
 
 The review is **critique-only**: anything you don't touch counts as
 approved, so a plan you like is a single click of **Approve plan**. Your

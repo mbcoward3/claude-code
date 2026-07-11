@@ -2,27 +2,27 @@
   "title": "Add OAuth login to the web app",
   "round": 1,
   "updatedAt": "2026-07-11 14:03",
-  "summaryHtml": "<p>Replace the homegrown password flow with OAuth (Google + GitHub), feature-flagged with a staged rollout.</p>",
+  "summaryHtml": "<p>Replace the homegrown password flow with OAuth (Google + GitHub), feature-flagged with a staged rollout. Legacy password login stays available for one release while accounts migrate.</p>",
   "sections": [
     {
       "id": "db",
       "heading": "1. Database changes",
-      "bodyHtml": "<p>Add an <code>identities</code> table linking users to providers:</p><pre><code>CREATE TABLE identities (\n  id BIGINT PRIMARY KEY,\n  user_id BIGINT REFERENCES users(id),\n  provider TEXT NOT NULL,\n  provider_uid TEXT NOT NULL,\n  UNIQUE (provider, provider_uid)\n);</code></pre><p>The existing <strong>sessions table stays as-is</strong>; we only add a nullable <code>identity_id</code> column.</p>"
+      "bodyHtml": "<p>Add an <code>identities</code> table linking users to providers:</p><pre><code>CREATE TABLE identities (\n  id BIGINT PRIMARY KEY,\n  user_id BIGINT REFERENCES users(id),\n  provider TEXT NOT NULL,\n  provider_uid TEXT NOT NULL,\n  UNIQUE (provider, provider_uid)\n);</code></pre><table><thead><tr><th>Migration</th><th>Purpose</th><th>Reversible</th></tr></thead><tbody><tr><td><code>0041_identities</code></td><td>new table above</td><td>yes</td></tr><tr><td><code>0042_sessions_identity</code></td><td>nullable <code>identity_id</code> on sessions</td><td>yes</td></tr><tr><td><code>0043_backfill</code></td><td>link existing users by verified email</td><td>no — snapshot first</td></tr></tbody></table><p>The existing <strong>sessions table stays as-is</strong> otherwise.</p>"
     },
     {
       "id": "api",
       "heading": "2. Auth endpoints",
-      "bodyHtml": "<p>New routes in <code>src/auth/oauth.ts</code>:</p><ul><li><code>GET /auth/:provider</code> — redirect to provider consent screen</li><li><code>GET /auth/:provider/callback</code> — exchange code, upsert identity, mint session</li><li><code>POST /auth/logout</code> — unchanged</li></ul><p>State parameter is a signed nonce stored in a short-lived cookie to block CSRF.</p>"
+      "bodyHtml": "<p>New routes in <code>src/auth/oauth.ts</code>:</p><ul><li><code>GET /auth/:provider</code> — redirect to provider consent screen</li><li><code>GET /auth/:provider/callback</code> — exchange code, upsert identity, mint session</li><li><code>POST /auth/logout</code> — unchanged</li></ul><p>State parameter is a signed nonce stored in a short-lived cookie to block CSRF.</p><div class=\"callout risk\"><strong>Risk:</strong> callback endpoint is unauthenticated by design — rate-limit it at the edge.</div>"
     },
     {
-      "id": "ui",
-      "heading": "3. Login UI",
-      "bodyHtml": "<p>Replace the password form with provider buttons; keep the password form behind a <em>“use legacy login”</em> toggle for one release while accounts migrate.</p>"
+      "id": "storage",
+      "heading": "3. Session storage strategy",
+      "bodyHtml": "<p>Two viable approaches; the plan proposes Option A.</p><div class=\"tabs\"><section data-tab=\"Option A — DB sessions (proposed)\"><div class=\"cols\"><div class=\"col\"><h4>Pros</h4><ul><li>Instant revocation</li><li>Reuses existing sessions table</li></ul></div><div class=\"col\"><h4>Cons</h4><ul><li>DB read per request</li></ul></div></div></section><section data-tab=\"Option B — JWT\"><div class=\"cols\"><div class=\"col\"><h4>Pros</h4><ul><li>Stateless, no DB read</li></ul></div><div class=\"col\"><h4>Cons</h4><ul><li>Revocation needs a denylist</li><li>Key rotation ceremony</li></ul></div></div></section></div>"
     },
     {
       "id": "rollout",
       "heading": "4. Rollout & testing",
-      "bodyHtml": "<p>Feature-flagged (<code>oauth_login</code>). Integration tests hit a mock provider; canary to 5% of traffic for 48h before full rollout.</p>"
+      "bodyHtml": "<p>Feature-flagged (<code>oauth_login</code>). Integration tests hit a mock provider; canary to 5% of traffic for 48 hours before full rollout.</p><details><summary>Test matrix detail</summary><ul><li>New signup via Google / GitHub</li><li>Existing account linking by verified email</li><li>Provider outage → graceful fallback to legacy login</li></ul></details><div class=\"callout success\">Zero-downtime: every migration is additive.</div>"
     }
   ]
 }
