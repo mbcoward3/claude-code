@@ -1,0 +1,788 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan Review</title>
+<style>
+  :root {
+    --bg: #f2f2ef; --panel: #ffffff; --ink: #1b1b19; --muted: #6f6e68;
+    --line: #e6e5df; --accent: #4f63d2; --accent-ink: #ffffff;
+    --ok: #2e7d4f; --warn: #b3591a; --bad: #c23b3b;
+    --pending: #8a6d00; --pending-soft: #fff4cf; --hl-pending: #ffdbe4;
+    --shadow: 0 1px 2px rgba(20,20,15,.05), 0 8px 32px rgba(20,20,15,.07);
+    --shadow-pop: 0 4px 12px rgba(20,20,15,.10), 0 16px 48px rgba(20,20,15,.16);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121215; --panel: #1c1c21; --ink: #ebebe8; --muted: #9c9b94;
+      --line: #303036; --accent: #8fa2e8; --accent-ink: #12131a;
+      --ok: #6fbf8f; --warn: #e09154; --bad: #e07f7f;
+      --pending: #d9b53c; --pending-soft: #34300f; --hl-pending: #58303d;
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 32px rgba(0,0,0,.35);
+      --shadow-pop: 0 4px 12px rgba(0,0,0,.45), 0 16px 48px rgba(0,0,0,.5);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 15.5px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased; padding-bottom: 120px;
+  }
+  ::selection { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+  main { max-width: 860px; margin: 0 auto; padding: 36px 16px 24px; }
+  #sheet {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+    box-shadow: var(--shadow); padding: 44px 56px 52px;
+  }
+  @media (max-width: 680px) { #sheet { padding: 26px 20px 32px; border-radius: 14px; } }
+  #sheet > h1 { margin: 0 0 6px; font-size: 29px; font-weight: 650; letter-spacing: -.022em; line-height: 1.25; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+  .meta .dot { margin: 0 7px; opacity: .5; }
+  .revbanner {
+    display: flex; align-items: center; gap: 8px; margin: 14px 0 4px; padding: 9px 14px;
+    border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--ok);
+    background: color-mix(in srgb, var(--ok) 9%, var(--panel));
+    border: 1px solid color-mix(in srgb, var(--ok) 35%, transparent);
+  }
+
+  /* ---------- document ---------- */
+  .section { margin-top: 8px; }
+  .section.flagged { border-left: 3px solid var(--warn); padding-left: 18px; margin-left: -21px; border-radius: 2px; }
+  .sec-h { display: flex; align-items: center; gap: 10px; margin-top: 26px; }
+  .sec-h h2 { margin: 0; font-size: 19.5px; font-weight: 650; letter-spacing: -.014em; }
+  .sec-h .tools { display: flex; gap: 4px; opacity: 0; transition: opacity .15s ease; }
+  .sec-h:hover .tools, .sec-h:focus-within .tools { opacity: 1; }
+  .ghost {
+    border: 1px solid transparent; background: transparent; color: var(--muted);
+    border-radius: 7px; padding: 2px 8px; font: inherit; font-size: 12.5px; cursor: pointer;
+  }
+  .ghost:hover { background: color-mix(in srgb, var(--muted) 10%, transparent); color: var(--ink); }
+  .ghost.warn-on { opacity: 1; background: color-mix(in srgb, var(--warn) 12%, transparent); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .section.flagged .sec-h .tools { opacity: 1; }
+  .sec-body h3 { font-size: 16.5px; margin: 26px 0 8px; letter-spacing: -.01em; }
+  .sec-body h4 { font-size: 14px; margin: 18px 0 6px; }
+  .sec-body p, .sec-body ul, .sec-body ol { margin: 10px 0; }
+  .sec-body li { margin: 3px 0; }
+  .sec-body pre {
+    background: color-mix(in srgb, var(--bg) 72%, var(--panel)); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px 16px; overflow-x: auto; font-size: 12.8px; line-height: 1.6;
+  }
+  .sec-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+  .sec-body p code, .sec-body li code, .sec-body td code {
+    background: color-mix(in srgb, var(--muted) 10%, transparent);
+    border-radius: 5px; padding: 1px 5px;
+  }
+  .sec-body kbd {
+    font-family: ui-monospace, monospace; font-size: .85em; border: 1px solid var(--line);
+    border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; background: var(--bg);
+  }
+  .sec-body a { color: var(--accent); }
+
+  /* ---------- rich components ---------- */
+  .sec-body table {
+    width: 100%; border-collapse: separate; border-spacing: 0; margin: 14px 0;
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 13.5px;
+  }
+  .sec-body th, .sec-body td { padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+  .sec-body th { background: color-mix(in srgb, var(--bg) 70%, var(--panel)); font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+  .sec-body tr:last-child td { border-bottom: none; }
+  .sec-body tbody tr:hover td { background: color-mix(in srgb, var(--accent) 4%, transparent); }
+
+  .callout {
+    position: relative; border: 1px solid var(--line); border-radius: 12px;
+    padding: 11px 16px 11px 44px; margin: 14px 0; font-size: 14px;
+  }
+  .callout::before { position: absolute; left: 15px; top: 10px; font-weight: 700; font-size: 15px; }
+  .callout.info { border-color: color-mix(in srgb, var(--accent) 30%, transparent); background: color-mix(in srgb, var(--accent) 6%, var(--panel)); }
+  .callout.info::before { content: 'ⓘ'; color: var(--accent); }
+  .callout.warn, .callout.risk { border-color: color-mix(in srgb, var(--warn) 35%, transparent); background: color-mix(in srgb, var(--warn) 7%, var(--panel)); }
+  .callout.warn::before, .callout.risk::before { content: '⚠'; color: var(--warn); }
+  .callout.success { border-color: color-mix(in srgb, var(--ok) 35%, transparent); background: color-mix(in srgb, var(--ok) 7%, var(--panel)); }
+  .callout.success::before { content: '✓'; color: var(--ok); }
+
+  .tab-bar {
+    display: inline-flex; gap: 2px; background: color-mix(in srgb, var(--bg) 80%, var(--panel));
+    border: 1px solid var(--line); border-radius: 11px; padding: 3px; margin: 14px 0 0;
+  }
+  .tab-bar button {
+    border: none; background: transparent; padding: 5px 15px; border-radius: 8px;
+    font: inherit; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer;
+  }
+  .tab-bar button.active {
+    background: var(--panel); color: var(--ink); font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,.14);
+  }
+  .tabs > section { display: none; padding: 12px 2px 4px; }
+  .tabs > section.active { display: block; animation: fadein .18s ease; }
+
+  .sec-body details { border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; margin: 14px 0; }
+  .sec-body details summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--muted); }
+  .sec-body details[open] summary { color: var(--ink); margin-bottom: 6px; }
+
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 12px 0; }
+  .col { border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; background: color-mix(in srgb, var(--bg) 40%, var(--panel)); }
+  .col h4 { margin: 0 0 6px; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat {
+    border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px;
+    background: color-mix(in srgb, var(--bg) 40%, var(--panel));
+  }
+  .stat .v { font-size: 27px; font-weight: 600; letter-spacing: -.015em; line-height: 1.2; }
+  .stat .l { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .stat .d { font-size: 12px; font-weight: 600; margin-left: 6px; }
+  .stat .d.up { color: var(--ok); } .stat .d.down { color: var(--bad); }
+
+  ol.steps { list-style: none; margin: 16px 0; padding: 0; counter-reset: step; }
+  .steps li { position: relative; padding: 0 0 20px 46px; counter-increment: step; }
+  .steps li::before {
+    content: counter(step); position: absolute; left: 0; top: -1px;
+    width: 27px; height: 27px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: color-mix(in srgb, var(--accent) 11%, var(--panel)); color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    font-weight: 650; font-size: 13px;
+  }
+  .steps li::after {
+    content: ''; position: absolute; left: 13px; top: 30px; bottom: 4px; width: 1px;
+    background: var(--line);
+  }
+  .steps li:last-child { padding-bottom: 4px; }
+  .steps li:last-child::after { display: none; }
+  .steps li b:first-child, .steps li strong:first-child { display: block; font-size: 14.5px; }
+
+  ul.file-tree { list-style: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.8px; padding: 12px 16px; margin: 14px 0; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--bg) 72%, var(--panel)); }
+  .file-tree ul { list-style: none; padding-left: 14px; margin: 1px 0 1px 5px; border-left: 1px solid var(--line); }
+  .file-tree li { padding: 1.5px 0 1.5px 6px; }
+  .file-tree .dir { font-weight: 650; }
+  .file-tree .add { color: var(--ok); }
+  .file-tree .mod { color: var(--pending); }
+
+  pre.diff { padding: 10px 0; }
+  .dl { display: block; padding: 0 16px; }
+  .dl.add { background: color-mix(in srgb, var(--ok) 13%, transparent); }
+  .dl.del { background: color-mix(in srgb, var(--bad) 12%, transparent); }
+  .dl.hunk { color: var(--accent); opacity: .8; }
+
+  .pill {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 650; vertical-align: 1px; letter-spacing: .01em;
+  }
+  .pill.info { background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent); }
+  .pill.ok { background: color-mix(in srgb, var(--ok) 13%, transparent); color: var(--ok); }
+  .pill.warn { background: color-mix(in srgb, var(--warn) 14%, transparent); color: var(--warn); }
+  .pill.danger { background: color-mix(in srgb, var(--bad) 13%, transparent); color: var(--bad); }
+
+  /* ---------- annotations ---------- */
+  mark.hl {
+    background: color-mix(in srgb, var(--hl-pending) 75%, transparent); color: inherit;
+    border-radius: 3px; cursor: pointer; padding: 0 1px;
+    box-shadow: 0 1.5px 0 0 color-mix(in srgb, var(--bad) 45%, transparent);
+  }
+  mark.hl.strike {
+    background: color-mix(in srgb, var(--warn) 13%, transparent); box-shadow: none;
+    text-decoration: line-through; text-decoration-thickness: 2px;
+    text-decoration-color: var(--warn);
+  }
+  @keyframes fadein { from { opacity: 0; transform: translateY(3px); } }
+  @keyframes pop { from { opacity: 0; transform: translateY(5px) scale(.98); } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  #seltools[hidden] { display: none; }
+  #seltools {
+    position: absolute; z-index: 30; display: flex; border-radius: 10px; overflow: hidden;
+    background: var(--ink); box-shadow: var(--shadow-pop); animation: pop .14s ease;
+  }
+  #seltools button {
+    background: transparent; color: var(--bg); border: none; padding: 7px 14px;
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  }
+  #seltools button:hover { background: color-mix(in srgb, var(--bg) 14%, transparent); }
+  #seltools button + button { border-left: 1px solid color-mix(in srgb, var(--bg) 22%, transparent); }
+
+  #composer[hidden] { display: none; }
+  #composer {
+    position: absolute; z-index: 35; width: min(360px, calc(100vw - 24px));
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow-pop); padding: 12px; animation: pop .14s ease;
+  }
+  #composer .ctx {
+    font-size: 12px; color: var(--muted); margin: 0 0 8px; font-style: italic;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  textarea.cbox {
+    width: 100%; min-height: 68px; font: inherit; font-size: 13.5px; line-height: 1.5;
+    background: color-mix(in srgb, var(--bg) 55%, var(--panel)); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; resize: vertical;
+  }
+  textarea.cbox:focus { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); border-color: var(--accent); }
+  .row { display: flex; gap: 8px; margin-top: 8px; }
+  #composer button, #drawer button, #bar button {
+    font: inherit; font-size: 12.5px; font-weight: 550; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 5px 13px;
+  }
+  #composer button:hover, #drawer button:hover { border-color: var(--accent); }
+  #composer .save { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  /* ---------- staged drawer ---------- */
+  #drawer[hidden] { display: none; }
+  #drawer {
+    position: fixed; right: 16px; bottom: 88px; z-index: 25;
+    width: min(410px, calc(100vw - 32px)); max-height: 56vh; overflow-y: auto;
+    background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(14px);
+    border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-pop);
+    animation: pop .16s ease;
+  }
+  #drawer .d-head {
+    position: sticky; top: 0; z-index: 1; padding: 12px 16px; font-weight: 650; font-size: 13px;
+    background: inherit; backdrop-filter: blur(14px); border-bottom: 1px solid var(--line);
+    letter-spacing: .01em;
+  }
+  .d-item { padding: 11px 16px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .d-item:last-child { border-bottom: none; }
+  .d-item .kind { font-weight: 650; font-size: 11.5px; letter-spacing: .03em; text-transform: uppercase; margin-right: 8px; }
+  .d-item.strike .kind, .d-item.flag .kind { color: var(--warn); }
+  .d-item.comment .kind { color: var(--pending); }
+  .d-item .where { color: var(--muted); font-size: 12px; }
+  .d-item .quote {
+    border-left: 3px solid var(--line); margin: 7px 0; padding: 2px 10px;
+    color: var(--muted); font-style: italic; white-space: pre-wrap; font-size: 12.5px;
+  }
+  .d-item.strike .quote { text-decoration: line-through; text-decoration-color: var(--warn); }
+  .d-item .msg { margin: 5px 0; white-space: pre-wrap; }
+  .d-item .row { margin-top: 8px; }
+  .d-item .row button { font-size: 12px; padding: 3px 11px; }
+  .d-empty { padding: 26px 16px; color: var(--muted); text-align: center; font-size: 13.5px; }
+  .d-item.flash-item { animation: flash 1.2s ease-out; }
+
+  /* ---------- floating dock ---------- */
+  #bar[hidden] { display: none; }
+  #bar {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 20;
+    width: min(780px, calc(100vw - 24px));
+    background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(14px);
+    border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-pop);
+  }
+  #bar .inner { padding: 10px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  #staged { flex: 0 0 auto; font-size: 13px; }
+  #staged.has { background: var(--pending-soft); color: var(--pending); border-color: color-mix(in srgb, var(--pending) 45%, transparent); font-weight: 650; }
+  #overall {
+    flex: 1 1 200px; min-width: 130px; font: inherit; font-size: 13.5px;
+    background: color-mix(in srgb, var(--bg) 55%, var(--panel)); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 9px; padding: 7px 11px;
+  }
+  #overall:focus { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); border-color: var(--accent); }
+  #btn-changes { background: color-mix(in srgb, var(--warn) 11%, var(--panel)); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); font-weight: 650; }
+  #btn-approve { background: var(--ok); color: #fff; border-color: var(--ok); font-weight: 650; }
+  #bar button { padding: 7px 16px; }
+
+  #overlay[hidden] { display: none; }
+  #overlay {
+    position: fixed; inset: 0; z-index: 40; display: flex; align-items: center;
+    justify-content: center; background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(5px); text-align: center; padding: 20px;
+  }
+  #overlay .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 30px 36px; box-shadow: var(--shadow-pop); max-width: 430px; animation: pop .2s ease;
+  }
+  #overlay h2 { margin: 0 0 8px; font-size: 18px; }
+  #overlay p { margin: 0; color: var(--muted); font-size: 14px; }
+  .spin {
+    display: inline-block; width: 16px; height: 16px; margin-right: 9px;
+    border: 2px solid var(--line); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 1s linear infinite; vertical-align: -3px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { color: var(--muted); text-align: center; padding: 70px 0; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: none; } }
+  .flash { animation: flash 1.2s ease-out; }
+</style>
+
+<main id="main"><div class="empty"><span class="spin"></span>Waiting for Claude to publish a plan…</div></main>
+<div id="seltools" hidden>
+  <button id="sel-comment">&#128172; Comment</button>
+  <button id="sel-strike">&#10007; Cross out</button>
+</div>
+<div id="composer" hidden>
+  <p class="ctx"></p>
+  <textarea class="cbox"></textarea>
+  <div class="row"><button class="save">Save</button><button class="cancel">Cancel</button></div>
+</div>
+<div id="drawer" hidden>
+  <div class="d-head">Staged annotations · sent with your verdict</div>
+  <div id="d-list"></div>
+</div>
+<footer id="bar" hidden>
+  <div class="inner">
+    <button id="staged"></button>
+    <input id="overall" placeholder="Overall note to Claude (optional)">
+    <button id="btn-changes">Request changes</button>
+    <button id="btn-approve">Approve plan</button>
+  </div>
+</footer>
+<div id="overlay" hidden>
+  <div class="card">
+    <h2 id="ov-title"></h2>
+    <p id="ov-body"></p>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = (s, el) => (el || document).querySelector(s);
+const $$ = (s, el) => [...(el || document).querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const state = {
+  plan: null, draft: null, submitted: false, activeTabs: {},
+  drawerOpen: false, drawerEditing: null, composing: null,
+};
+let saveTimer = null;
+
+function freshDraft(round) {
+  return { round, newThreads: [], sectionVerdicts: {}, overallComment: '', verdict: null };
+}
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(path + ' -> ' + r.status);
+  return r.json();
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    api('/api/draft', { method: 'POST', body: JSON.stringify(state.draft) }).catch(() => {});
+  }, 400);
+}
+
+/* ---------- document rendering ---------- */
+
+/* A plan is summaryHtml? + bodyHtml? (free-form, sectionless) + sections?[] */
+function blocks(p) {
+  const b = [];
+  if (p.summaryHtml) b.push({ id: '_summary', heading: null, bodyHtml: p.summaryHtml });
+  if (p.bodyHtml) b.push({ id: '_doc', heading: null, bodyHtml: p.bodyHtml });
+  for (const s of p.sections || []) b.push(s);
+  return b;
+}
+
+function render() {
+  const p = state.plan;
+  if (!p) return;
+  document.title = 'Plan Review — ' + p.title;
+
+  const main = $('#main');
+  main.innerHTML = '';
+  const sheet = document.createElement('article');
+  sheet.id = 'sheet';
+  let head = `<h1>${esc(p.title)}</h1>` +
+    `<div class="meta">Round ${p.round}` +
+    (p.updatedAt ? `<span class="dot">·</span>${esc(p.updatedAt)}</div>` : '</div>');
+  // The latest revision hasn't been reviewed yet: say so, without any
+  // inline change-tracking — the page always shows only the current plan.
+  if (p.round > 1 && !state.submitted)
+    head += `<div class="revbanner">✓ Changes made — revision ${p.round}, awaiting your review</div>`;
+  sheet.innerHTML = head;
+  for (const sec of blocks(p)) sheet.appendChild(renderBlock(sec));
+  main.appendChild(sheet);
+
+  // Anchor highlights: prefer the annotation's own block, fall back to a
+  // document-wide search so quotes survive section reshuffles.
+  for (const a of state.draft.newThreads) {
+    if (!a.quote) continue;
+    const own = $(`.section[data-sec="${CSS.escape(a.sectionId || '')}"] .sec-body`);
+    if (!(own && highlight(own, a.quote, a.id, a.type === 'strike')))
+      for (const body of $$('.sec-body'))
+        if (highlight(body, a.quote, a.id, a.type === 'strike')) break;
+  }
+
+  $('#bar').hidden = false;
+  $('#overall').value = state.draft.overallComment || '';
+  renderFooter();
+  renderDrawer();
+  applyOverlay();
+}
+
+function renderBlock(sec) {
+  const wrap = document.createElement('section');
+  wrap.className = 'section';
+  wrap.dataset.sec = sec.id;
+  const flagged = state.draft.sectionVerdicts[sec.id] === 'needs_changes';
+  if (flagged) wrap.classList.add('flagged');
+  const head = sec.heading == null ? '' :
+    `<div class="sec-h"><h2>${esc(sec.heading)}</h2><span class="tools">` +
+    `<button class="ghost" data-act="comment" title="Comment on this section">&#128172;</button>` +
+    `<button class="ghost ${flagged ? 'warn-on' : ''}" data-act="flag" title="Flag as needs changes">` +
+    (flagged ? '&#9873; needs changes' : '&#9873;') + `</button></span></div>`;
+  wrap.innerHTML = head + `<div class="sec-body"></div>`;
+  const body = $('.sec-body', wrap);
+  body.innerHTML = sec.bodyHtml || '';
+  enhanceTabs(body, sec.id);
+  enhanceDiffs(body);
+  return wrap;
+}
+
+/* Progressive enhancement: <div class="tabs"><section data-tab="Label">…</section>…</div> */
+function enhanceTabs(bodyEl, secId) {
+  $$('.tabs', bodyEl).forEach((group, gi) => {
+    const panels = $$(':scope > section[data-tab]', group);
+    if (!panels.length) return;
+    const key = secId + ':' + gi;
+    const active = Math.min(state.activeTabs[key] || 0, panels.length - 1);
+    const bar = document.createElement('div');
+    bar.className = 'tab-bar';
+    panels.forEach((panel, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = panel.dataset.tab;
+      if (i === active) { b.classList.add('active'); panel.classList.add('active'); }
+      b.addEventListener('click', () => activateTab(bar, panels, key, i));
+      bar.appendChild(b);
+    });
+    group.insertBefore(bar, panels[0]);
+  });
+}
+
+function activateTab(bar, panels, key, i) {
+  state.activeTabs[key] = i;
+  $$('button', bar).forEach((x, j) => x.classList.toggle('active', j === i));
+  panels.forEach((x, j) => x.classList.toggle('active', j === i));
+}
+
+/* Progressive enhancement: <pre class="diff"> gets +/- line coloring */
+function enhanceDiffs(bodyEl) {
+  $$('pre.diff', bodyEl).forEach(pre => {
+    if (pre.dataset.enh) return;
+    pre.dataset.enh = '1';
+    const lines = pre.textContent.replace(/\n$/, '').split('\n');
+    pre.textContent = '';
+    for (const ln of lines) {
+      const span = document.createElement('span');
+      span.className = 'dl' +
+        (ln.startsWith('+') ? ' add' : ln.startsWith('-') ? ' del' : ln.startsWith('@@') ? ' hunk' : '');
+      span.textContent = ln || ' ';
+      pre.appendChild(span);
+    }
+  });
+}
+
+/* Wrap the first occurrence of `quote` inside `bodyEl` in <mark> elements,
+   even when it spans multiple text nodes. Returns true if anchored. */
+function highlight(bodyEl, quote, tid, isStrike) {
+  if (!bodyEl || !quote) return false;
+  if ($(`mark[data-tid="${CSS.escape(tid)}"]`, bodyEl)) return true;
+  const walker = document.createTreeWalker(bodyEl, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let full = '';
+  while (walker.nextNode()) {
+    nodes.push({ n: walker.currentNode, start: full.length });
+    full += walker.currentNode.data;
+  }
+  const idx = full.indexOf(quote);
+  if (idx < 0) return false;
+  const end = idx + quote.length;
+  for (const { n, start } of nodes) {
+    const nEnd = start + n.data.length;
+    if (nEnd <= idx || start >= end) continue;
+    const range = document.createRange();
+    range.setStart(n, Math.max(idx, start) - start);
+    range.setEnd(n, Math.min(end, nEnd) - start);
+    const mark = document.createElement('mark');
+    mark.className = 'hl' + (isStrike ? ' strike' : '');
+    mark.dataset.tid = tid;
+    try { range.surroundContents(mark); } catch (e) { /* skip un-wrappable segment */ }
+  }
+  return true;
+}
+
+/* ---------- staged drawer + footer ---------- */
+
+function stagedItems() {
+  const anns = state.draft.newThreads.map(a => ({ kind: a.type === 'strike' ? 'strike' : 'comment', a }));
+  const flags = Object.keys(state.draft.sectionVerdicts).map(id => ({ kind: 'flag', id }));
+  return [...anns, ...flags];
+}
+
+function sectionName(id) {
+  if (id === '_summary') return 'Summary';
+  if (id === '_doc') return 'Document';
+  const s = (state.plan.sections || []).find(x => x.id === id);
+  return s ? s.heading : id;
+}
+
+function renderFooter() {
+  const n = stagedItems().length;
+  const btn = $('#staged');
+  btn.textContent = n ? `${n} staged ▾` : 'Nothing staged';
+  btn.title = 'Anything you don’t annotate counts as approved';
+  btn.classList.toggle('has', n > 0);
+}
+
+function renderDrawer() {
+  const list = $('#d-list');
+  const items = stagedItems();
+  $('#drawer').hidden = !state.drawerOpen;
+  if (!items.length) {
+    list.innerHTML = '<div class="d-empty">Nothing staged yet.<br>Select any text to comment or cross out.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  for (const it of items) {
+    const el = document.createElement('div');
+    if (it.kind === 'flag') {
+      el.className = 'd-item flag';
+      el.innerHTML = `<span class="kind">⚑ needs changes</span><span class="where">${esc(sectionName(it.id))}</span>` +
+        `<div class="row"><button data-dact="unflag" data-id="${esc(it.id)}">Remove</button></div>`;
+    } else {
+      const a = it.a;
+      el.className = 'd-item ' + it.kind;
+      el.dataset.tid = a.id;
+      let html = `<span class="kind">${it.kind === 'strike' ? '✗ cross out' : '💬 comment'}</span>` +
+        `<span class="where">${esc(sectionName(a.sectionId))}</span>`;
+      if (a.quote) html += `<div class="quote">${esc(a.quote)}</div>`;
+      if (state.drawerEditing === a.id) {
+        html += `<textarea class="cbox">${esc(a.text)}</textarea>` +
+          `<div class="row"><button data-dact="save" data-id="${esc(a.id)}">Save</button>` +
+          `<button data-dact="cancel">Cancel</button></div>`;
+      } else {
+        if (a.text) html += `<div class="msg">${esc(a.text)}</div>`;
+        html += `<div class="row">` +
+          (a.quote ? `<button data-dact="jump" data-id="${esc(a.id)}">Show</button>` : '') +
+          `<button data-dact="edit" data-id="${esc(a.id)}">Edit</button>` +
+          `<button data-dact="del" data-id="${esc(a.id)}">Delete</button></div>`;
+      }
+      el.innerHTML = html;
+    }
+    list.appendChild(el);
+  }
+}
+
+$('#staged').addEventListener('click', () => {
+  state.drawerOpen = !state.drawerOpen;
+  state.drawerEditing = null;
+  renderDrawer();
+});
+
+$('#drawer').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-dact]');
+  if (!b) return;
+  const id = b.dataset.id;
+  const act = b.dataset.dact;
+  if (act === 'unflag') {
+    delete state.draft.sectionVerdicts[id];
+    scheduleSave(); render();
+  } else if (act === 'del') {
+    state.draft.newThreads = state.draft.newThreads.filter(x => x.id !== id);
+    scheduleSave(); render();
+  } else if (act === 'edit') {
+    state.drawerEditing = id; renderDrawer();
+  } else if (act === 'cancel') {
+    state.drawerEditing = null; renderDrawer();
+  } else if (act === 'save') {
+    const a = state.draft.newThreads.find(x => x.id === id);
+    const text = $('textarea', b.closest('.d-item')).value.trim();
+    if (a) {
+      if (!text && a.type !== 'strike' && !a.quote) {
+        state.draft.newThreads = state.draft.newThreads.filter(x => x.id !== id);
+      } else a.text = text;
+    }
+    state.drawerEditing = null;
+    scheduleSave(); render();
+  } else if (act === 'jump') {
+    jumpToMark(id);
+  }
+});
+
+function jumpToMark(tid) {
+  const mark = $(`mark[data-tid="${CSS.escape(tid)}"]`);
+  if (!mark) return;
+  // If the mark lives in an inactive tab panel, switch to that tab first.
+  const panel = mark.closest('.tabs > section');
+  if (panel && !panel.classList.contains('active')) {
+    const group = panel.parentElement;
+    const panels = $$(':scope > section[data-tab]', group);
+    const bar = $('.tab-bar', group);
+    activateTab(bar, panels, keyOfGroup(group), panels.indexOf(panel));
+  }
+  // Open a closed <details> if needed.
+  let d = mark.closest('details');
+  while (d) { d.open = true; d = d.parentElement.closest('details'); }
+  mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  mark.classList.add('flash');
+  setTimeout(() => mark.classList.remove('flash'), 1300);
+}
+
+function keyOfGroup(group) {
+  const secId = group.closest('.section').dataset.sec;
+  const gi = $$('.tabs', group.closest('.sec-body')).indexOf(group);
+  return secId + ':' + gi;
+}
+
+/* ---------- floating composer ---------- */
+
+const composerEl = $('#composer');
+
+function openComposer(ann, x, y) {
+  state.composing = ann.id;
+  $('.ctx', composerEl).textContent = ann.quote
+    ? (ann.type === 'strike' ? 'cross out: ' : 'on: ') + '“' + ann.quote + '”'
+    : 'on section: ' + sectionName(ann.sectionId);
+  const ta = $('textarea', composerEl);
+  ta.placeholder = ann.type === 'strike' ? 'Why cross this out? (optional)' : 'What should change here?';
+  ta.value = ann.text || '';
+  composerEl.style.left = Math.max(8, Math.min(x, window.innerWidth - 380)) + window.scrollX + 'px';
+  composerEl.style.top = (y + window.scrollY) + 'px';
+  composerEl.hidden = false;
+  setTimeout(() => ta.focus(), 0);
+}
+
+function closeComposer(keep) {
+  const ann = state.draft.newThreads.find(a => a.id === state.composing);
+  if (ann) {
+    const text = $('textarea', composerEl).value.trim();
+    if (keep) ann.text = text;
+    // A comment with no text and no save is discarded; strikes stand alone.
+    if (!keep && !ann.text && ann.type !== 'strike')
+      state.draft.newThreads = state.draft.newThreads.filter(a => a.id !== state.composing);
+    if (keep && !text && ann.type !== 'strike' && !ann.quote)
+      state.draft.newThreads = state.draft.newThreads.filter(a => a.id !== state.composing);
+  }
+  state.composing = null;
+  composerEl.hidden = true;
+  scheduleSave();
+  render();
+}
+
+$('.save', composerEl).addEventListener('click', () => closeComposer(true));
+$('.cancel', composerEl).addEventListener('click', () => closeComposer(false));
+
+function newAnnotation(sectionId, quote, type, x, y) {
+  const d = { id: 'd' + Date.now() + Math.floor(Math.random() * 1e4), sectionId, quote, type, text: '' };
+  state.draft.newThreads.push(d);
+  if (type === 'strike') scheduleSave(); // strikes are valid with no text
+  render();
+  openComposer(d, x, y);
+}
+
+/* ---------- document events ---------- */
+
+document.addEventListener('click', ev => {
+  const btn = ev.target.closest('[data-act]');
+  if (btn) {
+    const secEl = btn.closest('.section');
+    const secId = secEl && secEl.dataset.sec;
+    const act = btn.dataset.act;
+    if (act === 'flag') {
+      if (state.draft.sectionVerdicts[secId]) delete state.draft.sectionVerdicts[secId];
+      else state.draft.sectionVerdicts[secId] = 'needs_changes';
+      scheduleSave(); render();
+    } else if (act === 'comment') {
+      const r = btn.getBoundingClientRect();
+      newAnnotation(secId, null, 'comment', r.left, r.bottom + 8);
+    }
+    return;
+  }
+  const mark = ev.target.closest('mark.hl');
+  if (mark) {
+    state.drawerOpen = true;
+    renderDrawer();
+    const item = $(`.d-item[data-tid="${CSS.escape(mark.dataset.tid)}"]`);
+    if (item) { item.scrollIntoView({ block: 'nearest' }); item.classList.add('flash-item');
+      setTimeout(() => item.classList.remove('flash-item'), 1300); }
+  }
+});
+
+/* text-selection annotation: works on any text in the plan */
+const seltools = $('#seltools');
+let pendingSel = null;
+document.addEventListener('mouseup', ev => {
+  if (ev.target instanceof Element &&
+      ev.target.closest('#seltools, #composer, #drawer, #bar')) return;
+  setTimeout(() => {
+    const sel = window.getSelection();
+    const text = sel && sel.toString().trim();
+    if (!text || text.length < 3 || sel.rangeCount === 0) { seltools.hidden = true; return; }
+    const bodyOf = node => {
+      const el = node && (node.nodeType === 1 ? node : node.parentElement);
+      return el && el.closest('.sec-body');
+    };
+    const body = bodyOf(sel.anchorNode);
+    if (!body || body !== bodyOf(sel.focusNode)) { seltools.hidden = true; return; }
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    pendingSel = { sectionId: body.closest('.section').dataset.sec, quote: text,
+                   x: rect.left + rect.width / 2 - 90, y: rect.bottom + 8 };
+    seltools.style.left = Math.max(8, window.scrollX + pendingSel.x) + 'px';
+    seltools.style.top = (window.scrollY + pendingSel.y) + 'px';
+    seltools.hidden = false;
+  }, 0);
+});
+function selAction(type) {
+  seltools.hidden = true;
+  if (pendingSel) newAnnotation(pendingSel.sectionId, pendingSel.quote, type, pendingSel.x, pendingSel.y);
+  pendingSel = null;
+}
+$('#sel-comment').addEventListener('mousedown', ev => { ev.preventDefault(); selAction('comment'); });
+$('#sel-strike').addEventListener('mousedown', ev => { ev.preventDefault(); selAction('strike'); });
+
+$('#overall').addEventListener('input', ev => {
+  state.draft.overallComment = ev.target.value;
+  scheduleSave();
+});
+
+async function submit(verdict) {
+  clearTimeout(saveTimer);
+  const payload = { ...state.draft, verdict, round: state.plan.round };
+  if (verdict === 'request_changes' &&
+      !payload.newThreads.length && !Object.keys(payload.sectionVerdicts).length &&
+      !payload.overallComment &&
+      !confirm('Request changes without any comments or flags?')) return;
+  await api('/api/submit', { method: 'POST', body: JSON.stringify(payload) });
+  state.submitted = true;
+  state.drawerOpen = false;
+  renderDrawer();
+  applyOverlay();
+}
+$('#btn-approve').onclick = () => submit('approve');
+$('#btn-changes').onclick = () => submit('request_changes');
+
+function applyOverlay() {
+  const ov = $('#overlay');
+  if (state.submitted) {
+    $('#ov-title').innerHTML = '<span class="spin"></span>Waiting for Claude to make changes…';
+    $('#ov-body').textContent = 'Round ' + state.plan.round + ' sent. Keep this tab open — the revised plan will replace this page automatically.';
+    ov.hidden = false;
+  } else {
+    ov.hidden = true;
+  }
+}
+
+/* ---------- state sync ---------- */
+
+async function load(first) {
+  let s;
+  try { s = await api('/api/state'); } catch (e) { return; }
+  const newPlan = s.plan;
+  if (!newPlan) return;
+  const roundChanged = !state.plan || newPlan.round !== state.plan.round;
+  if (!roundChanged && !first) {
+    state.submitted = (s.submittedRounds || []).includes(newPlan.round);
+    applyOverlay();
+    return;
+  }
+  state.plan = newPlan;
+  state.submitted = (s.submittedRounds || []).includes(newPlan.round);
+  const draft = s.draft;
+  state.draft = (draft && draft.round === newPlan.round)
+    ? { ...freshDraft(newPlan.round), ...draft }
+    : freshDraft(newPlan.round);
+  state.activeTabs = {};
+  state.drawerEditing = null;
+  state.composing = null;
+  composerEl.hidden = true;
+  render();
+}
+
+load(true);
+setInterval(() => load(false), 3000);
+</script>
