@@ -23,9 +23,14 @@ normal markdown plan.
   your first plan of the session** — it has the component vocabulary
   (stat tiles, steps, tabs, diffs, file trees, callouts…) and house
   style. No JSON escaping, ever.
-- **`plan.json`** — tiny metadata only:
+- **`plan.json`** — tiny metadata only (`updatedAt` optional; the file's
+  mtime is shown when omitted):
 
-      { "title": "Add OAuth login", "round": 1, "updatedAt": "2026-07-11 14:03" }
+      { "title": "Add OAuth login", "round": 1 }
+
+When the state dir is inside a git repo, append `.claude/plan-review/`
+to `.git/info/exclude` on first publish so review state never shows up
+as untracked noise (skip if the user wants review records committed).
 
 ## Workflow
 
@@ -37,7 +42,8 @@ tasks (never poll or sleep — the watcher wakes you on submit):
     $SERVER serve --dir <dir> --port 4173     # prints the URL; idempotent
     $SERVER wait  --dir <dir> --round 1        # exits when feedback lands
 
-Tell the user the URL and end your turn.
+Give the user the printed URL **verbatim** — it carries a `?t=` access
+token the page needs — and end your turn.
 
 **On feedback** (the watcher's stdout, schema below):
 
@@ -60,17 +66,22 @@ Tell the user the URL and end your turn.
       "verdict": "approve | request_changes",
       "overallComment": "may be empty",
       "newThreads": [
-        { "sectionId": "_doc", "quote": "exact selected text or null",
-          "type": "comment | strike", "text": "…" }
+        { "sectionId": "_doc", "quote": "selected text or null",
+          "type": "comment | strike", "text": "…",
+          "context": { "block": "li.add", "heading": "File changes" } }
       ],
       "sectionVerdicts": { "api": "needs_changes" },
       "submittedAt": "…"
     }
 
-`quote` targets that exact phrase (`sectionId` `"_doc"` = the
-`plan.html` body, `"_summary"` = summaryHtml metadata if you used it).
-**`type: "strike"` means the user crossed the text out — remove that
-element from the plan**; `text` is their optional reason. A null
-`quote` targets a whole section. `sectionVerdicts` only appears for
+`quote` targets that phrase (`sectionId` `"_doc"` = the `plan.html`
+body, `"_summary"` = summaryHtml metadata if you used it). Quotes are
+whitespace-collapsed rendered text, so they may not match plan.html
+byte-for-byte across line breaks — locate them tolerantly. `context`
+(when present) names the block element the selection sits in and the
+last heading above it. **`type: "strike"` means the user crossed the
+text out — remove the annotated element (per `context`/`quote`) from
+the plan**; `text` is their optional reason. A null `quote` targets a
+whole section. `sectionVerdicts` only appears for
 sectioned plans (an opt-in — see reference.md; free-form `plan.html`
 is the default and preferred style).

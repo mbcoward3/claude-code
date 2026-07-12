@@ -24,16 +24,19 @@ State directory layout:
   plan.json                 the current plan (written by the agent each round)
   annotations.json          the user's in-progress draft (auto-saved by the UI)
   feedback-round-N.json     submitted feedback for round N (written on submit)
-  server.json               {port, pid} of the running server
+  server.json               {port, pid, token} of the running server
 """
 
 import argparse
+import hmac
 import json
 import os
+import secrets
 import socket
 import sys
 import threading
 import time
+import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -56,7 +59,7 @@ def write_json(path, obj):
     os.replace(tmp, path)
 
 
-def make_handler(state_dir: Path, server_ref):
+def make_handler(state_dir: Path, server_ref, token: str):
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
 
@@ -71,6 +74,26 @@ def make_handler(state_dir: Path, server_ref):
         def _json(self, obj, code=200):
             self._send(code, json.dumps(obj).encode("utf-8"))
 
+        def _host_ok(self):
+            # Reject DNS-rebinding: a hostile domain resolving to 127.0.0.1
+            # would arrive with its own Host header.
+            host = (self.headers.get("Host") or "").rsplit(":", 1)[0]
+            return host in ("127.0.0.1", "localhost", "[::1]")
+
+        def _authed(self):
+            # Plan content and feedback endpoints require the per-server
+            # token (in the page URL as ?t=…, echoed back as a header),
+            # so other local processes / hostile web pages can't read the
+            # plan or forge a verdict.
+            supplied = (
+                urllib.parse.parse_qs(
+                    urllib.parse.urlparse(self.path).query
+                ).get("t", [None])[0]
+                or self.headers.get("X-Plan-Token")
+                or ""
+            )
+            return hmac.compare_digest(supplied, token)
+
         def _body(self):
             length = int(self.headers.get("Content-Length") or 0)
             if length <= 0 or length > 10_000_000:
@@ -81,6 +104,9 @@ def make_handler(state_dir: Path, server_ref):
                 return None
 
         def do_GET(self):
+            if not self._host_ok():
+                self._send(403, b"forbidden", "text/plain")
+                return
             path = self.path.split("?", 1)[0]
             if path in ("/", "/index.html"):
                 try:
@@ -89,15 +115,37 @@ def make_handler(state_dir: Path, server_ref):
                     self._send(500, b"app.html missing", "text/plain")
                     return
                 self._send(200, html, "text/html; charset=utf-8")
+            elif path == "/favicon.ico":
+                self._send(204, b"", "image/x-icon")
             elif path == "/api/health":
                 self._json({"ok": True, "dir": str(state_dir)})
             elif path == "/api/state":
-                submitted = sorted(
-                    int(p.stem.split("-")[-1])
-                    for p in state_dir.glob("feedback-round-*.json")
-                    if p.stem.split("-")[-1].isdigit()
-                )
-                plan = read_json(state_dir / "plan.json")
+                if not self._authed():
+                    self._json({"error": "missing or bad token"}, 403)
+                    return
+                plan_path = state_dir / "plan.json"
+                try:
+                    plan_mtime = plan_path.stat().st_mtime
+                except OSError:
+                    plan_mtime = 0.0
+                # Feedback older than the current plan.json is left over
+                # from an earlier review in a reused state dir — ignore it.
+                submitted = []
+                verdicts = {}
+                for p in state_dir.glob("feedback-round-*.json"):
+                    stem = p.stem.split("-")[-1]
+                    if not stem.isdigit():
+                        continue
+                    try:
+                        if p.stat().st_mtime < plan_mtime:
+                            continue
+                    except OSError:
+                        continue
+                    submitted.append(int(stem))
+                    fb = read_json(p)
+                    if fb and fb.get("verdict"):
+                        verdicts[stem] = fb["verdict"]
+                plan = read_json(plan_path)
                 # The plan body lives in a raw HTML sidecar so agents can
                 # author and revise it with targeted edits, free of JSON
                 # string escaping. plan.json stays a tiny metadata file.
@@ -107,15 +155,25 @@ def make_handler(state_dir: Path, server_ref):
                         plan["bodyHtml"] = body_file.read_text(encoding="utf-8")
                     except OSError:
                         pass
+                if plan is not None and not plan.get("updatedAt") and plan_mtime:
+                    plan["updatedAt"] = time.strftime(
+                        "%Y-%m-%d %H:%M", time.localtime(plan_mtime))
                 self._json({
                     "plan": plan,
                     "draft": read_json(state_dir / "annotations.json"),
-                    "submittedRounds": submitted,
+                    "submittedRounds": sorted(submitted),
+                    "verdicts": verdicts,
                 })
             else:
                 self._send(404, b"not found", "text/plain")
 
         def do_POST(self):
+            if not self._host_ok():
+                self._send(403, b"forbidden", "text/plain")
+                return
+            if not self._authed():
+                self._json({"error": "missing or bad token"}, 403)
+                return
             path = self.path.split("?", 1)[0]
             if path == "/api/draft":
                 body = self._body()
@@ -147,30 +205,36 @@ def make_handler(state_dir: Path, server_ref):
     return Handler
 
 
-def existing_server_url(state_dir: Path):
+def existing_server(state_dir: Path):
+    """Return (base_url, token) of a healthy server for this dir, else None."""
     info = read_json(state_dir / "server.json")
     if not info or "port" not in info:
         return None
-    url = f"http://127.0.0.1:{info['port']}"
+    base = f"http://127.0.0.1:{info['port']}"
     try:
-        with urllib.request.urlopen(url + "/api/health", timeout=1.5) as resp:
+        with urllib.request.urlopen(base + "/api/health", timeout=1.5) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         if data.get("ok") and data.get("dir") == str(state_dir):
-            return url
+            return base, info.get("token", "")
     except Exception:
         return None
     return None
+
+
+def review_url(base: str, token: str):
+    return f"{base}/?t={token}" if token else base
 
 
 def cmd_serve(args):
     state_dir = Path(args.dir).resolve()
     state_dir.mkdir(parents=True, exist_ok=True)
 
-    url = existing_server_url(state_dir)
-    if url:
-        print(f"Plan review already running at {url}", flush=True)
+    existing = existing_server(state_dir)
+    if existing:
+        print(f"Plan review already running at {review_url(*existing)}", flush=True)
         return 0
 
+    token = secrets.token_urlsafe(16)
     port = args.port
     server = None
     for candidate in range(port, port + 50):
@@ -178,7 +242,7 @@ def cmd_serve(args):
             server = ThreadingHTTPServer(("127.0.0.1", candidate), BaseHTTPRequestHandler)
             server.server_close()
             server_ref = []
-            handler = make_handler(state_dir, server_ref)
+            handler = make_handler(state_dir, server_ref, token)
             server = ThreadingHTTPServer(("127.0.0.1", candidate), handler)
             server_ref.append(server)
             port = candidate
@@ -189,8 +253,10 @@ def cmd_serve(args):
         print(f"No free port in {args.port}-{args.port + 49}", file=sys.stderr)
         return 1
 
-    write_json(state_dir / "server.json", {"port": port, "pid": os.getpid()})
-    print(f"Plan review server: http://127.0.0.1:{port}", flush=True)
+    write_json(state_dir / "server.json",
+               {"port": port, "pid": os.getpid(), "token": token})
+    print(f"Plan review server: {review_url(f'http://127.0.0.1:{port}', token)}",
+          flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -206,10 +272,19 @@ def cmd_serve(args):
 def cmd_wait(args):
     state_dir = Path(args.dir).resolve()
     target = state_dir / f"feedback-round-{args.round}.json"
+    plan_path = state_dir / "plan.json"
     deadline = time.time() + args.timeout if args.timeout > 0 else None
     while True:
         if target.exists():
-            data = read_json(target)
+            # Ignore feedback predating the current plan.json — leftovers
+            # from an earlier review in a reused state dir. A genuine
+            # submission rewrites the file, refreshing its mtime.
+            stale = False
+            try:
+                stale = target.stat().st_mtime < plan_path.stat().st_mtime
+            except OSError:
+                pass
+            data = None if stale else read_json(target)
             if data is not None:
                 print(json.dumps(data, indent=2, ensure_ascii=False))
                 return 0
@@ -221,12 +296,15 @@ def cmd_wait(args):
 
 def cmd_stop(args):
     state_dir = Path(args.dir).resolve()
-    url = existing_server_url(state_dir)
-    if not url:
+    existing = existing_server(state_dir)
+    if not existing:
         print("No running server found.")
         return 0
+    base, token = existing
     try:
-        req = urllib.request.Request(url + "/api/shutdown", data=b"{}", method="POST")
+        req = urllib.request.Request(base + "/api/shutdown", data=b"{}",
+                                     method="POST",
+                                     headers={"X-Plan-Token": token})
         urllib.request.urlopen(req, timeout=2)
         print("Server stopped.")
     except Exception as exc:

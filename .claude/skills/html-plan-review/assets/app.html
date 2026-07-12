@@ -1,6 +1,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Plan Review</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#128203;</text></svg>">
 <style>
   :root {
     --bg: #f2f2ef; --panel: #ffffff; --ink: #1b1b19; --muted: #6f6e68;
@@ -343,8 +344,14 @@ function freshDraft(round) {
   return { round, newThreads: [], sectionVerdicts: {}, overallComment: '', verdict: null };
 }
 
+/* The server URL carries a per-server token (?t=…); echo it on every
+   API call so plan content and verdicts stay private to this page. */
+const TOKEN = new URLSearchParams(location.search).get('t');
+
 async function api(path, opts) {
-  const r = await fetch(path, opts);
+  const r = await fetch(path, {
+    ...opts, headers: TOKEN ? { 'X-Plan-Token': TOKEN } : {},
+  });
   if (!r.ok) throw new Error(path + ' -> ' + r.status);
   return r.json();
 }
@@ -468,7 +475,11 @@ function enhanceDiffs(bodyEl) {
 }
 
 /* Wrap the first occurrence of `quote` inside `bodyEl` in <mark> elements,
-   even when it spans multiple text nodes. Returns true if anchored. */
+   even when it spans multiple text nodes. Returns true if anchored.
+   Whitespace-tolerant: quotes come from Selection.toString(), which
+   collapses the newlines/indentation present in the raw (indented,
+   multi-line) plan HTML, so both sides are matched in a normalized
+   view with offsets mapped back to the raw text nodes. */
 function highlight(bodyEl, quote, tid, isStrike) {
   if (!bodyEl || !quote) return false;
   if ($(`mark[data-tid="${CSS.escape(tid)}"]`, bodyEl)) return true;
@@ -479,9 +490,18 @@ function highlight(bodyEl, quote, tid, isStrike) {
     nodes.push({ n: walker.currentNode, start: full.length });
     full += walker.currentNode.data;
   }
-  const idx = full.indexOf(quote);
-  if (idx < 0) return false;
-  const end = idx + quote.length;
+  let norm = '';
+  const map = [];
+  for (let i = 0; i < full.length; i++) {
+    if (/\s/.test(full[i])) {
+      if (norm && norm[norm.length - 1] !== ' ') { norm += ' '; map.push(i); }
+    } else { norm += full[i]; map.push(i); }
+  }
+  const q = quote.replace(/\s+/g, ' ').trim();
+  const nIdx = q ? norm.indexOf(q) : -1;
+  if (nIdx < 0) return false;
+  const idx = map[nIdx];
+  const end = map[nIdx + q.length - 1] + 1;
   for (const { n, start } of nodes) {
     const nEnd = start + n.data.length;
     if (nEnd <= idx || start >= end) continue;
@@ -657,8 +677,27 @@ function closeComposer(keep) {
 $('.save', composerEl).addEventListener('click', () => closeComposer(true));
 $('.cancel', composerEl).addEventListener('click', () => closeComposer(false));
 
-function newAnnotation(sectionId, quote, type, x, y) {
+/* Where in the document a selection lives: the nearest block element and
+   the last heading above it. Sent with the annotation so a strike on a
+   text fragment unambiguously identifies the element it belongs to. */
+function blockContext(body, node) {
+  const el = node.nodeType === 1 ? node : node.parentElement;
+  const block = el && el.closest(
+    'li, td, th, p, pre, h3, h4, summary, .stat, .callout, .col, section[data-tab]');
+  if (!block) return null;
+  let heading = null;
+  for (const h of $$('h3, h4', body))
+    if (h.compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING)
+      heading = h.textContent.trim();
+  let desc = block.tagName.toLowerCase();
+  if (block.dataset.tab) desc += `[data-tab="${block.dataset.tab}"]`;
+  else if (block.classList.length) desc += '.' + block.classList[0];
+  return { block: desc, heading };
+}
+
+function newAnnotation(sectionId, quote, type, x, y, context) {
   const d = { id: 'd' + Date.now() + Math.floor(Math.random() * 1e4), sectionId, quote, type, text: '' };
+  if (context) d.context = context;
   state.draft.newThreads.push(d);
   if (type === 'strike') scheduleSave(); // strikes are valid with no text
   render();
@@ -710,7 +749,11 @@ document.addEventListener('mouseup', ev => {
     const body = bodyOf(sel.anchorNode);
     if (!body || body !== bodyOf(sel.focusNode)) { seltools.hidden = true; return; }
     const rect = sel.getRangeAt(0).getBoundingClientRect();
+    // Anchor node can sit on an inter-element boundary (triple-click,
+    // edge drags) where no block encloses it — fall back to the focus end.
     pendingSel = { sectionId: body.closest('.section').dataset.sec, quote: text,
+                   context: blockContext(body, sel.anchorNode)
+                         || blockContext(body, sel.focusNode),
                    x: rect.left + rect.width / 2 - 90, y: rect.bottom + 8 };
     seltools.style.left = Math.max(8, window.scrollX + pendingSel.x) + 'px';
     seltools.style.top = (window.scrollY + pendingSel.y) + 'px';
@@ -719,7 +762,8 @@ document.addEventListener('mouseup', ev => {
 });
 function selAction(type) {
   seltools.hidden = true;
-  if (pendingSel) newAnnotation(pendingSel.sectionId, pendingSel.quote, type, pendingSel.x, pendingSel.y);
+  if (pendingSel) newAnnotation(pendingSel.sectionId, pendingSel.quote, type,
+                                pendingSel.x, pendingSel.y, pendingSel.context);
   pendingSel = null;
 }
 $('#sel-comment').addEventListener('mousedown', ev => { ev.preventDefault(); selAction('comment'); });
@@ -739,6 +783,7 @@ async function submit(verdict) {
       !confirm('Request changes without any comments or flags?')) return;
   await api('/api/submit', { method: 'POST', body: JSON.stringify(payload) });
   state.submitted = true;
+  state.lastVerdict = verdict;
   state.drawerOpen = false;
   renderDrawer();
   applyOverlay();
@@ -748,13 +793,17 @@ $('#btn-changes').onclick = () => submit('request_changes');
 
 function applyOverlay() {
   const ov = $('#overlay');
-  if (state.submitted) {
+  if (!state.submitted) { ov.hidden = true; return; }
+  const verdict = (state.verdicts || {})[String(state.plan.round)] || state.lastVerdict;
+  if (verdict === 'approve') {
+    $('#ov-title').textContent = '✓ Plan approved';
+    $('#ov-body').textContent = 'Round ' + state.plan.round +
+      ' approved — Claude is proceeding to implementation. You can close this tab.';
+  } else {
     $('#ov-title').innerHTML = '<span class="spin"></span>Waiting for Claude to make changes…';
     $('#ov-body').textContent = 'Round ' + state.plan.round + ' sent. Keep this tab open — the revised plan will replace this page automatically.';
-    ov.hidden = false;
-  } else {
-    ov.hidden = true;
   }
+  ov.hidden = false;
 }
 
 /* ---------- state sync ---------- */
@@ -766,16 +815,29 @@ async function load(first) {
   if (!newPlan) return;
   const roundChanged = !state.plan || newPlan.round !== state.plan.round;
   if (!roundChanged && !first) {
+    state.verdicts = s.verdicts || {};
     state.submitted = (s.submittedRounds || []).includes(newPlan.round);
     applyOverlay();
     return;
   }
   state.plan = newPlan;
+  state.verdicts = s.verdicts || {};
   state.submitted = (s.submittedRounds || []).includes(newPlan.round);
   const draft = s.draft;
-  state.draft = (draft && draft.round === newPlan.round)
-    ? { ...freshDraft(newPlan.round), ...draft }
-    : freshDraft(newPlan.round);
+  if (draft && draft.round === newPlan.round) {
+    state.draft = { ...freshDraft(newPlan.round), ...draft };
+  } else if (draft && draft.round < newPlan.round &&
+             !(s.submittedRounds || []).includes(draft.round) &&
+             ((draft.newThreads || []).length || draft.overallComment)) {
+    // The round was bumped while annotations were still unsubmitted
+    // (shouldn't happen in the normal protocol) — keep the user's work
+    // instead of silently discarding it.
+    state.draft = { ...freshDraft(newPlan.round), ...draft,
+                    round: newPlan.round, verdict: null };
+    scheduleSave();
+  } else {
+    state.draft = freshDraft(newPlan.round);
+  }
   state.activeTabs = {};
   state.drawerEditing = null;
   state.composing = null;
