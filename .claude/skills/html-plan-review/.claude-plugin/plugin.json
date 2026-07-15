@@ -1,0 +1,12 @@
+{
+  "name": "html-plan-review",
+  "displayName": "HTML Plan Review",
+  "version": "0.2.0",
+  "description": "Interactive local HTML review pages for implementation plans: annotate exact phrases, cross out what to remove, answer multiple-choice consensus briefs, then approve — feedback returns to the Claude Code session automatically.",
+  "author": {
+    "name": "mbcoward3",
+    "url": "https://github.com/mbcoward3"
+  },
+  "repository": "https://github.com/mbcoward3/claude-code",
+  "keywords": ["plan", "review", "planning", "consensus", "brief", "ui"]
+}
