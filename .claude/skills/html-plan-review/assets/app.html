@@ -202,6 +202,13 @@
   }
   .q-other-input:focus { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); border-color: var(--accent); }
   label.q-other.on .q-other-input { display: block; }
+  /* Dashed "add your own" affordance keeps the escape hatch visible next
+     to heavyweight option cards (rich mockups). */
+  .question label.q-other {
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--muted) 50%, transparent);
+  }
+  .question label.q-other.on { border-style: solid; border-color: var(--accent); }
 
   /* ---------- annotations ---------- */
   mark.hl {
