@@ -19,7 +19,7 @@ normal markdown plan.
 ## Files you write (state dir: `.claude/plan-review/<kebab-slug>/`)
 
 - **`plan.html`** — the plan body: raw, multi-line, nicely indented
-  HTML. **Read `reference.md` in this skill directory before authoring
+  HTML. **Read `references/REFERENCE.md` in this skill before authoring
   your first plan of the session** — it has the component vocabulary
   (stat tiles, steps, tabs, diffs, file trees, callouts…) and house
   style. No JSON escaping, ever.
@@ -121,5 +121,5 @@ last heading above it. **`type: "strike"` means the user crossed the
 text out — remove the annotated element (per `context`/`quote`) from
 the plan**; `text` is their optional reason. A null `quote` targets a
 whole section. `sectionVerdicts` only appears for
-sectioned plans (an opt-in — see reference.md; free-form `plan.html`
+sectioned plans (an opt-in — see references/REFERENCE.md; free-form `plan.html`
 is the default and preferred style).

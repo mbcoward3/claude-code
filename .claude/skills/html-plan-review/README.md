@@ -100,18 +100,26 @@ not whole-plan regeneration, so each review round costs a few hundred
 output tokens instead of thousands. Feedback returns as compact
 structured JSON (cheaper and less ambiguous than parsing prose
 comments about a markdown plan). The component vocabulary lives in
-`reference.md`, read only when authoring.
+`references/REFERENCE.md`, read only when authoring.
 
 ## Files
 
 ```
 SKILL.md                        lean agent protocol + feedback schema
-reference.md                    component vocabulary + house style
+references/REFERENCE.md         component vocabulary + house style
 scripts/plan_review_server.py   stdlib HTTP server: serve / wait / stop
 assets/app.html                 the review UI (vanilla JS, light/dark)
 examples/plan.html              sample plan body (the house style)
 examples/plan.json              sample metadata
+.claude-plugin/plugin.json      loads the folder as a Claude Code plugin
 ```
+
+The layout follows the [Agent Skills specification](https://agentskills.io/specification)
+(`SKILL.md` + `scripts/` + `references/` + `assets/`). The
+`.claude-plugin/plugin.json` manifest is a Claude Code extension — the
+folder loads as the plugin `html-plan-review@skills-dir` (project scope:
+after the workspace trust dialog; run from the repo root). Other Agent
+Skills implementations ignore it.
 
 Quick demo without Claude:
 
