@@ -172,6 +172,37 @@
   .pill.warn { background: color-mix(in srgb, var(--warn) 14%, transparent); color: var(--warn); }
   .pill.danger { background: color-mix(in srgb, var(--bad) 13%, transparent); color: var(--bad); }
 
+  /* ---------- brief questions ---------- */
+  .q-opts { display: grid; gap: 8px; margin: 12px 0 6px; }
+  .question label[data-opt] {
+    position: relative; display: block; padding: 10px 14px 10px 40px;
+    border: 1px solid var(--line); border-radius: 12px; cursor: pointer;
+    background: color-mix(in srgb, var(--bg) 40%, var(--panel));
+    transition: border-color .12s ease; font-size: 14px;
+  }
+  .question label[data-opt]:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+  .question label[data-opt]::before {
+    content: ''; position: absolute; left: 14px; top: 13px; width: 15px; height: 15px;
+    border: 1.5px solid var(--muted); border-radius: 50%; background: var(--panel);
+  }
+  .question[data-multi] label[data-opt]::before { border-radius: 4px; }
+  .question label[data-opt].on {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--panel));
+  }
+  .question label[data-opt].on::before {
+    border-color: var(--accent); background: var(--accent);
+    box-shadow: inset 0 0 0 3px var(--panel);
+  }
+  .question label[data-opt] strong { display: block; font-size: 14px; }
+  .q-other-input {
+    display: none; width: 100%; margin-top: 7px; font: inherit; font-size: 13.5px;
+    background: var(--panel); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px;
+  }
+  .q-other-input:focus { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); border-color: var(--accent); }
+  label.q-other.on .q-other-input { display: block; }
+
   /* ---------- annotations ---------- */
   mark.hl {
     background: color-mix(in srgb, var(--hl-pending) 75%, transparent); color: inherit;
@@ -341,8 +372,11 @@ const state = {
 let saveTimer = null;
 
 function freshDraft(round) {
-  return { round, newThreads: [], sectionVerdicts: {}, overallComment: '', verdict: null };
+  return { round, newThreads: [], sectionVerdicts: {}, answers: {},
+           overallComment: '', verdict: null };
 }
+
+const stageOf = p => (p && p.stage) || 'plan';
 
 /* The server URL carries a per-server token (?t=…); echo it on every
    API call so plan content and verdicts stay private to this page. */
@@ -383,13 +417,16 @@ function render() {
   main.innerHTML = '';
   const sheet = document.createElement('article');
   sheet.id = 'sheet';
+  const brief = stageOf(p) === 'brief';
   let head = `<h1>${esc(p.title)}</h1>` +
-    `<div class="meta">Round ${p.round}` +
+    `<div class="meta">${brief ? 'Brief — round' : 'Round'} ${p.round}` +
     (p.updatedAt ? `<span class="dot">·</span>${esc(p.updatedAt)}</div>` : '</div>');
-  // The latest revision hasn't been reviewed yet: say so, without any
-  // inline change-tracking — the page always shows only the current plan.
+  // The latest round hasn't been reviewed yet: say so, without any
+  // inline change-tracking — the page always shows only the current version.
   if (p.round > 1 && !state.submitted)
-    head += `<div class="revbanner">✓ Changes made — revision ${p.round}, awaiting your review</div>`;
+    head += `<div class="revbanner">${esc(state.banner ||
+      (brief ? `✓ Answers received — follow-up questions, round ${p.round}`
+             : `✓ Changes made — revision ${p.round}, awaiting your review`))}</div>`;
   sheet.innerHTML = head;
   for (const sec of blocks(p)) sheet.appendChild(renderBlock(sec));
   main.appendChild(sheet);
@@ -405,6 +442,11 @@ function render() {
   }
 
   $('#bar').hidden = false;
+  $('#btn-changes').hidden = brief;
+  $('#btn-approve').textContent = brief ? 'Send answers' : 'Approve plan';
+  $('#overall').placeholder = brief
+    ? 'Anything else Claude should know (optional)'
+    : 'Overall note to Claude (optional)';
   $('#overall').value = state.draft.overallComment || '';
   renderFooter();
   renderDrawer();
@@ -427,6 +469,7 @@ function renderBlock(sec) {
   body.innerHTML = sec.bodyHtml || '';
   enhanceTabs(body, sec.id);
   enhanceDiffs(body);
+  enhanceQuestions(body);
   return wrap;
 }
 
@@ -455,6 +498,78 @@ function activateTab(bar, panels, key, i) {
   state.activeTabs[key] = i;
   $$('button', bar).forEach((x, j) => x.classList.toggle('active', j === i));
   panels.forEach((x, j) => x.classList.toggle('active', j === i));
+}
+
+/* Progressive enhancement for brief rounds:
+   <div class="question" data-q="id" [data-multi]>
+     <h4>…?</h4> <p>context…</p>
+     <label data-opt="a"><strong>Title</strong> consequence…</label> …
+   </div>
+   Options become selectable cards; a "Something else…" free-text option
+   is always appended so the enumeration is never a cage. Answers live in
+   draft.answers[qid] = { selected: [ids], other: text|null }. */
+function enhanceQuestions(bodyEl) {
+  $$('.question[data-q]', bodyEl).forEach(qEl => {
+    const qid = qEl.dataset.q;
+    const multi = 'multi' in qEl.dataset;
+    const wrap = document.createElement('div');
+    wrap.className = 'q-opts';
+    $$(':scope > label[data-opt]', qEl).forEach(l => wrap.appendChild(l));
+    const other = document.createElement('label');
+    other.className = 'q-other';
+    other.dataset.opt = '_other';
+    other.innerHTML = '<strong>Something else…</strong>';
+    const inp = document.createElement('input');
+    inp.className = 'q-other-input';
+    inp.placeholder = 'describe your alternative';
+    other.appendChild(inp);
+    wrap.appendChild(other);
+    qEl.appendChild(wrap);
+
+    const current = () => state.draft.answers[qid] || { selected: [], other: null };
+    const store = a => {
+      if (!a.selected.length && a.other == null) delete state.draft.answers[qid];
+      else state.draft.answers[qid] = a;
+      scheduleSave();
+    };
+    const paint = () => {
+      const a = current();
+      $$('label[data-opt]', wrap).forEach(l => l.classList.toggle('on',
+        l.dataset.opt === '_other' ? a.other != null : a.selected.includes(l.dataset.opt)));
+    };
+    wrap.addEventListener('click', ev => {
+      if (ev.target === inp) return;
+      // A drag that selected text for annotation must not toggle the card.
+      if ((window.getSelection() || '').toString().trim()) return;
+      const l = ev.target.closest('label[data-opt]');
+      if (!l) return;
+      ev.preventDefault();
+      const a = current();
+      const id = l.dataset.opt;
+      if (id === '_other') {
+        if (a.other != null) a.other = null;
+        else {
+          a.other = inp.value;
+          if (!multi) a.selected = [];
+          setTimeout(() => inp.focus(), 0);
+        }
+      } else if (multi) {
+        a.selected = a.selected.includes(id)
+          ? a.selected.filter(x => x !== id) : [...a.selected, id];
+      } else {
+        a.selected = a.selected.includes(id) ? [] : [id];
+        if (a.selected.length) a.other = null;
+      }
+      store(a); paint();
+    });
+    inp.addEventListener('input', () => {
+      const a = current();
+      a.other = inp.value;
+      store(a);
+    });
+    inp.value = current().other || '';
+    paint();
+  });
 }
 
 /* Progressive enhancement: <pre class="diff"> gets +/- line coloring */
@@ -776,11 +891,21 @@ $('#overall').addEventListener('input', ev => {
 
 async function submit(verdict) {
   clearTimeout(saveTimer);
-  const payload = { ...state.draft, verdict, round: state.plan.round };
+  const payload = { ...state.draft, verdict, round: state.plan.round,
+                    stage: stageOf(state.plan) };
   if (verdict === 'request_changes' &&
       !payload.newThreads.length && !Object.keys(payload.sectionVerdicts).length &&
       !payload.overallComment &&
       !confirm('Request changes without any comments or flags?')) return;
+  if (verdict === 'answers') {
+    const open = $$('.question[data-q]').filter(q => {
+      const a = payload.answers[q.dataset.q];
+      return !(a && (a.selected.length || a.other != null));
+    }).length;
+    if (open &&
+        !confirm(`${open} question${open > 1 ? 's' : ''} unanswered — send anyway? ` +
+                 'Unanswered means "Claude’s call".')) return;
+  }
   await api('/api/submit', { method: 'POST', body: JSON.stringify(payload) });
   state.submitted = true;
   state.lastVerdict = verdict;
@@ -788,7 +913,8 @@ async function submit(verdict) {
   renderDrawer();
   applyOverlay();
 }
-$('#btn-approve').onclick = () => submit('approve');
+$('#btn-approve').onclick = () =>
+  submit(stageOf(state.plan) === 'brief' ? 'answers' : 'approve');
 $('#btn-changes').onclick = () => submit('request_changes');
 
 function applyOverlay() {
@@ -799,6 +925,10 @@ function applyOverlay() {
     $('#ov-title').textContent = '✓ Plan approved';
     $('#ov-body').textContent = 'Round ' + state.plan.round +
       ' approved — Claude is proceeding to implementation. You can close this tab.';
+  } else if (verdict === 'answers') {
+    $('#ov-title').innerHTML = '<span class="spin"></span>Answers sent — waiting for Claude…';
+    $('#ov-body').textContent = 'Keep this tab open — the next step (the plan, or a short ' +
+      'follow-up if your answers opened something new) will replace this page automatically.';
   } else {
     $('#ov-title').innerHTML = '<span class="spin"></span>Waiting for Claude to make changes…';
     $('#ov-body').textContent = 'Round ' + state.plan.round + ' sent. Keep this tab open — the revised plan will replace this page automatically.';
@@ -820,6 +950,11 @@ async function load(first) {
     applyOverlay();
     return;
   }
+  // Stage transition decides the banner wording (brief → plan means the
+  // first plan draft, not a revision of one).
+  const prevStage = state.plan ? stageOf(state.plan) : null;
+  state.banner = (prevStage === 'brief' && stageOf(newPlan) === 'plan')
+    ? '✓ Plan drafted from your answers — awaiting your review' : null;
   state.plan = newPlan;
   state.verdicts = s.verdicts || {};
   state.submitted = (s.submittedRounds || []).includes(newPlan.round);
@@ -828,12 +963,15 @@ async function load(first) {
     state.draft = { ...freshDraft(newPlan.round), ...draft };
   } else if (draft && draft.round < newPlan.round &&
              !(s.submittedRounds || []).includes(draft.round) &&
-             ((draft.newThreads || []).length || draft.overallComment)) {
+             ((draft.newThreads || []).length || draft.overallComment ||
+              Object.keys(draft.answers || {}).length)) {
     // The round was bumped while annotations were still unsubmitted
     // (shouldn't happen in the normal protocol) — keep the user's work
-    // instead of silently discarding it.
+    // instead of silently discarding it. Answers only survive within
+    // the same stage; a stage change means the questions are gone.
     state.draft = { ...freshDraft(newPlan.round), ...draft,
-                    round: newPlan.round, verdict: null };
+                    round: newPlan.round, verdict: null,
+                    answers: prevStage === stageOf(newPlan) ? (draft.answers || {}) : {} };
     scheduleSave();
   } else {
     state.draft = freshDraft(newPlan.round);

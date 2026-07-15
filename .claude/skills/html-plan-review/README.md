@@ -19,6 +19,13 @@ Plans render with rich components, not just prose: auto-styled tables,
 **multi-tab sections** for alternatives, callouts for risks, collapsible
 detail blocks, and side-by-side comparison columns.
 
+When Claude lacks the context to defend a plan, it can first publish a
+**brief** on the same page — its current best understanding plus a few
+multiple-choice questions (each with an automatic "Something else…"
+free-text escape). You answer in place, and Claude either drafts the
+plan from your answers or asks one short follow-up — same tab, same
+URL, no bouncing between browser and terminal.
+
 The review is **critique-only**: anything you don't touch counts as
 approved, so a plan you like is a single click of **Approve plan**. Your
 annotations auto-save as you type (reload-safe; highlights stay in the

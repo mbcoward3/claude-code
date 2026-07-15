@@ -59,11 +59,49 @@ token the page needs — and end your turn.
   `wait --round N+1` in the background, tell the user briefly, and end
   your turn.
 
+## Brief rounds — consensus before the plan (optional)
+
+Publishing a plan asserts you have the context to defend it. When you
+don't — requirements genuinely ambiguous, a decision genuinely open —
+publish a **brief** on the same page first instead of asking in chat:
+same files and workflow, but `plan.json` carries `"stage": "brief"`
+(rounds share one counter: brief round 1, then plan round 2, …).
+
+A brief leads with your current best understanding — what you'd build
+absent answers — then asks 2–5 **multiple-choice** questions whose
+options you can defend, each with its consequence:
+
+    <div class="question" data-q="transport">
+      <h4>Which remote transport should the plan target?</h4>
+      <label data-opt="relay"><strong>Signed relay URL</strong>
+        one-click for reviewers; needs a token story</label>
+      <label data-opt="ssh"><strong>SSH port-forward</strong>
+        zero server code; manual step each session</label>
+    </div>
+
+`data-multi` on the div allows several selections. The page always
+appends a "Something else…" free-text option — never rely on your
+enumeration being complete. Don't ask what you can infer.
+
+Feedback arrives with `verdict: "answers"` plus
+
+    "answers": { "transport": { "selected": ["relay"], "other": null } }
+
+(`"other"` non-null = the user's own alternative; an unanswered
+question means "your call"). **On answers, you decide the next round:**
+publish the plan (`"stage": "plan"`) if consensus is reached — the
+normal case — or one follow-up brief only if the answers opened a
+genuinely new question. Never exceed two briefs; if consensus still
+hasn't formed, move to chat. While any round is open, never also ask
+questions in chat — one surface at a time.
+
 ## Feedback schema
 
     {
       "round": 1,
-      "verdict": "approve | request_changes",
+      "stage": "plan | brief",
+      "verdict": "approve | request_changes | answers",
+      "answers": { "…": { "selected": ["…"], "other": null } },
       "overallComment": "may be empty",
       "newThreads": [
         { "sectionId": "_doc", "quote": "selected text or null",

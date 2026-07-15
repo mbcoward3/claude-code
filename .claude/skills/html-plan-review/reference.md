@@ -66,6 +66,21 @@ lists, API matrices.
 **Pills** — `<span class="pill info|ok|warn|danger">label</span>` for
 inline status (flag names, reversibility).
 
+**Questions** — brief rounds only (`plan.json` `"stage": "brief"`; see
+SKILL.md). Multiple-choice first: enumerate only options you can
+defend, give each its consequence, and let the auto-appended
+"Something else…" catch the rest. `data-multi` for several answers:
+
+    <div class="question" data-q="scope" data-multi>
+      <h4>Which surfaces are in scope?</h4>
+      <label data-opt="cli"><strong>CLI</strong> ships this quarter</label>
+      <label data-opt="web"><strong>Web</strong> needs the relay work first</label>
+    </div>
+
+House rule: a brief still leads with your current best understanding —
+questions hang off a concrete position, not a blank page. All the
+annotation tools (comments, cross-outs) work on brief text too.
+
 **Columns** — `<div class="cols"><div class="col">…</div>…</div>`.
 
 ## Sectioned plans (opt-in, rarely needed)
