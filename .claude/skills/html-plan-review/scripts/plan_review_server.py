@@ -41,6 +41,13 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+# Feedback JSON is written with ensure_ascii=False and printed back to the
+# agent; on Windows a non-console stdout defaults to the legacy code page
+# (e.g. cp1252), which dies on characters like "→". Pin UTF-8 explicitly.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+
 ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
 
 

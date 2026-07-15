@@ -221,6 +221,12 @@
     text-decoration: line-through; text-decoration-thickness: 2px;
     text-decoration-color: var(--warn);
   }
+  mark.hl[data-badge]::after {
+    content: attr(data-badge); font-size: 9.5px; font-weight: 750;
+    vertical-align: super; margin-left: 2px; letter-spacing: 0;
+    color: var(--bad); opacity: .8; text-decoration: none; display: inline-block;
+  }
+  mark.hl.strike[data-badge]::after { color: var(--warn); }
   @keyframes fadein { from { opacity: 0; transform: translateY(3px); } }
   @keyframes pop { from { opacity: 0; transform: translateY(5px) scale(.98); } }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
@@ -236,6 +242,7 @@
   }
   #seltools button:hover { background: color-mix(in srgb, var(--bg) 14%, transparent); }
   #seltools button + button { border-left: 1px solid color-mix(in srgb, var(--bg) 22%, transparent); }
+  #seltools button[hidden] { display: none; }
 
   #composer[hidden] { display: none; }
   #composer {
@@ -447,6 +454,16 @@ function render() {
       for (const body of $$('.sec-body'))
         if (highlight(body, a.quote, a.id, a.type === 'strike')) break;
   }
+  // Number each highlight to match its drawer entry, and put the note in
+  // a hover tooltip, so it's clear what text an annotation is attached to.
+  state.draft.newThreads.forEach((a, i) => {
+    const segs = $$(`mark[data-tid="${CSS.escape(a.id)}"]`);
+    if (!segs.length) return;
+    const label = (a.type === 'strike' ? '✗ cross out' : '💬 comment') +
+      ' #' + (i + 1) + (a.text ? ' — ' + a.text : '');
+    segs.forEach(m => m.title = label);
+    segs[segs.length - 1].dataset.badge = i + 1;
+  });
 
   $('#bar').hidden = false;
   $('#btn-changes').hidden = brief;
@@ -678,10 +695,11 @@ function renderDrawer() {
         `<div class="row"><button data-dact="unflag" data-id="${esc(it.id)}">Remove</button></div>`;
     } else {
       const a = it.a;
+      const n = state.draft.newThreads.indexOf(a) + 1;
       el.className = 'd-item ' + it.kind;
       el.dataset.tid = a.id;
-      let html = `<span class="kind">${it.kind === 'strike' ? '✗ cross out' : '💬 comment'}</span>` +
-        `<span class="where">${esc(sectionName(a.sectionId))}</span>`;
+      let html = `<span class="kind">${it.kind === 'strike' ? '✗ cross out' : '💬 comment'}` +
+        ` #${n}</span><span class="where">${esc(sectionName(a.sectionId))}</span>`;
       if (a.quote) html += `<div class="quote">${esc(a.quote)}</div>`;
       if (state.drawerEditing === a.id) {
         html += `<textarea class="cbox">${esc(a.text)}</textarea>` +
@@ -706,6 +724,11 @@ $('#staged').addEventListener('click', () => {
   renderDrawer();
 });
 
+// An emptied drawer closes itself rather than lingering over the page.
+function closeDrawerIfEmpty() {
+  if (!stagedItems().length) state.drawerOpen = false;
+}
+
 $('#drawer').addEventListener('click', ev => {
   const b = ev.target.closest('[data-dact]');
   if (!b) return;
@@ -713,9 +736,11 @@ $('#drawer').addEventListener('click', ev => {
   const act = b.dataset.dact;
   if (act === 'unflag') {
     delete state.draft.sectionVerdicts[id];
+    closeDrawerIfEmpty();
     scheduleSave(); render();
   } else if (act === 'del') {
     state.draft.newThreads = state.draft.newThreads.filter(x => x.id !== id);
+    closeDrawerIfEmpty();
     scheduleSave(); render();
   } else if (act === 'edit') {
     state.drawerEditing = id; renderDrawer();
@@ -730,6 +755,7 @@ $('#drawer').addEventListener('click', ev => {
       } else a.text = text;
     }
     state.drawerEditing = null;
+    closeDrawerIfEmpty();
     scheduleSave(); render();
   } else if (act === 'jump') {
     jumpToMark(id);
@@ -817,7 +843,64 @@ function blockContext(body, node) {
   return { block: desc, heading };
 }
 
+/* Normalized (whitespace-collapsed) text of a section body — the same
+   view highlight() anchors quotes in. */
+function normTextOf(bodyEl) {
+  const walker = document.createTreeWalker(bodyEl, NodeFilter.SHOW_TEXT);
+  let full = '';
+  while (walker.nextNode()) full += walker.currentNode.data;
+  let norm = '';
+  for (const c of full) {
+    if (/\s/.test(c)) { if (norm && norm[norm.length - 1] !== ' ') norm += ' '; }
+    else norm += c;
+  }
+  return norm;
+}
+
+/* A strike that overlaps or touches existing strikes expands them into
+   one union strike (editor strikethrough semantics) instead of stacking
+   duplicates. Returns the surviving thread, or null if nothing overlapped. */
+function mergeStrike(sectionId, quote) {
+  const body = $(`.section[data-sec="${CSS.escape(sectionId || '')}"] .sec-body`)
+            || $('.sec-body');
+  if (!body) return null;
+  const doc = normTextOf(body);
+  const rangeOf = q => {
+    const nq = q.replace(/\s+/g, ' ').trim();
+    const s = nq ? doc.indexOf(nq) : -1;
+    return s < 0 ? null : [s, s + nq.length];
+  };
+  const target = rangeOf(quote);
+  if (!target) return null;
+  let [start, end] = target;
+  const merged = [];
+  for (const t of state.draft.newThreads) {
+    if (t.type !== 'strike' || !t.quote) continue;
+    const r = rangeOf(t.quote);
+    if (r && r[0] <= end && r[1] >= start) {
+      start = Math.min(start, r[0]);
+      end = Math.max(end, r[1]);
+      merged.push(t);
+    }
+  }
+  if (!merged.length) return null;
+  const keep = merged[0];
+  keep.quote = doc.slice(start, end);
+  keep.text = [...new Set(merged.map(t => t.text).filter(Boolean))].join('; ');
+  const drop = new Set(merged.slice(1).map(t => t.id));
+  state.draft.newThreads = state.draft.newThreads.filter(t => !drop.has(t.id));
+  return keep;
+}
+
 function newAnnotation(sectionId, quote, type, x, y, context) {
+  if (type === 'strike' && quote) {
+    const expanded = mergeStrike(sectionId, quote);
+    if (expanded) {
+      scheduleSave(); render();
+      jumpToMark(expanded.id);
+      return;
+    }
+  }
   const d = { id: 'd' + Date.now() + Math.floor(Math.random() * 1e4), sectionId, quote, type, text: '' };
   if (context) d.context = context;
   state.draft.newThreads.push(d);
@@ -870,6 +953,23 @@ document.addEventListener('mouseup', ev => {
     };
     const body = bodyOf(sel.anchorNode);
     if (!body || body !== bodyOf(sel.focusNode)) { seltools.hidden = true; return; }
+    // Re-striking is offered unless the WHOLE selection is already struck
+    // (a strike overlapping an existing one expands it; a selection that
+    // bridges two strikes merges them — only a pure no-op is suppressed).
+    const fullyStruck = () => {
+      const range = sel.getRangeAt(0);
+      const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (!range.intersectsNode(node)) continue;
+        const from = node === range.startContainer ? range.startOffset : 0;
+        const to = node === range.endContainer ? range.endOffset : node.data.length;
+        if (to <= from || !node.data.slice(from, to).trim()) continue;
+        if (!node.parentElement.closest('mark.hl.strike')) return false;
+      }
+      return true;
+    };
+    $('#sel-strike').hidden = fullyStruck();
     const rect = sel.getRangeAt(0).getBoundingClientRect();
     // Anchor node can sit on an inter-element boundary (triple-click,
     // edge drags) where no block encloses it — fall back to the focus end.
