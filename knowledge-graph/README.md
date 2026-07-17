@@ -1,42 +1,62 @@
 ---
 type: Reference
-title: Knowledge Graph — README
+title: Security Remediation Knowledge Graph — README
 description: Human entry point explaining what this bundle is and how to use it.
 tags: [readme]
-timestamp: 2026-07-16T00:00:00Z
+timestamp: 2026-07-17T00:00:00Z
 ---
 
-# Knowledge Graph
+# Security Remediation Knowledge Graph
 
-An **LLM-maintained knowledge graph** for a significant development effort,
-built as an [Open Knowledge Format v0.1](/references/okf-spec-v0.1.md) bundle
+An **LLM-maintained knowledge graph of security findings and their resolutions**,
+distilled from a backlog of GitLab issues produced by AI security scanning. The
+goal: let a future agent take a *new* finding, **categorize it against what we've
+already solved, and reach the right resolution quickly** — instead of re-triaging
+the same vulnerability classes over and over.
+
+Built as an [Open Knowledge Format v0.1](/references/okf-spec-v0.1.md) bundle
 following [Karpathy's LLM Wiki pattern](/references/karpathy-llm-wiki.md).
 
-The knowledge here is a compounding artifact: the LLM reads sources once and
-integrates them into interlinked pages, so cross-references and synthesis are
-built up rather than re-derived on every question.
+## ⚠️ This is sensitive
+
+The graph maps the org's known weaknesses; the *wontfix* set are live,
+unmitigated issues. **It belongs in a private repo** and must contain **no real
+secrets, hostnames, customer data, or working exploits** — only vulnerability
+classes and remediation patterns. See the sensitivity rules in
+[`CLAUDE.md`](/CLAUDE.md). The examples shipped here are synthetic.
 
 ## How to use it
 
-1. **Open [`CLAUDE.md`](/CLAUDE.md)** — it's the operating manual. Any LLM agent
-   working in this directory should read it first.
-2. **Curate sources.** Drop founding documents (spec, RFC, kickoff notes) into
-   `sources/` and ask the agent to *ingest* them.
-3. **Ask questions.** Query the graph; good answers get filed back as pages.
-4. **Browse the graph.** Every page is plain markdown with bundle-relative
-   links — open it in Obsidian (use the graph view) or read it on GitHub.
+1. **Read [`CLAUDE.md`](/CLAUDE.md)** — the operating manual for the maintaining
+   agent.
+2. **Triage a new finding** with [`triage.md`](/triage.md): extract signals →
+   match a category → apply a known resolution → file the outcome back.
+3. **Ingest the backlog**: feed GitLab issues in and let the agent build out
+   categories, resolutions, and precedents.
+4. **Browse** in Obsidian (graph view shows which classes are hubs) or on your
+   git host.
 
 ## Layout
 
-| Path          | What lives there                                        |
-|---------------|---------------------------------------------------------|
-| `CLAUDE.md`   | Schema + operating manual for the maintaining agent.    |
-| `index.md`    | Catalog of every page, grouped by category.             |
-| `log.md`      | Append-only chronological history.                      |
-| `references/` | The OKF spec and LLM-wiki idea file.                    |
-| `sources/`    | One summary concept per ingested source.                |
-| `entities/`   | People, teams, systems, services, components.           |
-| `concepts/`   | Architecture, requirements, risks, open questions.      |
-| `decisions/`  | Decision records.                                       |
+| Path           | What lives there                                             |
+|----------------|--------------------------------------------------------------|
+| `CLAUDE.md`    | Schema + operating manual.                                   |
+| `triage.md`    | Classification procedure for a new finding.                  |
+| `index.md`     | Catalog of every page.                                       |
+| `log.md`       | Append-only history.                                         |
+| `categories/`  | One page per vulnerability class — the reusable core.        |
+| `resolutions/` | Reusable fixes / controls / false-positive & risk rationale. |
+| `findings/`    | Standalone pages for landmark issues.                        |
+| `projects/`    | Repos/services where findings arise.                         |
+| `scanners/`    | The scanning tools that produce findings.                    |
+| `decisions/`   | Cross-cutting precedents & policy.                           |
+| `references/`  | The OKF spec and LLM-wiki idea file.                         |
 
 `_template.md` files show the expected shape of each concept type.
+
+## Getting the backlog in
+
+Export from GitLab per issue: title, description, labels, state, **closing
+comment/resolution**, and close reason. Provide either API access (a token) or a
+JSON/CSV export dropped where the agent can read it — that determines whether the
+agent runs an ingest script or parses a file.

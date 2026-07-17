@@ -2,44 +2,62 @@
 okf_version: "0.1"
 ---
 
-# Knowledge Graph — Root Index
+# Security Remediation Knowledge Graph — Root Index
 
-The catalog for this LLM-maintained knowledge graph. Every page lives under a
-category below. Read [`CLAUDE.md`](/CLAUDE.md) for how the bundle works and
-[`log.md`](/log.md) for its history.
+Catalog of every page. A graph of security **findings** from AI scanning and the
+**resolutions** we've already applied, so future agents can categorize new
+findings fast. Read [`CLAUDE.md`](/CLAUDE.md) for how it works,
+[`triage.md`](/triage.md) to classify a new finding, and [`log.md`](/log.md) for
+history.
 
-> Status: **scaffolded, not yet populated.** The pages marked _(template)_ show
-> the expected shape for each concept type — replace or delete them as real
-> content lands.
+> Status: **scaffolded with a synthetic worked example.** Real content is added
+> in the private destination repo (see the sensitivity rules in `CLAUDE.md`). The
+> `hardcoded-secrets` category and `externalize-secret` resolution are
+> illustrative only.
 
-# References
+# Playbooks
 
-External material this bundle is built on, mirrored as first-class concepts.
+* [Triage — classify a new finding](/triage.md) - the front door for a new scanner finding.
 
-* [Open Knowledge Format (OKF) v0.1](/references/okf-spec-v0.1.md) - the file format every concept conforms to.
-* [LLM Wiki — Andrej Karpathy](/references/karpathy-llm-wiki.md) - the wiki-maintenance pattern this bundle instantiates.
+# Categories
 
-# Sources
+One page per vulnerability class — the reusable core of the graph.
 
-Ingested raw material, one summary concept per source. _Empty — drop the dev
-effort's founding documents here and ingest them._
+* [Hardcoded Secrets](/categories/hardcoded-secrets.md) - credentials committed into source instead of injected at runtime. _(example)_
+* [Category (template)](/categories/_template.md) - shape of a category page.
 
-* [Source (template)](/sources/_template.md) - shape of a source summary page.
+# Resolutions
 
-# Entities
+Reusable remediation patterns (fix / compensating-control / false-positive / accepted-risk).
 
-People, teams, systems, services, and components involved in the effort.
+* [Externalize Secret to a Secrets Manager](/resolutions/externalize-secret.md) - remove, inject at runtime, rotate. _(example)_
+* [Resolution (template)](/resolutions/_template.md) - shape of a resolution page.
 
-* [Entity (template)](/entities/_template.md) - shape of an entity page.
+# Findings
 
-# Concepts
+Standalone pages for landmark issues only. _Empty — promote exemplars here._
 
-Abstract topics — architecture, requirements, risks, open questions.
+* [Finding (template)](/findings/_template.md) - shape of a landmark finding page.
 
-* [Concept (template)](/concepts/_template.md) - shape of a concept page.
+# Projects
+
+Repos/services where findings arise. _Empty._
+
+* [Project (template)](/projects/_template.md) - shape of a project page.
+
+# Scanners
+
+The scanning tools that produce findings. _Empty._
+
+* [Scanner (template)](/scanners/_template.md) - shape of a scanner page.
 
 # Decisions
 
-Decision records: what was chosen, the alternatives, and why.
+Cross-cutting precedents & policy, especially wontfix / accepted-risk rationale.
 
 * [Decision (template)](/decisions/_template.md) - shape of a decision record.
+
+# References
+
+* [Open Knowledge Format (OKF) v0.1](/references/okf-spec-v0.1.md) - the file format every concept conforms to.
+* [LLM Wiki — Andrej Karpathy](/references/karpathy-llm-wiki.md) - the wiki-maintenance pattern this bundle instantiates.

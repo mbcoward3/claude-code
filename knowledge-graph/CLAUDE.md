@@ -1,26 +1,47 @@
 ---
 type: Schema
-title: Knowledge Graph — Schema & Operating Manual
-description: The configuration file that makes the LLM a disciplined maintainer of this bundle.
-tags: [schema, config]
-timestamp: 2026-07-16T00:00:00Z
+title: Security Remediation Knowledge Graph — Schema & Operating Manual
+description: The configuration file that makes the LLM a disciplined maintainer and triage assistant for this bundle.
+tags: [schema, config, security]
+timestamp: 2026-07-17T00:00:00Z
 ---
 
-# Knowledge Graph — Schema & Operating Manual
+# Security Remediation Knowledge Graph — Schema & Operating Manual
 
-This directory is an **LLM-maintained knowledge graph** for a significant
-development effort. It follows two sources, both mirrored under
-[`references/`](/references/):
+An **LLM-maintained knowledge graph of security findings and how we resolved
+them**, distilled from a large backlog of GitLab issues produced by AI security
+scanning. Its job is to let a future agent take a *new* finding, **categorize it
+against what we already know, and reach the right resolution quickly** — instead
+of re-triaging the same vulnerability classes from scratch every time.
 
-- The **[LLM Wiki pattern](/references/karpathy-llm-wiki.md)** (Karpathy) — the
-  three-layer idea: immutable raw sources, an LLM-maintained wiki, and this
-  schema file.
-- The **[Open Knowledge Format v0.1](/references/okf-spec-v0.1.md)** (OKF) — the
-  file format every concept in this bundle conforms to.
+It follows two sources, mirrored under [`references/`](/references/):
+the **[LLM Wiki pattern](/references/karpathy-llm-wiki.md)** (three layers: raw
+sources → LLM-maintained wiki → this schema) and
+**[OKF v0.1](/references/okf-spec-v0.1.md)** (the file format every concept
+conforms to).
 
-You (the LLM) own the wiki layer entirely. The human curates sources, directs
-the analysis, and asks questions. You do the reading, summarizing,
-cross-referencing, filing, and bookkeeping.
+You (the LLM) own the wiki layer. The human curates sources and asks questions;
+you do the reading, categorizing, cross-referencing, and bookkeeping.
+
+---
+
+## ⚠️ Sensitivity rules — read before writing anything
+
+This graph is a map of the organization's known weaknesses. The
+**"decided against resolving" (wontfix) set are live, unmitigated issues.**
+Treat the whole bundle as sensitive.
+
+- **Destination is a private repo.** This scaffold is staged in a public
+  leak-analysis repo only temporarily; it must be moved to a dedicated private
+  repository before real finding detail is added. Do not treat this location as
+  the permanent home.
+- **Never commit** real secrets, tokens, credentials, private keys, internal
+  hostnames/IPs, customer data, or working exploit steps. Redact them. Describe
+  the *class* of problem and the *shape* of the fix, not a reproduction recipe.
+- Prefer generic, synthetic examples (like the ones shipped in this scaffold)
+  over pasting real scanner output verbatim.
+- If a source you're ingesting contains the above, summarize and redact; keep
+  the raw material out of the bundle.
 
 ---
 
@@ -28,96 +49,113 @@ cross-referencing, filing, and bookkeeping.
 
 ```
 knowledge-graph/
-├── CLAUDE.md          # This file. The schema. Read it first.
-├── index.md           # Root catalog of every page. Read second.
+├── CLAUDE.md          # This file — the schema. Read first.
+├── index.md           # Catalog of every page. Read second.
+├── triage.md          # The front door for classifying a NEW finding.
 ├── log.md             # Append-only chronological history.
-├── references/        # The OKF spec + LLM-wiki idea file (immutable).
-├── sources/           # Ingested raw material, one summary concept per source.
-├── entities/          # People, teams, systems, services, components.
-├── concepts/          # Abstract topics: architecture, requirements, risks.
-└── decisions/         # Decision records (what was chosen and why).
+├── references/        # OKF spec + LLM-wiki idea file (immutable).
+├── categories/        # One page per vulnerability class. The reusable core.
+├── resolutions/       # Reusable remediation patterns (fix / control / FP / risk).
+├── findings/          # Landmark individual issues worth a deep-dive page.
+├── projects/          # The repos/services where findings arise.
+├── scanners/          # The scanning tools that produce findings.
+└── decisions/         # Cross-cutting precedents & policy (esp. wontfix rationale).
 ```
 
-Every `.md` file except `index.md` and `log.md` is an **OKF concept**: a YAML
-frontmatter block followed by a markdown body.
+## The domain model (how the graph is shaped)
+
+The three most important node types and how they relate:
+
+- **Category** — a vulnerability *class* (e.g. "hardcoded secrets", "SSRF in
+  outbound fetchers"). This is where reusable knowledge lives: how to recognize
+  it, common false-positive signals, the canonical resolution(s), and a rolled-up
+  list of member findings. **Categories emerge from the data** — create one when
+  a pattern recurs; don't force findings into a rigid pre-set taxonomy. Where a
+  standard mapping is obvious, record it in optional `cwe:` / `owasp:`
+  frontmatter so external scanner findings self-map, but the primary structure is
+  whatever actually reflects our backlog.
+- **Resolution** — a *reusable* way we've addressed a class: a fix pattern, a
+  compensating control, a false-positive rationale, or an accepted-risk
+  rationale. Many findings and categories point at the same resolution.
+- **Finding** — an individual GitLab issue. **Hybrid granularity:** most findings
+  live as *rows in their category page*, not as their own file. Only **landmark**
+  findings — the canonical exemplar of a class, an unusually instructive fix, or
+  a heavily-cited precedent — get a standalone page under `findings/`.
+
+`projects/` and `scanners/` are supporting entities so findings can be traced to
+where they arose and which tool flagged them (useful for tracking scanner
+false-positive rates).
 
 ## Frontmatter contract (OKF §4.1)
 
-Required on every concept:
+Required on every concept: a non-empty `type`. Recommended: `title`,
+`description`, `tags`, `timestamp`. Domain-specific optional fields by type:
 
 ```yaml
----
-type: <Concept type>          # REQUIRED. e.g. Source, Entity, Concept, Decision, Reference
-title: <Human-readable name>
-description: <One-sentence summary>   # used by index.md
-tags: [<tag>, <tag>]
-timestamp: <ISO 8601>          # last meaningful change
----
+# Category
+type: Category
+cwe: [CWE-798]                 # optional cross-map
+owasp: "A07:2021"              # optional
+status_summary: "12 fixed, 3 wontfix, 4 false-positive"
+
+# Resolution
+type: Resolution
+resolution_kind: fix           # fix | compensating-control | false-positive | accepted-risk
+
+# Finding (landmark)
+type: Finding
+status: fixed                  # fixed | wontfix | false-positive | accepted-risk
+severity: high                 # critical | high | medium | low | info
+scanner: <name>
+project: <name>
+gitlab_issue: "<url or #id>"   # citation to the original
 ```
 
-`type` is the only field OKF *requires*. Pick descriptive values. Types in use
-here: `Source`, `Entity`, `Concept`, `Decision`, `Reference`, `Requirement`,
-`Risk`. Add more as the domain needs them — no registry, no approval.
+Types in use: `Category`, `Resolution`, `Finding`, `Project`, `Scanner`,
+`Decision`, `Reference`, `Playbook`, `Schema`.
 
 ## Cross-linking (OKF §5)
 
-- Link concepts with **bundle-relative absolute** links: `[orders](/tables/orders.md)`.
-  These stay valid when files move within a subdirectory.
-- A link is an untyped directed edge; the *kind* of relationship lives in the
-  surrounding prose, not the link.
-- Broken links are allowed — they represent not-yet-written knowledge. Prefer
-  linking to a page that doesn't exist yet over not linking at all; it becomes a
-  visible to-do in the graph.
+Use **bundle-relative absolute** links: `[hardcoded secrets](/categories/hardcoded-secrets.md)`.
+A finding links to its category and its resolution; a category links to its
+resolutions, landmark findings, and any decision precedent. Broken links are
+allowed and represent not-yet-written knowledge.
 
 ---
 
-## Operations (from the LLM Wiki pattern)
+## Operations
 
-### Ingest
-When the human drops a source into `sources/` (or points you at a URL/doc):
-1. Read it fully.
-2. Discuss the key takeaways with the human.
-3. Write a summary concept in `sources/` (`type: Source`, cite the original in a
-   `# Citations` section).
-4. Update or create the entity/concept/decision pages it touches — a single
-   source often touches 5–15 pages.
-5. Update [`index.md`](/index.md).
-6. Append an entry to [`log.md`](/log.md).
+### Ingest (backlog → graph)
+Given a GitLab issue (or a batch export):
+1. Read it; redact anything sensitive per the rules above.
+2. Determine its vulnerability class. Match to an existing
+   [category](/categories/) or create a new one if the pattern is new.
+3. Capture how it was resolved. Reuse an existing [resolution](/resolutions/) or
+   write a new reusable one. Record the close reason (fixed / wontfix /
+   false-positive / accepted-risk).
+4. Record the finding: a **row** in the category's finding table, or — if
+   landmark — a standalone [`findings/`](/findings/) page.
+5. Update the category's `status_summary`, touch related projects/scanners.
+6. Update [`index.md`](/index.md); append to [`log.md`](/log.md).
 
-### Query
-1. Read [`index.md`](/index.md) first to find candidate pages.
-2. Read those pages, synthesize an answer **with citations** (link the pages).
-3. **File good answers back** as new concept pages — a comparison, an analysis,
-   a discovered connection shouldn't vanish into chat. Log it.
+### Triage (the key query — a NEW finding comes in)
+This is what the graph exists for. Full procedure in [`triage.md`](/triage.md).
+In short: extract signals (CWE, rule ID, message, context) → match to a category
+→ apply its canonical resolution and check prior precedents → if nothing matches,
+propose a new category. File the outcome back so the graph compounds.
 
 ### Lint
-Periodically health-check the graph. Look for: contradictions between pages,
-stale claims newer sources have superseded, orphan pages with no inbound links,
-important concepts mentioned but lacking their own page, missing cross-links,
-and gaps a search could fill. Report findings and propose fixes; log the pass.
-
----
+Periodically health-check: categories with no resolution, resolutions no finding
+uses, contradictory precedents, stale fixes newer guidance supersedes, orphan
+pages, near-duplicate categories that should merge, and scanners with high
+false-positive rates worth flagging. Report and propose fixes; log the pass.
 
 ## Conventions
 
-- **index.md** is content-oriented — a catalog grouped by category, each entry a
-  link + one-line description (pulled from the concept's `description`). Update
-  on every ingest.
-- **log.md** is chronological and append-only. Start each entry with a
-  consistent prefix so it stays greppable:
-  `## [YYYY-MM-DD] <op> | <title>` where `<op>` ∈ `ingest | query | lint | init`.
-  `grep "^## \[" log.md | tail -5` then gives the recent history.
-- Favor **structural markdown** — headings, lists, tables — over prose, for both
-  human reading and agent retrieval (OKF §4.2).
-- The whole bundle is a git repo of markdown. Commit meaningful updates so the
-  history tells the story of the effort.
-
-## This bundle's purpose
-
-Scaffolded 2026-07-16 to support a significant development effort starting the
-following week. The directory structure is ready; the content is not yet
-populated. First real work: ingest the effort's founding documents (spec, RFC,
-kickoff notes) into `sources/`, stand up the core `entities/` and `concepts/`
-pages, and record early architectural choices in `decisions/`. See
-[`index.md`](/index.md) for current contents and the placeholder pages for the
-expected shape of each type.
+- **index.md** — catalog grouped by category, each entry a link + one-line
+  description. Update on every ingest.
+- **log.md** — append-only, newest first. Prefix each entry
+  `## [YYYY-MM-DD] <op> | <title>`, `<op>` ∈ `ingest | triage | lint | init`, so
+  `grep "^## \[" log.md | tail -5` shows recent history.
+- Favor **structural markdown** — tables, lists, headings — over prose.
+- Commit meaningful updates; the git history is the story of the effort.
