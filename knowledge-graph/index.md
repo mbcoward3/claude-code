@@ -10,10 +10,9 @@ findings fast. Read [`CLAUDE.md`](/CLAUDE.md) for how it works,
 [`triage.md`](/triage.md) to classify a new finding, and [`log.md`](/log.md) for
 history.
 
-> Status: **scaffolded with a synthetic worked example.** Real content is added
-> in the private destination repo (see the sensitivity rules in `CLAUDE.md`). The
-> `hardcoded-secrets` category and `externalize-secret` resolution are
-> illustrative only.
+> Status: **scaffolded, not yet populated.** Real content is added in the private
+> destination repo (see the sensitivity rules in `CLAUDE.md`). The `_template.md`
+> files show the expected shape of each concept type.
 
 # Playbooks
 
@@ -21,16 +20,15 @@ history.
 
 # Categories
 
-One page per vulnerability class — the reusable core of the graph.
+One page per vulnerability class — the reusable core of the graph. _Empty — a
+category is created when a finding pattern recurs._
 
-* [Hardcoded Secrets](/categories/hardcoded-secrets.md) - credentials committed into source instead of injected at runtime. _(example)_
 * [Category (template)](/categories/_template.md) - shape of a category page.
 
 # Resolutions
 
-Reusable remediation patterns (fix / compensating-control / false-positive / accepted-risk).
+Reusable remediation patterns (fix / compensating-control / false-positive / accepted-risk). _Empty._
 
-* [Externalize Secret to a Secrets Manager](/resolutions/externalize-secret.md) - remove, inject at runtime, rotate. _(example)_
 * [Resolution (template)](/resolutions/_template.md) - shape of a resolution page.
 
 # Findings

@@ -3,6 +3,12 @@
 Append-only, newest first. Each entry: `## [YYYY-MM-DD] <op> | <title>`
 where `<op>` ∈ `ingest | triage | lint | init`.
 
+## [2026-07-17] init | Removed synthetic example pages
+
+* **Update**: Dropped the illustrative `hardcoded-secrets` category and
+  `externalize-secret` resolution; the `_template.md` files carry the shape.
+  Categories and resolutions now start empty, to be built from the real backlog.
+
 ## [2026-07-17] init | Retargeted bundle to security-remediation domain
 
 * **Update**: Reworked the bundle for its real purpose — a knowledge graph of AI

@@ -38,8 +38,8 @@ Treat the whole bundle as sensitive.
 - **Never commit** real secrets, tokens, credentials, private keys, internal
   hostnames/IPs, customer data, or working exploit steps. Redact them. Describe
   the *class* of problem and the *shape* of the fix, not a reproduction recipe.
-- Prefer generic, synthetic examples (like the ones shipped in this scaffold)
-  over pasting real scanner output verbatim.
+- Prefer generic, redacted descriptions over pasting real scanner output
+  verbatim.
 - If a source you're ingesting contains the above, summarize and redact; keep
   the raw material out of the bundle.
 
@@ -116,7 +116,7 @@ Types in use: `Category`, `Resolution`, `Finding`, `Project`, `Scanner`,
 
 ## Cross-linking (OKF §5)
 
-Use **bundle-relative absolute** links: `[hardcoded secrets](/categories/hardcoded-secrets.md)`.
+Use **bundle-relative absolute** links: `[<category>](/categories/<slug>.md)`.
 A finding links to its category and its resolution; a category links to its
 resolutions, landmark findings, and any decision precedent. Broken links are
 allowed and represent not-yet-written knowledge.
