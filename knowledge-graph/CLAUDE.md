@@ -8,11 +8,12 @@ timestamp: 2026-07-17T00:00:00Z
 
 # Security Remediation Knowledge Graph — Schema & Operating Manual
 
-An **LLM-maintained knowledge graph of security findings and how we resolved
-them**, distilled from a large backlog of GitLab issues produced by AI security
-scanning. Its job is to let a future agent take a *new* finding, **categorize it
-against what we already know, and reach the right resolution quickly** — instead
-of re-triaging the same vulnerability classes from scratch every time.
+An **LLM-maintained knowledge graph of recurring security-finding patterns and
+the best-practice fix we've already agreed on for each**, distilled from a large
+backlog of *resolved* GitLab issues from AI security scanning. Its job: when a
+future agent meets a finding that **has precedent**, let it recognize the pattern
+and **implement the established fix in the new location** — instead of re-deciding
+a problem the team has already solved.
 
 It follows two sources, mirrored under [`references/`](/references/):
 the **[LLM Wiki pattern](/references/karpathy-llm-wiki.md)** (three layers: raw
@@ -25,22 +26,20 @@ you do the reading, categorizing, cross-referencing, and bookkeeping.
 
 ---
 
-## ⚠️ Sensitivity rules — read before writing anything
+## Content hygiene
 
-This graph is a map of the organization's known weaknesses. The
-**"decided against resolving" (wontfix) set are live, unmitigated issues.**
-Treat the whole bundle as sensitive.
+This is internal engineering knowledge — solved patterns and their fixes. Keep
+the pages about *patterns*, not raw incident data:
 
-- **Destination is a private repo.** This scaffold is staged in a public
-  leak-analysis repo only temporarily; it must be moved to a dedicated private
-  repository before real finding detail is added. Do not treat this location as
-  the permanent home.
-- **Never commit** real secrets, tokens, credentials, private keys, internal
-  hostnames/IPs, customer data, or working exploit steps. Redact them. Describe
-  the *class* of problem and the *shape* of the fix, not a reproduction recipe.
-- Prefer generic, redacted descriptions over pasting real scanner output
-  verbatim.
-- If a source you're ingesting contains the above, summarize and redact; keep
+- **Destination is the team's private repo.** This scaffold is staged in a
+  public leak-analysis repo only temporarily; move it to the private repository
+  before adding real content. Do not treat this location as the permanent home.
+- Record the **class** of finding and the **shape** of the fix — not a working
+  exploit or reproduction recipe.
+- Don't paste real secrets, tokens, credentials, keys, internal hostnames/IPs,
+  or customer data into a page; they add nothing to a reusable pattern. Redact
+  them.
+- When ingesting a source that contains the above, summarize and redact; keep
   the raw material out of the bundle.
 
 ---
@@ -66,17 +65,19 @@ knowledge-graph/
 
 The three most important node types and how they relate:
 
-- **Category** — a vulnerability *class* (e.g. "hardcoded secrets", "SSRF in
-  outbound fetchers"). This is where reusable knowledge lives: how to recognize
-  it, common false-positive signals, the canonical resolution(s), and a rolled-up
-  list of member findings. **Categories emerge from the data** — create one when
-  a pattern recurs; don't force findings into a rigid pre-set taxonomy. Where a
-  standard mapping is obvious, record it in optional `cwe:` / `owasp:`
-  frontmatter so external scanner findings self-map, but the primary structure is
-  whatever actually reflects our backlog.
-- **Resolution** — a *reusable* way we've addressed a class: a fix pattern, a
+- **Category** — a finding *pattern* (e.g. "SSRF in outbound fetchers", "missing
+  authorization check on an endpoint"). This is where the precedent lives: how to
+  recognize the pattern, the **agreed best-practice fix**, common false-positive
+  signals, and the findings that established the precedent. **Categories emerge
+  from the data** — create one when a pattern recurs; don't force findings into a
+  rigid pre-set taxonomy. Where a standard mapping is obvious, record it in
+  optional `cwe:` / `owasp:` frontmatter so external scanner findings self-map,
+  but the primary structure is whatever actually reflects our backlog.
+- **Resolution** — the **reusable best-practice fix** for a pattern, written so an
+  agent can implement it in a new location. (A resolution may also be a
   compensating control, a false-positive rationale, or an accepted-risk
-  rationale. Many findings and categories point at the same resolution.
+  rationale — precedents to *not* fix are precedents too.) Many findings and
+  categories point at the same resolution.
 - **Finding** — an individual GitLab issue. **Hybrid granularity:** most findings
   live as *rows in their category page*, not as their own file. Only **landmark**
   findings — the canonical exemplar of a class, an unusually instructive fix, or
@@ -127,7 +128,7 @@ allowed and represent not-yet-written knowledge.
 
 ### Ingest (backlog → graph)
 Given a GitLab issue (or a batch export):
-1. Read it; redact anything sensitive per the rules above.
+1. Read it; redact per the content-hygiene note above.
 2. Determine its vulnerability class. Match to an existing
    [category](/categories/) or create a new one if the pattern is new.
 3. Capture how it was resolved. Reuse an existing [resolution](/resolutions/) or
@@ -140,9 +141,10 @@ Given a GitLab issue (or a batch export):
 
 ### Triage (the key query — a NEW finding comes in)
 This is what the graph exists for. Full procedure in [`triage.md`](/triage.md).
-In short: extract signals (CWE, rule ID, message, context) → match to a category
-→ apply its canonical resolution and check prior precedents → if nothing matches,
-propose a new category. File the outcome back so the graph compounds.
+In short: extract signals (CWE, rule ID, message, context) → check for
+**precedent** by matching to a category → if found, **implement that category's
+best-practice fix in the new finding's location** → if nothing matches, it's a
+new pattern: propose a category. File the outcome back so the graph compounds.
 
 ### Lint
 Periodically health-check: categories with no resolution, resolutions no finding

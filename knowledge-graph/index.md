@@ -4,14 +4,14 @@ okf_version: "0.1"
 
 # Security Remediation Knowledge Graph — Root Index
 
-Catalog of every page. A graph of security **findings** from AI scanning and the
-**resolutions** we've already applied, so future agents can categorize new
-findings fast. Read [`CLAUDE.md`](/CLAUDE.md) for how it works,
-[`triage.md`](/triage.md) to classify a new finding, and [`log.md`](/log.md) for
-history.
+Catalog of every page. A graph of **solved finding patterns** from AI scanning
+and the **best-practice fix** for each, so a future agent meeting a finding with
+precedent can recognize it and implement the known fix in the new location. Read
+[`CLAUDE.md`](/CLAUDE.md) for how it works, [`triage.md`](/triage.md) to check a
+new finding for precedent, and [`log.md`](/log.md) for history.
 
 > Status: **scaffolded, not yet populated.** Real content is added in the private
-> destination repo (see the sensitivity rules in `CLAUDE.md`). The `_template.md`
+> destination repo (see the content-hygiene note in `CLAUDE.md`). The `_template.md`
 > files show the expected shape of each concept type.
 
 # Playbooks

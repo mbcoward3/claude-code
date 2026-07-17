@@ -6,11 +6,12 @@ tags: [triage, playbook, classification]
 timestamp: 2026-07-17T00:00:00Z
 ---
 
-# Triage: classify a new finding, reuse a known resolution
+# Triage: does this finding have precedent — and can we reuse the fix?
 
-This is the front door when a new scanner finding arrives. Goal: land it in the
-right [category](/categories/) and apply a known [resolution](/resolutions/) with
-minimal re-analysis. Read [`CLAUDE.md`](/CLAUDE.md) for the model.
+This is the front door when a new scanner finding arrives. Goal: check whether
+the finding matches a **pattern we've already solved**, and if so, **implement
+that established best-practice fix in the new location** with minimal re-analysis.
+Read [`CLAUDE.md`](/CLAUDE.md) for the model.
 
 ## 1. Extract signals
 
@@ -42,19 +43,22 @@ Read [`index.md`](/index.md) first to see the candidate set.
 3. Check for a **decision precedent** (linked from the category) — especially
    *accepted-risk* / *false-positive* rulings, so you don't re-litigate a call
    the team already made.
-4. Apply the category's **canonical [resolution](/resolutions/)**. Confirm it
-   still fits (not superseded by newer guidance — check the timestamp).
+4. **Implement the category's [best-practice fix](/resolutions/) in the new
+   finding's location.** Confirm it still fits (not superseded by newer guidance —
+   check the timestamp) and adapt it to the new codebase/context.
 5. Record the outcome (step 5 below).
 
 ## 4. If nothing matches
 
-The pattern may be new — that's expected; the taxonomy is emergent.
+No precedent yet — this pattern hasn't been solved before. That's expected; the
+taxonomy is emergent. This is where a new best practice gets established.
 
 1. Confirm it isn't a near-miss of an existing category that should just be
    broadened.
 2. Create a new [category](/categories/) page (copy `_template.md`). Fill in
    recognition signals and, if obvious, the `cwe:`/`owasp:` cross-map.
-3. Draft or link a [resolution](/resolutions/).
+3. Once the team settles on the fix, capture it as a [resolution](/resolutions/)
+   so it becomes the precedent.
 4. Record the outcome and **log it** — the next similar finding now self-serves.
 
 ## 5. Record the outcome (so the graph compounds)

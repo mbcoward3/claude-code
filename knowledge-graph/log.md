@@ -3,6 +3,16 @@
 Append-only, newest first. Each entry: `## [YYYY-MM-DD] <op> | <title>`
 where `<op>` ∈ `ingest | triage | lint | init`.
 
+## [2026-07-17] init | Reframed around precedent + best-practice fixes
+
+* **Update**: Recentered the framing — the graph is a library of *solved finding
+  patterns and the agreed best-practice fix for each*, not an inventory of the
+  org's weaknesses. Triage = recognize precedent, then implement the known fix in
+  the new location.
+* **Update**: Replaced the alarmist "sensitivity rules" section with a lighter
+  "content hygiene" note (keep pages about patterns, not raw incident data).
+  Updated CLAUDE.md, README.md, index.md, triage.md to match.
+
 ## [2026-07-17] init | Removed synthetic example pages
 
 * **Update**: Dropped the illustrative `hardcoded-secrets` category and
