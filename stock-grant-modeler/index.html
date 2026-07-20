@@ -117,7 +117,14 @@
   @media (max-width: 1000px) { aside.controls { position: static; max-height: none; } }
   main.results { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
-  .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 18px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px; padding: 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 28px -14px rgba(0,0,0,0.14);
+  }
+  :root[data-theme="dark"] .card { box-shadow: 0 1px 0 rgba(255,255,255,0.045) inset, 0 12px 32px -16px rgba(0,0,0,0.7); }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .card { box-shadow: 0 1px 0 rgba(255,255,255,0.045) inset, 0 12px 32px -16px rgba(0,0,0,0.7); }
+  }
   .card h2 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin: 0 0 4px; }
   .card .sub { font-size: 12.5px; color: var(--muted); margin: 0 0 14px; }
   .card .sub:last-child { margin-bottom: 0; }
@@ -192,9 +199,19 @@
   /* ============ stat tiles ============ */
   .tiles { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
   @media (max-width: 880px) { .tiles { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-  .tile { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 14px 16px; position: relative; overflow: hidden; }
-  .tile .t-label { font-size: 12px; color: var(--ink-2); margin-bottom: 4px; }
-  .tile .t-value { font-size: 27px; font-weight: 600; line-height: 1.12; letter-spacing: -0.01em; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px;
+    padding: 15px 17px; position: relative; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 28px -14px rgba(0,0,0,0.14);
+  }
+  .tile::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 2.5px;
+    background: linear-gradient(90deg, var(--accent), transparent 70%);
+    opacity: 0.55;
+  }
+  .tile .t-label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+  .tile .t-value { font-size: 29px; font-weight: 650; line-height: 1.1; letter-spacing: -0.02em; }
+  .tile:first-child .t-value { font-size: 33px; }
   .tile .t-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
   .tile .t-sub.pos { color: var(--good-text); }
   .tile .t-sub.neg { color: var(--s-loan); }
@@ -203,8 +220,12 @@
   /* ============ charts ============ */
   .chart-card { position: relative; }
   .chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink-2); margin: 6px 0 2px; }
-  .legend .key { display: inline-flex; align-items: center; gap: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--ink-2); margin: 8px 0 4px; }
+  .legend .key {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--hairline); border-radius: 999px; padding: 3.5px 11px;
+    background: color-mix(in srgb, var(--page) 55%, transparent);
+  }
   .key .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
   .key .stroke { width: 16px; height: 2px; border-radius: 1px; flex: none; }
   .chart-body { position: relative; }
@@ -212,9 +233,12 @@
   svg text { font-family: var(--sans); }
   .tooltip {
     position: absolute; pointer-events: none; z-index: 5;
-    background: var(--surface); border: 1px solid var(--hairline);
-    border-radius: 5px; padding: 8px 10px; font-size: 12.5px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.14); min-width: 150px; display: none;
+    background: color-mix(in srgb, var(--surface) 84%, transparent);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--hairline);
+    border-radius: 9px; padding: 9px 12px; font-size: 12.5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 14px 34px -10px rgba(0,0,0,0.24);
+    min-width: 156px; display: none;
   }
   .tooltip .tt-title { color: var(--muted); font-size: 11.5px; margin-bottom: 5px; }
   .tooltip .tt-row { display: flex; align-items: center; gap: 7px; padding: 1.5px 0; }
@@ -251,7 +275,16 @@
   details.math li { margin: 4px 0; }
   .empty { padding: 40px 0; text-align: center; color: var(--muted); font-size: 14px; }
 
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  main.results > * { animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  main.results > *:nth-child(2) { animation-delay: 0.06s; }
+  main.results > *:nth-child(3) { animation-delay: 0.12s; }
+  main.results > *:nth-child(4) { animation-delay: 0.18s; }
+  main.results > *:nth-child(5) { animation-delay: 0.24s; }
+  main.results > *:nth-child(6) { animation-delay: 0.30s; }
+  svg path[tabindex] { transition: opacity 0.16s ease; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
 <div class="wrap">
@@ -936,7 +969,11 @@ function renderPriceChart(model) {
     d += (i ? `L${x1.toFixed(1)} ${y.toFixed(1)}` : `M${x1.toFixed(1)} ${y.toFixed(1)}`) + `H${x2.toFixed(1)}`;
   });
   area = d + `V${(H - M.b).toFixed(1)}H${px(0).toFixed(1)}Z`;
+  const pf = sv("filter", { id: "ppglow", x: "-30%", y: "-30%", width: "160%", height: "160%" }, defs);
+  sv("feGaussianBlur", { stdDeviation: 4 }, pf);
   sv("path", { d: area, fill: "url(#ppg)" }, svg);
+  sv("path", { d, fill: "none", stroke: "var(--accent)", "stroke-width": 5, opacity: 0.25,
+    filter: "url(#ppglow)", "stroke-linejoin": "round" }, svg);
   sv("path", { d, fill: "none", stroke: "var(--accent)", "stroke-width": 2, "stroke-linejoin": "round" }, svg);
   years.forEach((yr, i) => {
     if (!yr.anchor) return;
@@ -1089,7 +1126,7 @@ function renderTiles(model) {
 }
 
 /* ================= chart 1: position over time ================= */
-let heroPrev = null;
+let heroPrev = null, heroIntroDone = false;
 function renderPositionChart(model) {
   const host = $("chart-pos");
   const legendItems = [
@@ -1117,7 +1154,7 @@ function drawHero(host, model, flat, final) {
   const G = i => flat[i * 4], P = i => flat[i * 4 + 1], N = i => flat[i * 4 + 2], NB = i => flat[i * 4 + 3];
 
   const W = Math.max(host.clientWidth || 840, 420), H = 400;
-  const M = { t: 22, r: 112, b: 32, l: 8 };
+  const M = { t: 22, r: 122, b: 32, l: 8 };
   let maxV = 1;
   for (let i = 0; i < n; i++) maxV = Math.max(maxV, G(i), P(i), hasB ? NB(i) : 0);
   const ticks = niceTicks(maxV, 5);
@@ -1136,13 +1173,15 @@ function drawHero(host, model, flat, final) {
 
   /* gradients */
   const defs = sv("defs", {}, svg);
-  const grad = (id, colorVar, o1, o2) => {
+  const grad = (id, colorVar, stops) => {
     const g = sv("linearGradient", { id, x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
-    sv("stop", { offset: "0%", style: `stop-color:${colorVar}`, "stop-opacity": o1 }, g);
-    sv("stop", { offset: "100%", style: `stop-color:${colorVar}`, "stop-opacity": o2 }, g);
+    for (const [off, op] of stops)
+      sv("stop", { offset: off, style: `stop-color:${colorVar}`, "stop-opacity": op }, g);
   };
-  grad("hgNet", "var(--s-net)", 0.34, 0.10);
-  grad("hgLoan", "var(--s-loan)", 0.30, 0.12);
+  grad("hgNet", "var(--s-net)", [["0%", 0.42], ["48%", 0.15], ["100%", 0.03]]);
+  grad("hgLoan", "var(--s-loan)", [["0%", 0.34], ["55%", 0.15], ["100%", 0.05]]);
+  const filt = sv("filter", { id: "hglow", x: "-30%", y: "-30%", width: "160%", height: "160%" }, defs);
+  sv("feGaussianBlur", { stdDeviation: 5 }, filt);
 
   /* frame: horizontal gridlines + y labels + vertical year hairlines */
   const yearIdx = [];
@@ -1190,8 +1229,11 @@ function drawHero(host, model, flat, final) {
   const ti = data.findIndex(d => d.t >= TODAY);
   if (ti > 0 && ti < n - 1) {
     sv("line", { x1: px(ti), x2: px(ti), y1: M.t, y2: M.t + ih, stroke: "var(--baseline)", "stroke-width": 1 }, svg);
-    sv("text", { x: px(ti), y: M.t - 7, "text-anchor": "middle", "font-size": 10.5, fill: "var(--muted)" }, svg)
-      .textContent = "today";
+    const tw2 = 46;
+    sv("rect", { x: px(ti) - tw2 / 2, y: M.t - 17, width: tw2, height: 15, rx: 7.5,
+      fill: "var(--surface)", stroke: "var(--hairline)" }, svg);
+    sv("text", { x: px(ti), y: M.t - 6, "text-anchor": "middle", "font-size": 9,
+      "font-weight": 600, "letter-spacing": "0.08em", fill: "var(--muted)" }, svg).textContent = "TODAY";
   }
   if (departIdx >= 0 && departIdx < n) {
     const x = px(departIdx);
@@ -1202,15 +1244,17 @@ function drawHero(host, model, flat, final) {
   /* boundary lines: surface underlay masks band seams, then the colored line */
   const boundary = (pts, color) => {
     const d = monoPath(pts);
+    sv("path", { d, fill: "none", stroke: color, "stroke-width": 7, opacity: 0.28,
+      filter: "url(#hglow)", "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
     sv("path", { d, fill: "none", stroke: "var(--surface)", "stroke-width": 4,
       "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
-    sv("path", { d, fill: "none", stroke: color, "stroke-width": 2,
+    return sv("path", { d, fill: "none", stroke: color, "stroke-width": 2,
       "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
   };
-  boundary(netPts, "var(--s-net)");
-  boundary(grossPts, "var(--s-value)");
-  if (hasB) sv("path", { d: monoPath(nbPts), fill: "none", stroke: "var(--s-net-alt)",
-    "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+  const mainNet = boundary(netPts, "var(--s-net)");
+  const mainGross = boundary(grossPts, "var(--s-value)");
+  const mainAlt = hasB ? sv("path", { d: monoPath(nbPts), fill: "none", stroke: "var(--s-net-alt)",
+    "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg) : null;
 
   /* balloon diamonds ride the gross line */
   for (const bd of model.balloonDates) {
@@ -1240,15 +1284,31 @@ function drawHero(host, model, flat, final) {
     if (ends[i].y - ends[i - 1].y < 15) ends[i].y = ends[i - 1].y + 15;
   for (const e of ends) {
     const yLine = py(e.band ? G(n - 1) : e.v);
+    const label = (e.band ? "owed " : "") + fmtCompact(e.v);
     if (Math.abs(e.y - yLine) > 2)
-      sv("line", { x1: xe + 2, x2: xe + 10, y1: yLine, y2: e.y, stroke: "var(--baseline)", "stroke-width": 1 }, svg);
+      sv("line", { x1: xe + 2, x2: xe + 9, y1: yLine, y2: e.y, stroke: "var(--baseline)", "stroke-width": 1 }, svg);
     if (!e.band) sv("circle", { cx: xe, cy: yLine, r: 4, fill: e.color, stroke: "var(--surface)", "stroke-width": 2 }, svg);
-    sv("text", { x: xe + 13, y: e.y + 4, "font-size": 11.5, fill: "var(--ink)", "font-weight": 600,
-      style: "font-variant-numeric:tabular-nums" }, svg).textContent =
-      (e.band ? "owed " : "") + fmtCompact(e.v);
+    const pw = label.length * 6.6 + 22;
+    sv("rect", { x: xe + 10, y: e.y - 9.5, width: pw, height: 19, rx: 9.5,
+      fill: "var(--surface)", stroke: "var(--hairline)" }, svg);
+    sv("circle", { cx: xe + 19, cy: e.y, r: 3, fill: e.color }, svg);
+    sv("text", { x: xe + 26, y: e.y + 3.5, "font-size": 11, fill: "var(--ink)", "font-weight": 600,
+      style: "font-variant-numeric:tabular-nums" }, svg).textContent = label;
   }
 
   if (!final) return;
+
+  if (!heroIntroDone && !REDUCED) {
+    heroIntroDone = true;
+    for (const pth of [mainNet, mainGross, mainAlt]) {
+      if (!pth) continue;
+      const L = pth.getTotalLength();
+      pth.style.strokeDasharray = L; pth.style.strokeDashoffset = L;
+      pth.animate([{ strokeDashoffset: L }, { strokeDashoffset: 0 }],
+        { duration: 950, easing: "cubic-bezier(0.3,0,0.2,1)", fill: "forwards" })
+        .onfinish = () => { pth.style.strokeDasharray = ""; pth.style.strokeDashoffset = ""; };
+    }
+  } else heroIntroDone = true;
 
   /* crosshair + tooltip */
   const tt = makeTooltip(host);
@@ -1368,6 +1428,15 @@ function renderVestChart(model) {
 
   const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
     "aria-label": "Stacked columns of shares vesting each year, by grant" }, host);
+  const vDefs = sv("defs", {}, svg);
+  const vGrad = idx => {
+    if (!vDefs.querySelector("#vsg" + idx)) {
+      const g = sv("linearGradient", { id: "vsg" + idx, x1: 0, y1: 0, x2: 0, y2: 1 }, vDefs);
+      sv("stop", { offset: "0%", style: `stop-color:${VEST_COLORS[idx]}`, "stop-opacity": 1 }, g);
+      sv("stop", { offset: "100%", style: `stop-color:${VEST_COLORS[idx]}`, "stop-opacity": 0.78 }, g);
+    }
+    return "url(#vsg" + idx + ")";
+  };
   for (const t of ticks) {
     sv("line", { x1: M.l + yTickW, x2: W - M.r, y1: py(t), y2: py(t),
       stroke: t === 0 ? "var(--baseline)" : "var(--grid)", "stroke-width": 1 }, svg);
@@ -1386,7 +1455,7 @@ function renderVestChart(model) {
       const h = Math.max(y0 - y1 - (topmost ? 0 : 2), 1);
       const seg = sv("path", {
         d: roundedTopRect(x, y1, bw, h, topmost ? 4 : 0),
-        fill: VEST_COLORS[gi], tabindex: "0", role: "img",
+        fill: vGrad(gi), tabindex: "0", role: "img",
         "aria-label": p.grant.year + " grant, " + fmtShares(p.shares) + " shares vest in " + yr.year
       }, svg);
       const show = () => {
@@ -1462,6 +1531,12 @@ function drawCash(host, model, full, CATS, flat, final) {
 
   const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
     "aria-label": "Stacked columns of annual out-of-pocket cash" }, host);
+  const cDefs = sv("defs", {}, svg);
+  CATS.forEach((c, ci) => {
+    const g = sv("linearGradient", { id: "csg" + ci, x1: 0, y1: 0, x2: 0, y2: 1 }, cDefs);
+    sv("stop", { offset: "0%", style: `stop-color:${c.color}`, "stop-opacity": 1 }, g);
+    sv("stop", { offset: "100%", style: `stop-color:${c.color}`, "stop-opacity": 0.78 }, g);
+  });
   for (const t of ticks) {
     sv("line", { x1: M.l + yTickW, x2: W - M.r, y1: py(t), y2: py(t),
       stroke: t === 0 ? "var(--baseline)" : "var(--grid)", "stroke-width": 1 }, svg);
@@ -1484,7 +1559,7 @@ function drawCash(host, model, full, CATS, flat, final) {
       const h = Math.max(y0 - y1 - (topmost ? 0 : 2), 1);
       const seg = sv("path", {
         d: roundedTopRect(x, y1, bw, h, topmost ? 4 : 0),
-        fill: p.c.color, tabindex: final ? "0" : "-1", role: "img",
+        fill: "url(#csg" + CATS.indexOf(p.c) + ")", tabindex: final ? "0" : "-1", role: "img",
         "aria-label": p.c.label + " " + fmtFull(p.v) + " in " + d.year
       }, svg);
       if (final) {
