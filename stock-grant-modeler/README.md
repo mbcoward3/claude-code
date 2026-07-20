@@ -18,9 +18,17 @@ Each grant card represents one year's offer:
   can either be paid in cash or capitalized into principal at a separate rate.
   Principal is a single balloon due June 30, nine years after the grant.
 
+- **Down payment**: cash in the grant year, payroll deduct spread across the
+  following year, or a share exchange that consumes prior vested shares first
+  and then the oldest modeled grant's vested shares at that year's price.
+- **Vesting structure**: first-vest offset and tranche count are editable per
+  grant, as is the loan's years-to-balloon.
+
 Outputs: net walk-away value over time (vested shares at the modeled price,
-unvested at cost, minus loan payoff), shares vesting per year, annual
-out-of-pocket cash, and a year-by-year table.
+unvested at cost, minus loan payoff) with a departure-date scrubber and full
+walk-away breakdown, an optional second-growth-rate comparison line, a
+year-by-year editable price path, shares vesting per year, annual
+out-of-pocket cash, and a detail table.
 
 The default numbers are placeholders — enter your own offer's figures.
 Inputs persist in the browser's localStorage; nothing leaves the page.

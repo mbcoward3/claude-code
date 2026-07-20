@@ -19,181 +19,185 @@
     --baseline:    #c3c2b7;
     --hairline:    rgba(11,11,11,0.10);
     --accent:      #1c5cab;
+    --accent-ink:  #1c5cab;
     --accent-soft: #cde2fb;
 
-    --s-value:     #2a78d6;  /* gross value line   */
-    --s-net:       #008300;  /* net walk-away line */
-    --s-loan:      #e34948;  /* loan payoff line   */
+    --s-value:     #2a78d6;  /* gross value line        */
+    --s-net:       #008300;  /* net walk-away line      */
+    --s-net-alt:   #7dbd7d;  /* comparison-scenario net */
+    --s-loan:      #e34948;  /* loan payoff line        */
 
-    --cf-interest: #eda100;  /* cash-flow stack, bottom */
-    --cf-purchase: #4a3aa7;  /* cash-flow stack, middle */
-    --cf-payoff:   #e34948;  /* cash-flow stack, top    */
+    --cf-interest: #eda100;
+    --cf-purchase: #4a3aa7;
+    --cf-payoff:   #e34948;
 
     --vest-1: #86b6ef; --vest-2: #5598e7; --vest-3: #2a78d6;
     --vest-4: #1c5cab; --vest-5: #104281; --vest-6: #0d366b;
 
     --good-text:   #006300;
+    --spark:       #c3c2b7;
     --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
     --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
       color-scheme: dark;
-      --page:        #0d0d0d;
-      --surface:     #1a1a19;
-      --ink:         #ffffff;
-      --ink-2:       #c3c2b7;
-      --muted:       #898781;
-      --grid:        #2c2c2a;
-      --baseline:    #383835;
-      --hairline:    rgba(255,255,255,0.10);
-      --accent:      #6da7ec;
-      --accent-soft: #0d366b;
-      --s-value:     #3987e5;
-      --s-net:       #008300;
-      --s-loan:      #e66767;
-      --cf-interest: #c98500;
-      --cf-purchase: #9085e9;
-      --cf-payoff:   #e66767;
+      --page: #0d0d0d; --surface: #1a1a19;
+      --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --baseline: #383835; --hairline: rgba(255,255,255,0.10);
+      --accent: #3987e5; --accent-ink: #6da7ec; --accent-soft: #0d366b;
+      --s-value: #3987e5; --s-net: #008300; --s-net-alt: #5d8f5d; --s-loan: #e66767;
+      --cf-interest: #c98500; --cf-purchase: #9085e9; --cf-payoff: #e66767;
       --vest-1: #cde2fb; --vest-2: #9ec5f4; --vest-3: #6da7ec;
       --vest-4: #3987e5; --vest-5: #256abf; --vest-6: #184f95;
-      --good-text:   #0ca30c;
+      --good-text: #0ca30c; --spark: #52514e;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --page:        #0d0d0d;
-    --surface:     #1a1a19;
-    --ink:         #ffffff;
-    --ink-2:       #c3c2b7;
-    --muted:       #898781;
-    --grid:        #2c2c2a;
-    --baseline:    #383835;
-    --hairline:    rgba(255,255,255,0.10);
-    --accent:      #6da7ec;
-    --accent-soft: #0d366b;
-    --s-value:     #3987e5;
-    --s-net:       #008300;
-    --s-loan:      #e66767;
-    --cf-interest: #c98500;
-    --cf-purchase: #9085e9;
-    --cf-payoff:   #e66767;
+    --page: #0d0d0d; --surface: #1a1a19;
+    --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --baseline: #383835; --hairline: rgba(255,255,255,0.10);
+    --accent: #3987e5; --accent-ink: #6da7ec; --accent-soft: #0d366b;
+    --s-value: #3987e5; --s-net: #008300; --s-net-alt: #5d8f5d; --s-loan: #e66767;
+    --cf-interest: #c98500; --cf-purchase: #9085e9; --cf-payoff: #e66767;
     --vest-1: #cde2fb; --vest-2: #9ec5f4; --vest-3: #6da7ec;
     --vest-4: #3987e5; --vest-5: #256abf; --vest-6: #184f95;
-    --good-text:   #0ca30c;
+    --good-text: #0ca30c; --spark: #52514e;
   }
   :root[data-theme="light"] {
     color-scheme: light;
-    --page:        #f9f9f7;
-    --surface:     #fcfcfb;
-    --ink:         #0b0b0b;
-    --ink-2:       #52514e;
-    --muted:       #898781;
-    --grid:        #e1e0d9;
-    --baseline:    #c3c2b7;
-    --hairline:    rgba(11,11,11,0.10);
-    --accent:      #1c5cab;
-    --accent-soft: #cde2fb;
-    --s-value:     #2a78d6;
-    --s-net:       #008300;
-    --s-loan:      #e34948;
-    --cf-interest: #eda100;
-    --cf-purchase: #4a3aa7;
-    --cf-payoff:   #e34948;
+    --page: #f9f9f7; --surface: #fcfcfb;
+    --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --baseline: #c3c2b7; --hairline: rgba(11,11,11,0.10);
+    --accent: #1c5cab; --accent-ink: #1c5cab; --accent-soft: #cde2fb;
+    --s-value: #2a78d6; --s-net: #008300; --s-net-alt: #7dbd7d; --s-loan: #e34948;
+    --cf-interest: #eda100; --cf-purchase: #4a3aa7; --cf-payoff: #e34948;
     --vest-1: #86b6ef; --vest-2: #5598e7; --vest-3: #2a78d6;
     --vest-4: #1c5cab; --vest-5: #104281; --vest-6: #0d366b;
-    --good-text:   #006300;
+    --good-text: #006300; --spark: #c3c2b7;
   }
 
   /* ============ base ============ */
   * { box-sizing: border-box; }
   html, body { margin: 0; }
-  body {
-    background: var(--page);
-    color: var(--ink);
-    font: 15px/1.5 var(--sans);
-  }
-  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px 80px; }
+  body { background: var(--page); color: var(--ink); font: 15px/1.5 var(--sans); }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px 90px; }
 
   /* ============ masthead ============ */
   header.masthead {
-    padding: 40px 0 20px;
+    padding: 38px 0 22px;
     border-bottom: 3px double var(--baseline);
-    margin-bottom: 28px;
+    margin-bottom: 26px;
+    display: flex; flex-wrap: wrap; gap: 18px 40px; align-items: flex-end; justify-content: space-between;
   }
   .eyebrow {
     font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+    text-transform: uppercase; color: var(--accent-ink); margin: 0 0 10px;
   }
   h1 {
     font-family: var(--serif); font-weight: 600;
-    font-size: clamp(28px, 4vw, 40px); line-height: 1.1;
+    font-size: clamp(30px, 4vw, 42px); line-height: 1.08;
     margin: 0 0 10px; text-wrap: balance; letter-spacing: -0.01em;
   }
-  .masthead p.lede { margin: 0; max-width: 62ch; color: var(--ink-2); }
+  .masthead p.lede { margin: 0; max-width: 60ch; color: var(--ink-2); }
+  .masthead .seal {
+    font-family: var(--serif); font-size: 12px; color: var(--muted); text-align: right;
+    border: 1px solid var(--baseline); border-radius: 4px; padding: 8px 14px;
+    line-height: 1.6; white-space: nowrap;
+  }
+  .seal b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 720px) { .masthead .seal { display: none; } }
 
   /* ============ layout ============ */
-  .cols { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 28px; align-items: start; }
-  @media (max-width: 980px) { .cols { grid-template-columns: 1fr; } }
-  aside.controls { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 16px; }
-  @media (max-width: 980px) { aside.controls { position: static; } }
+  .cols { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 26px; align-items: start; }
+  @media (max-width: 1000px) { .cols { grid-template-columns: 1fr; } }
+  aside.controls { position: sticky; top: 14px; display: flex; flex-direction: column; gap: 14px;
+    max-height: calc(100vh - 28px); overflow-y: auto; padding-right: 2px; scrollbar-width: thin; }
+  @media (max-width: 1000px) { aside.controls { position: static; max-height: none; } }
   main.results { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--hairline);
-    border-radius: 6px;
-    padding: 18px;
-  }
-  .card h2 {
-    font-family: var(--serif); font-weight: 600; font-size: 18px;
-    margin: 0 0 4px; letter-spacing: 0;
-  }
+  .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 18px; }
+  .card h2 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin: 0 0 4px; }
   .card .sub { font-size: 12.5px; color: var(--muted); margin: 0 0 14px; }
+  .card .sub:last-child { margin-bottom: 0; }
 
   /* ============ form controls ============ */
-  .field { display: flex; flex-direction: column; gap: 3px; }
-  .field label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
+  .field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .field label { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
   .field input, .field select {
-    font: 14px var(--sans); color: var(--ink);
-    background: var(--page);
-    border: 1px solid var(--baseline); border-radius: 4px;
-    padding: 6px 8px; width: 100%;
+    font: 14px var(--sans); color: var(--ink); background: var(--page);
+    border: 1px solid var(--baseline); border-radius: 4px; padding: 6px 8px; width: 100%; min-width: 0;
   }
-  .field input:focus-visible, .field select:focus-visible,
-  button:focus-visible, [tabindex="0"]:focus-visible {
+  .field input:focus-visible, .field select:focus-visible, button:focus-visible,
+  [tabindex="0"]:focus-visible, input[type="range"]:focus-visible, summary:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 1px;
   }
   .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .frow3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .stack { display: flex; flex-direction: column; gap: 10px; }
-  .growth-row { display: grid; grid-template-columns: 1fr 76px; gap: 10px; align-items: end; }
+  .growth-row { display: grid; grid-template-columns: 1fr 72px; gap: 10px; align-items: end; }
   input[type="range"] { accent-color: var(--accent); padding: 0; border: 0; background: transparent; width: 100%; }
 
   button {
-    font: 600 13.5px var(--sans); color: var(--ink);
-    background: var(--surface);
-    border: 1px solid var(--baseline); border-radius: 4px;
-    padding: 7px 12px; cursor: pointer;
+    font: 600 13.5px var(--sans); color: var(--ink); background: var(--surface);
+    border: 1px solid var(--baseline); border-radius: 4px; padding: 7px 12px; cursor: pointer;
   }
   button:hover { border-color: var(--ink-2); }
   button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   button.ghost { border-color: transparent; color: var(--ink-2); }
   button.ghost:hover { color: var(--ink); }
+  button.small { font-size: 12px; padding: 4px 9px; }
 
-  .grant-card { border-top: 3px solid var(--gcolor, var(--accent)); }
-  .grant-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
-  .grant-head h3 { font-family: var(--serif); font-size: 16px; font-weight: 600; margin: 0; }
-  .grant-head .cost { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .rail-group-label { font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--muted); margin: 6px 2px 0; }
+
+  /* collapsible grant cards */
+  details.grant {
+    background: var(--surface); border: 1px solid var(--hairline);
+    border-left: 3px solid var(--gcolor, var(--accent));
+    border-radius: 6px;
+  }
+  details.grant > summary {
+    list-style: none; cursor: pointer; padding: 12px 16px;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  details.grant > summary::-webkit-details-marker { display: none; }
+  details.grant > summary::before {
+    content: ""; width: 7px; height: 7px; flex: none; align-self: center;
+    border-right: 1.6px solid var(--muted); border-bottom: 1.6px solid var(--muted);
+    transform: rotate(-45deg); transition: transform 0.15s;
+  }
+  details.grant[open] > summary::before { transform: rotate(45deg); }
+  details.grant > summary h3 { font-family: var(--serif); font-size: 16px; font-weight: 600; margin: 0; }
+  details.grant > summary .gsum { margin-left: auto; font-size: 12px; color: var(--muted);
+    font-variant-numeric: tabular-nums; text-align: right; }
+  details.grant .gbody { padding: 4px 16px 16px; }
+  fieldset.sect { border: 0; border-top: 1px solid var(--grid); margin: 12px 0 0; padding: 10px 0 0; }
+  fieldset.sect legend { font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--muted); padding: 0 6px 0 0; }
+
+  /* price path editor */
+  details.pricepath .pp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; margin-top: 10px; }
+  details.pricepath .pp-cell label { font-size: 11px; color: var(--muted); display: block; font-variant-numeric: tabular-nums; }
+  details.pricepath .pp-cell input {
+    width: 100%; font: 13px var(--sans); color: var(--ink); background: var(--page);
+    border: 1px solid var(--baseline); border-radius: 4px; padding: 4px 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  details.pricepath .pp-cell.anchor input { border-color: var(--accent); font-weight: 600; }
+  details.pricepath summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 
   /* ============ stat tiles ============ */
   .tiles { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
-  @media (max-width: 860px) { .tiles { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-  .tile { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 14px 16px; }
+  @media (max-width: 880px) { .tiles { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .tile { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 14px 16px; position: relative; overflow: hidden; }
   .tile .t-label { font-size: 12px; color: var(--ink-2); margin-bottom: 4px; }
-  .tile .t-value { font-size: 26px; font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; }
+  .tile .t-value { font-size: 27px; font-weight: 600; line-height: 1.12; letter-spacing: -0.01em; }
   .tile .t-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
   .tile .t-sub.pos { color: var(--good-text); }
+  .tile .t-sub.neg { color: var(--s-loan); }
+  .tile svg.spark { position: absolute; right: 10px; bottom: 8px; opacity: 0.9; }
 
   /* ============ charts ============ */
   .chart-card { position: relative; }
@@ -209,15 +213,25 @@
     position: absolute; pointer-events: none; z-index: 5;
     background: var(--surface); border: 1px solid var(--hairline);
     border-radius: 5px; padding: 8px 10px; font-size: 12.5px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.13);
-    min-width: 150px; display: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.14); min-width: 150px; display: none;
   }
   .tooltip .tt-title { color: var(--muted); font-size: 11.5px; margin-bottom: 5px; }
   .tooltip .tt-row { display: flex; align-items: center; gap: 7px; padding: 1.5px 0; }
   .tooltip .tt-key { width: 12px; height: 2.5px; border-radius: 1px; flex: none; }
   .tooltip .tt-val { font-weight: 600; font-variant-numeric: tabular-nums; }
   .tooltip .tt-name { color: var(--ink-2); }
-  .footnote { font-size: 12px; color: var(--muted); margin: 10px 0 0; max-width: 78ch; }
+  .footnote { font-size: 12px; color: var(--muted); margin: 10px 0 0; max-width: 80ch; }
+
+  /* departure scrubber */
+  .depart { border-top: 1px solid var(--grid); margin-top: 14px; padding-top: 12px; }
+  .depart .d-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-bottom: 6px; }
+  .depart .d-title { font-size: 12px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-2); }
+  .depart .d-date { font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--accent-ink); }
+  .depart .d-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-top: 10px; }
+  @media (max-width: 720px) { .depart .d-stats { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .dstat .ds-label { font-size: 11.5px; color: var(--muted); }
+  .dstat .ds-value { font-size: 16.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .dstat .ds-note { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
   /* ============ table ============ */
   .table-scroll { overflow-x: auto; }
@@ -226,7 +240,7 @@
   th:first-child, td:first-child { text-align: left; padding-left: 2px; }
   td:last-child, th:last-child { padding-right: 2px; }
   thead th { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-2); border-bottom: 1px solid var(--baseline); }
-  tbody td { border-bottom: 1px solid var(--grid); color: var(--ink); }
+  tbody td { border-bottom: 1px solid var(--grid); }
   tbody tr.today-row td { background: color-mix(in srgb, var(--accent-soft) 34%, transparent); }
   .neg { color: var(--s-loan); }
 
@@ -234,17 +248,21 @@
   details.math summary { cursor: pointer; font-weight: 600; color: var(--ink); }
   details.math ul { padding-left: 20px; }
   details.math li { margin: 4px 0; }
+  .empty { padding: 40px 0; text-align: center; color: var(--muted); font-size: 14px; }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
 <div class="wrap">
   <header class="masthead">
-    <p class="eyebrow">Private stock &middot; Annual grants &middot; Employer loans</p>
-    <h1>Stock Grant Modeler</h1>
-    <p class="lede">Each year's offer — shares, price, vesting, and loan terms — is a grant card on the
-      left. Adjust the growth assumption and financing choices to see what your position is worth over
-      time, what you'd walk away with, and what the loans actually cost. Everything saves in your browser.</p>
+    <div>
+      <p class="eyebrow">Private stock &middot; Annual grants &middot; Employer loans</p>
+      <h1>Stock Grant Modeler</h1>
+      <p class="lede">Every year's offer is a grant card on the left — shares, price, vesting structure, and
+        loan terms are all editable. Set a growth assumption (or type in real prices year by year), scrub the
+        departure slider, and compare scenarios. Everything saves in your browser.</p>
+    </div>
+    <div class="seal" id="seal" aria-hidden="true"></div>
   </header>
 
   <div class="cols">
@@ -256,20 +274,50 @@
           <div class="growth-row">
             <div class="field">
               <label for="growth-range">Annual price growth</label>
-              <input id="growth-range" type="range" min="0" max="25" step="0.5">
+              <input id="growth-range" type="range" min="0" max="30" step="0.5">
             </div>
             <div class="field">
               <label for="growth-num">%</label>
               <input id="growth-num" type="number" min="-20" max="60" step="0.5">
             </div>
           </div>
-          <div class="field">
-            <label for="horizon">Project through year</label>
-            <input id="horizon" type="number" min="2026" max="2070" step="1">
+          <div class="frow">
+            <div class="field">
+              <label for="horizon">Through year</label>
+              <input id="horizon" type="number" min="2026" max="2070" step="1">
+            </div>
+            <div class="field">
+              <label for="prior-shares">Prior vested shares</label>
+              <input id="prior-shares" type="number" min="0" step="1" title="Vested shares from grants before the ones modeled here — available for share-exchange down payments">
+            </div>
+          </div>
+          <div class="frow">
+            <div class="field">
+              <label for="compare-on">Compare scenario</label>
+              <select id="compare-on">
+                <option value="off">Off</option>
+                <option value="on">Second growth rate</option>
+              </select>
+            </div>
+            <div class="field" id="compare-field" hidden>
+              <label for="compare-num">Compare growth %</label>
+              <input id="compare-num" type="number" min="-20" max="60" step="0.5">
+            </div>
           </div>
         </div>
       </section>
 
+      <section class="card pricepath-card">
+        <details class="pricepath">
+          <summary>Price path, year by year</summary>
+          <p class="sub" style="margin-top:8px">Grant prices anchor the path (outlined). Type over any year to
+            pin it; later years grow from the last pinned price.</p>
+          <div class="pp-grid" id="pp-grid"></div>
+          <div style="margin-top:10px"><button id="pp-clear" class="small ghost" type="button">Clear pinned overrides</button></div>
+        </details>
+      </section>
+
+      <p class="rail-group-label">Grants</p>
       <div id="grant-list" class="stack"></div>
 
       <div style="display:flex; gap:10px;">
@@ -285,21 +333,28 @@
         <div class="chart-head">
           <div>
             <h2>Position over time</h2>
-            <p class="sub">Redemption value of all shares, loan payoff, and the net if you left, month by month.</p>
+            <p class="sub">Redemption value of everything you hold, loan payoff, and the net if you left — month by month.
+              Ticks on the baseline are vesting dates; diamonds mark loan balloons.</p>
           </div>
         </div>
         <div class="legend" id="legend-pos"></div>
         <div class="chart-body" id="chart-pos"></div>
-        <p class="footnote">Vested shares redeem at the modeled price; unvested shares redeem at what you
-          paid for them, and loan payoff includes interest accrued to date — this is the departure math in
-          the purchase agreement.</p>
+
+        <div class="depart" id="depart">
+          <div class="d-head">
+            <span class="d-title">If you left on</span>
+            <span class="d-date" id="d-date">—</span>
+          </div>
+          <input id="d-range" type="range" min="0" max="1" step="1" aria-label="Departure date">
+          <div class="d-stats" id="d-stats"></div>
+        </div>
       </section>
 
       <section class="card chart-card">
         <div class="chart-head">
           <div>
             <h2>Shares vesting by year</h2>
-            <p class="sub">Each grant vests 25% a year on September&nbsp;30, starting the year after purchase.</p>
+            <p class="sub" id="vest-sub">Each grant's schedule, stacked by calendar year.</p>
           </div>
         </div>
         <div class="legend" id="legend-vest"></div>
@@ -310,14 +365,12 @@
         <div class="chart-head">
           <div>
             <h2>Out-of-pocket by year</h2>
-            <p class="sub">Purchases and down payments, annual interest, and the loan balloon when each loan comes due.</p>
+            <p class="sub">Purchases and down payments, annual interest, and each loan's balloon when it comes due.</p>
           </div>
         </div>
         <div class="legend" id="legend-cash"></div>
         <div class="chart-body" id="chart-cash"></div>
-        <p class="footnote">Interest shown here is what you pay in cash each December&nbsp;31. If a grant is
-          set to capitalize interest instead, that interest rolls into the loan and shows up in the balloon.
-          A balloon can also be paid by redeeming shares rather than cash.</p>
+        <p class="footnote" id="cash-note"></p>
       </section>
 
       <section class="card">
@@ -330,20 +383,26 @@
         <details class="math">
           <summary>How the math works</summary>
           <ul>
-            <li><strong>Price path.</strong> The board sets one price per calendar year, so the model steps the
-              price every January&nbsp;1 by your growth assumption. A grant year with a real price you've entered
-              anchors the path — later years grow from the most recent known price.</li>
-            <li><strong>Vesting.</strong> 25% per year on September&nbsp;30, first vest the year after the grant;
-              each tranche rounds down to a whole share and the final date picks up the remainder.</li>
+            <li><strong>Price path.</strong> One price per calendar year, stepping each January&nbsp;1 by your growth
+              assumption. Grant-year prices and any prices you pin in the editor anchor the path; later years grow
+              from the most recent anchor.</li>
+            <li><strong>Vesting.</strong> Equal tranches on September&nbsp;30, starting the chosen number of years
+              after the grant. Tranches round down to whole shares; the final date picks up the remainder.</li>
             <li><strong>Loan interest.</strong> Accrues daily (actual days &divide; 365) from September&nbsp;30 of the
-              grant year, first payment due December&nbsp;31 of the following year — matching the disclosure's
-              day count. Interest is due each December&nbsp;31; unpaid interest capitalizes into principal at the
-              capitalization rate. Principal is a single balloon due June&nbsp;30, nine years after the grant.</li>
+              grant year, first payment due December&nbsp;31 of the following year — matching the disclosure's day
+              count exactly. Interest is due each December&nbsp;31; unpaid interest capitalizes into principal at the
+              capitalization rate. Principal is a single balloon due June&nbsp;30 of the year you set (nine years
+              after the grant, per the standard terms).</li>
+            <li><strong>Share exchange.</strong> A down payment paid by exchanging vested shares consumes prior
+              vested shares first, then the oldest modeled grant's vested shares, at that year's price; any shortfall
+              is paid in cash. Exchanged shares leave your holdings.</li>
+            <li><strong>Payroll deduct.</strong> Spreads the down payment across the twelve paychecks of the following
+              year. The IRS treats total&nbsp;&times;&nbsp;loan rate as taxable income that year (not modeled).</li>
             <li><strong>Walk-away value.</strong> Vested shares &times; current price, plus unvested shares at your
-              purchase price, minus every loan's payoff (principal + accrued interest) — i.e., what a departure
-              redemption would net you.</li>
-            <li><strong>Not modeled:</strong> taxes on gains at sale, payroll-deduct imputed interest, tax loans,
-              share-exchange down payments, and minimum-redemption rules.</li>
+              purchase price, minus every loan's payoff (principal + interest accrued to the day) — the departure
+              math in the purchase agreement.</li>
+            <li><strong>Not modeled:</strong> taxes on gains at sale, imputed-interest tax, tax loans, and
+              minimum-redemption rules.</li>
           </ul>
         </details>
       </section>
@@ -355,36 +414,56 @@
 "use strict";
 /* ================= defaults & state ================= */
 const DEFAULT_STATE = {
-  growth: 10,
-  horizon: 2036,
+  growth: 10, compareOn: false, compareGrowth: 4.06, horizon: 2036,
+  priorShares: 0,
+  priceOverrides: {},                       /* year -> pinned price */
   grants: [
-    { id: 1, year: 2025, shares: 10000, price: 5.00, financing: "loan",
-      downPct: 10, ratePct: 4.06, interestMode: "pay", capRatePct: 4.06 }
+    { id: 1, year: 2025, shares: 10000, price: 5.00,
+      financing: "loan", downPct: 10, ratePct: 4.06,
+      interestMode: "pay", capRatePct: 4.06,
+      downMethod: "cash",                   /* cash | payroll | exchange */
+      vestStart: 1, vestYears: 4, loanTerm: 9 }
   ]
 };
+const GRANT_DEFAULTS = { financing: "loan", downPct: 10, ratePct: 4.06, interestMode: "pay",
+  capRatePct: 4.06, downMethod: "cash", vestStart: 1, vestYears: 4, loanTerm: 9 };
 
-const LS_KEY = "stock-grant-modeler-v1";
+const LS_KEY = "stock-grant-modeler-v2";
 let state = loadState();
 
 function loadState() {
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    let raw = localStorage.getItem(LS_KEY);
+    if (!raw) {                                        /* migrate v1 if present */
+      const v1 = localStorage.getItem("stock-grant-modeler-v1");
+      if (v1) {
+        const s1 = JSON.parse(v1);
+        const s = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        s.growth = s1.growth ?? s.growth; s.horizon = s1.horizon ?? s.horizon;
+        s.grants = (s1.grants || []).map(g => ({ ...GRANT_DEFAULTS, ...g }));
+        return s;
+      }
+    }
     if (raw) {
       const s = JSON.parse(raw);
-      if (s && Array.isArray(s.grants)) return s;
+      if (s && Array.isArray(s.grants)) {
+        s.grants = s.grants.map(g => ({ ...GRANT_DEFAULTS, ...g }));
+        s.priceOverrides = s.priceOverrides || {};
+        return s;
+      }
     }
-  } catch (e) { /* private mode etc. */ }
+  } catch (e) {}
   return JSON.parse(JSON.stringify(DEFAULT_STATE));
 }
-function saveState() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {}
-}
+function saveState() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
 
 /* ================= date & money helpers ================= */
 const MS_DAY = 86400000;
 const dUTC = (y, m, d) => Date.UTC(y, m, d);
 const daysBetween = (a, b) => Math.round((b - a) / MS_DAY);
 const TODAY = (() => { const n = new Date(); return dUTC(n.getFullYear(), n.getMonth(), n.getDate()); })();
+const fmtDate = t => new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+const fmtMonth = t => new Date(t).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 
 const fmtFull = v => (v < 0 ? "−$" : "$") + Math.round(Math.abs(v)).toLocaleString("en-US");
 function fmtCompact(v) {
@@ -394,13 +473,14 @@ function fmtCompact(v) {
   return s + "$" + Math.round(a);
 }
 const fmtShares = v => Math.round(v).toLocaleString("en-US");
+const fmtKShares = v => v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0) + "K" : String(v);
 
 /* ================= the model ================= */
-/* Price path: one price per calendar year. Grant-year prices anchor it;
-   other years grow from the latest known price. */
-function buildPricePath(grants, growth, y0, y1) {
+function buildPricePathFn(grants, growth, y0, y1) {
   const anchors = new Map();
   for (const g of grants) if (g.price > 0) anchors.set(g.year, g.price);
+  for (const [y, p] of Object.entries(state.priceOverrides))
+    if (p > 0) anchors.set(+y, +p);                    /* pinned overrides win */
   const path = new Map();
   let base = anchors.size ? anchors.get(Math.min(...anchors.keys())) : 0;
   for (let y = y0; y <= y1; y++) {
@@ -408,51 +488,47 @@ function buildPricePath(grants, growth, y0, y1) {
     else base = base * (1 + growth / 100);
     path.set(y, base);
   }
-  return y => path.get(Math.min(Math.max(y, y0), y1)) ?? 0;
+  return Object.assign(y => path.get(Math.min(Math.max(y, y0), y1)) ?? 0, { anchors, path });
 }
 
 function vestEvents(g) {
-  const per = Math.floor(g.shares * 0.25);
-  return [1, 2, 3, 4].map(k => ({
-    date: dUTC(g.year + k, 8, 30),
-    year: g.year + k,
-    shares: k < 4 ? per : g.shares - 3 * per
-  }));
+  const n = Math.max(1, Math.round(g.vestYears || 4));
+  const per = Math.floor(g.shares / n);
+  const evs = [];
+  for (let k = 0; k < n; k++) {
+    const year = g.year + (g.vestStart || 1) + k;
+    evs.push({ date: dUTC(year, 8, 30), year, shares: k < n - 1 ? per : g.shares - per * (n - 1) });
+  }
+  return evs;
 }
 const vestedAt = (g, t) => vestEvents(g).reduce((s, e) => s + (t >= e.date ? e.shares : 0), 0);
 
-/* Loan schedule per grant. Day count mirrors the disclosure: the first period
-   counts the disbursement day (so 2025's first payment covers 458 days), full
-   Dec-31-to-Dec-31 years count as 365 even across leap years, and the final
-   stub is actual days / 365. */
-function loanSchedule(g) {
+/* Loan engine — day count mirrors the Truth-in-Lending disclosure: the first
+   period counts the disbursement day, full Dec-31→Dec-31 years count as 365
+   even across leap years, and the final stub is actual days / 365. */
+function loanSchedule(g, downCash) {
   if (g.financing !== "loan") return null;
   const cost = g.shares * g.price;
   const base = cost * (1 - g.downPct / 100);
+  const term = Math.max(1, Math.round(g.loanTerm || 9));
   const disb = dUTC(g.year, 8, 30);
-  const due = dUTC(g.year + 9, 5, 30);
+  const due = dUTC(g.year + term, 5, 30);
   const r1 = g.ratePct / 100, r2 = (g.capRatePct ?? g.ratePct) / 100;
 
-  const rows = [];             // {date, year, interest, paidCash, capAdded, balanceAfter}
+  const rows = [];
   let cap = 0, prev = disb, first = true;
-  for (let y = g.year + 1; y <= g.year + 9; y++) {
-    const end = y === g.year + 9 ? due : dUTC(y, 11, 31);
+  for (let y = g.year + 1; y <= g.year + term; y++) {
+    const end = y === g.year + term ? due : dUTC(y, 11, 31);
     let days = daysBetween(prev, end) + (first ? 1 : 0);
     if (!first && days === 366) days = 365;
     const interest = (base * r1 + cap * r2) * days / 365;
     const isFinal = end === due;
     const payCash = isFinal || g.interestMode === "pay";
     if (!payCash) cap += interest;
-    rows.push({
-      date: end, year: y, interest,
-      paidCash: payCash ? interest : 0,
-      capAdded: payCash ? 0 : interest,
-      balanceAfter: isFinal ? 0 : base + cap
-    });
+    rows.push({ date: end, year: y, interest, paidCash: payCash ? interest : 0,
+                capAdded: payCash ? 0 : interest });
     prev = end; first = false;
   }
-
-  /* payoff at any time t = principal so far + interest accrued since last event */
   function payoffAt(t) {
     if (t < disb || t >= due) return 0;
     let capNow = 0, prevD = disb, isFirst = true;
@@ -462,72 +538,99 @@ function loanSchedule(g) {
     }
     let days = daysBetween(prevD, t) + (isFirst ? 1 : 0);
     if (days < 0) days = 0;
-    const accrued = (base * r1 + capNow * r2) * days / 365;
-    return base + capNow + accrued;
+    return base + capNow + (base * r1 + capNow * r2) * days / 365;
   }
-
-  const balloon = rows[rows.length - 1];
+  const last = rows[rows.length - 1];
   return { base, disb, due, rows, payoffAt,
-           balloonAmount: base + rows.slice(0, -1).reduce((s, r) => s + r.capAdded, 0) + balloon.interest,
-           balloonYear: balloon.year };
+           balloonAmount: base + rows.slice(0, -1).reduce((s, r) => s + r.capAdded, 0) + last.interest,
+           balloonYear: last.year, downCash };
 }
 
 function buildModel() {
-  const grants = state.grants.filter(g => g.shares > 0 && g.price > 0);
+  const grants = state.grants.filter(g => g.shares > 0 && g.price > 0)
+    .sort((a, b) => a.year - b.year);
   if (!grants.length) return null;
-  const sorted = [...grants].sort((a, b) => a.year - b.year);
-  const y0 = sorted[0].year;
-  const lastVest = Math.max(...grants.map(g => g.year + 4));
-  const lastDue = Math.max(...grants.map(g => g.financing === "loan" ? g.year + 9 : g.year));
-  const horizon = Math.max(state.horizon, y0 + 1);
-  const y1 = Math.max(horizon, lastVest);
-  const priceAt = buildPricePath(grants, state.growth, y0, Math.max(y1, lastDue));
-  const loans = new Map(grants.map(g => [g.id, loanSchedule(g)]));
+  const y0 = grants[0].year;
+  const lastVest = Math.max(...grants.map(g => g.year + (g.vestStart || 1) + (g.vestYears || 4) - 1));
+  const lastDue = Math.max(...grants.map(g => g.financing === "loan" ? g.year + (g.loanTerm || 9) : g.year));
+  const y1 = Math.max(state.horizon, y0 + 1, lastVest);
+  const priceAt = buildPricePathFn(grants, state.growth, y0, Math.max(y1, lastDue));
+  const priceAtB = state.compareOn
+    ? buildPricePathFn(grants, state.compareGrowth, y0, Math.max(y1, lastDue)) : null;
 
-  function snapshot(t) {
+  /* --- chronological purchase sim: share-exchange down payments --- */
+  /* pool of vested shares available at each purchase: prior shares + modeled
+     vesting before that date, minus what's already been exchanged */
+  const exchanged = new Map();               /* grantId -> shares consumed from that grant */
+  let priorConsumed = 0, exchangeShort = 0;
+  const downCashByGrant = new Map();
+  for (const g of grants) {
+    const cost = g.shares * g.price;
+    const down = g.financing === "loan" ? cost * g.downPct / 100 : 0;
+    if (g.financing !== "loan" || g.downMethod !== "exchange" || down <= 0) {
+      downCashByGrant.set(g.id, down); continue;
+    }
+    const t = dUTC(g.year, 8, 30);
+    let need = Math.ceil(down / g.price);     /* shares to exchange, at grant price */
+    let cash = 0;
+    let pool = Math.max(0, (state.priorShares || 0) - priorConsumed);
+    const takePrior = Math.min(pool, need);
+    priorConsumed += takePrior; need -= takePrior;
+    for (const h of grants) {
+      if (need <= 0 || h.id === g.id || h.year >= g.year) continue;
+      const avail = Math.max(0, vestedAt(h, t) - (exchanged.get(h.id) || 0));
+      const take = Math.min(avail, need);
+      if (take > 0) { exchanged.set(h.id, (exchanged.get(h.id) || 0) + take); need -= take; }
+    }
+    if (need > 0) { cash = need * g.price; exchangeShort += need; }
+    downCashByGrant.set(g.id, cash);
+  }
+  const loans = new Map(grants.map(g => [g.id, loanSchedule(g, downCashByGrant.get(g.id))]));
+
+  function snapshot(t, pfn) {
+    const p = (pfn || priceAt)(new Date(t).getUTCFullYear());
     let gross = 0, payoff = 0, vestedSh = 0, totalSh = 0;
-    const yr = new Date(t).getUTCFullYear();
-    const p = priceAt(yr);
     for (const g of grants) {
-      const owned = t >= dUTC(g.year, 8, 30);
-      if (!owned) continue;
-      totalSh += g.shares;
-      const v = vestedAt(g, t);
+      if (t < dUTC(g.year, 8, 30)) continue;
+      const ex = exchanged.get(g.id) || 0;
+      const v = Math.max(0, vestedAt(g, t) - ex);
+      totalSh += g.shares - ex;
       vestedSh += v;
-      gross += v * p + (g.shares - v) * g.price;
+      gross += v * p + (g.shares - (vestedAt(g, t))) * g.price;
       const L = loans.get(g.id);
       if (L) payoff += L.payoffAt(t);
     }
     return { gross, payoff, net: gross - payoff, vestedSh, totalSh, price: p };
   }
 
-  /* monthly series for the line chart */
   const months = [];
   for (let y = y0; y <= y1; y++)
     for (let m = 0; m < 12; m++) {
-      const t = dUTC(y, m + 1, 0);         // last day of month
-      months.push({ t, y, m, ...snapshot(t) });
+      const t = dUTC(y, m + 1, 0);
+      const s = snapshot(t);
+      const b = priceAtB ? snapshot(t, priceAtB) : null;
+      months.push({ t, y, m, ...s, netB: b ? b.net : null });
     }
 
-  /* annual cash flows */
-  const cash = new Map();                   // year -> {purchase, interest, payoff}
+  /* --- annual cash flows --- */
+  const cash = new Map();
   const bump = (y, k, v) => {
+    if (v <= 0) return;
     if (!cash.has(y)) cash.set(y, { purchase: 0, interest: 0, payoff: 0 });
     cash.get(y)[k] += v;
   };
   for (const g of grants) {
     const cost = g.shares * g.price;
     if (g.financing === "loan") {
-      bump(g.year, "purchase", cost * g.downPct / 100);
+      const dc = downCashByGrant.get(g.id) ?? cost * g.downPct / 100;
+      bump(g.downMethod === "payroll" ? g.year + 1 : g.year, "purchase", dc);
       const L = loans.get(g.id);
       for (const r of L.rows.slice(0, -1)) bump(r.year, "interest", r.paidCash);
       bump(L.balloonYear, "payoff", L.balloonAmount);
-    } else {
-      bump(g.year, "purchase", cost);
-    }
+    } else bump(g.year, "purchase", cost);
   }
 
-  /* vesting by calendar year, per grant */
+  /* --- vesting by calendar year, per grant (net of exchanged shares) --- */
   const vestYears = [];
   for (let y = y0 + 1; y <= lastVest; y++) {
     const parts = grants.map(g => {
@@ -537,170 +640,31 @@ function buildModel() {
     if (parts.length) vestYears.push({ year: y, parts, total: parts.reduce((s, p) => s + p.shares, 0) });
   }
 
-  return { grants: sorted, y0, y1, priceAt, loans, months, cash, vestYears, snapshot };
+  const vestDates = grants.flatMap(g => vestEvents(g).map(e => e.date));
+  const balloonDates = [...loans.values()].filter(Boolean).map(L => L.due);
+  const totalExchanged = priorConsumed + [...exchanged.values()].reduce((a, b) => a + b, 0);
+
+  return { grants, y0, y1, priceAt, priceAtB, loans, months, cash, vestYears,
+           snapshot, vestDates, balloonDates, exchanged, priorConsumed, totalExchanged, exchangeShort };
 }
 
-/* ================= controls rendering ================= */
-const $ = id => document.getElementById(id);
-const VEST_COLORS = ["var(--vest-1)", "var(--vest-2)", "var(--vest-3)", "var(--vest-4)", "var(--vest-5)", "var(--vest-6)"];
-
-/* With few grants, start deeper in the ramp so a lone grant gets a solid blue,
-   not the palest step. */
-function vestColorIdx(i, count) {
-  const start = Math.max(0, Math.min(2, 4 - count));
-  return Math.min(start + i, VEST_COLORS.length - 1);
-}
-function grantColor(g) {
-  const sorted = state.grants.slice().sort((a, b) => a.year - b.year);
-  return VEST_COLORS[vestColorIdx(sorted.findIndex(x => x.id === g.id), sorted.length)];
-}
-
-function numInput(labelText, value, attrs, onChange) {
-  const wrap = document.createElement("div"); wrap.className = "field";
-  const label = document.createElement("label"); label.textContent = labelText;
-  const input = document.createElement("input"); input.type = "number";
-  Object.assign(input, attrs); input.value = value;
-  const uid = "f" + Math.random().toString(36).slice(2, 8);
-  input.id = uid; label.htmlFor = uid;
-  input.addEventListener("change", () => { onChange(parseFloat(input.value) || 0); update(); });
-  wrap.append(label, input);
-  return wrap;
-}
-function selectInput(labelText, value, options, onChange) {
-  const wrap = document.createElement("div"); wrap.className = "field";
-  const label = document.createElement("label"); label.textContent = labelText;
-  const sel = document.createElement("select");
-  for (const [val, text] of options) {
-    const o = document.createElement("option"); o.value = val; o.textContent = text;
-    if (val === value) o.selected = true; sel.append(o);
-  }
-  const uid = "f" + Math.random().toString(36).slice(2, 8);
-  sel.id = uid; label.htmlFor = uid;
-  sel.addEventListener("change", () => { onChange(sel.value); update(); });
-  wrap.append(label, sel);
-  return wrap;
-}
-
-function renderControls() {
-  $("growth-range").value = state.growth;
-  $("growth-num").value = state.growth;
-  $("horizon").value = state.horizon;
-
-  const list = $("grant-list");
-  list.textContent = "";
-  const sorted = state.grants.slice().sort((a, b) => a.year - b.year);
-  for (const g of sorted) {
-    const card = document.createElement("section");
-    card.className = "card grant-card";
-    card.style.setProperty("--gcolor", grantColor(g));
-
-    const head = document.createElement("div"); head.className = "grant-head";
-    const h3 = document.createElement("h3"); h3.textContent = g.year + " grant";
-    const cost = document.createElement("span"); cost.className = "cost";
-    cost.textContent = fmtFull(g.shares * g.price);
-    head.append(h3, cost);
-    card.append(head);
-
-    const stack = document.createElement("div"); stack.className = "stack";
-    const row1 = document.createElement("div"); row1.className = "frow3";
-    row1.append(
-      numInput("Year", g.year, { min: 2000, max: 2069, step: 1 }, v => { g.year = Math.round(v); }),
-      numInput("Shares", g.shares, { min: 0, step: 100 }, v => { g.shares = Math.round(v); }),
-      numInput("Price $", g.price, { min: 0, step: 0.01 }, v => { g.price = v; })
-    );
-    stack.append(row1);
-
-    stack.append(selectInput("Financing", g.financing, [
-      ["loan", "Down payment + company loan"],
-      ["cash", "Pay in full out-of-pocket"]
-    ], v => { g.financing = v; }));
-
-    if (g.financing === "loan") {
-      const row2 = document.createElement("div"); row2.className = "frow";
-      row2.append(
-        numInput("Down %", g.downPct, { min: 0, max: 100, step: 1 }, v => { g.downPct = v; }),
-        numInput("Loan rate %", g.ratePct, { min: 0, max: 20, step: 0.01 }, v => { g.ratePct = v; })
-      );
-      stack.append(row2);
-      stack.append(selectInput("Annual interest", g.interestMode, [
-        ["pay", "Pay in cash each Dec 31"],
-        ["cap", "Capitalize into the loan"]
-      ], v => { g.interestMode = v; }));
-      if (g.interestMode === "cap") {
-        stack.append(numInput("Capitalized-interest rate % (AFR)", g.capRatePct ?? g.ratePct,
-          { min: 0, max: 20, step: 0.01 }, v => { g.capRatePct = v; }));
-      }
-    }
-
-    const rm = document.createElement("button");
-    rm.type = "button"; rm.className = "ghost"; rm.textContent = "Remove grant";
-    rm.addEventListener("click", () => {
-      state.grants = state.grants.filter(x => x.id !== g.id);
-      update();
-    });
-    stack.append(rm);
-    card.append(stack);
-    list.append(card);
-  }
-}
-
-$("growth-range").addEventListener("input", e => { state.growth = parseFloat(e.target.value); $("growth-num").value = state.growth; update(false); });
-$("growth-range").addEventListener("change", () => update());
-$("growth-num").addEventListener("change", e => { state.growth = parseFloat(e.target.value) || 0; update(); });
-$("horizon").addEventListener("change", e => { state.horizon = Math.round(parseFloat(e.target.value) || 2036); update(); });
-$("add-grant").addEventListener("click", () => {
-  const sorted = state.grants.slice().sort((a, b) => a.year - b.year);
-  const last = sorted[sorted.length - 1];
-  const year = last ? last.year + 1 : new Date().getFullYear();
-  const price = last ? +(last.price * (1 + state.growth / 100)).toFixed(2) : 5.00;
-  state.grants.push({
-    id: Date.now(), year, price,
-    shares: last ? last.shares : 10000,
-    financing: last ? last.financing : "loan",
-    downPct: last ? last.downPct : 10,
-    ratePct: last ? last.ratePct : 4.06,
-    interestMode: last ? last.interestMode : "pay",
-    capRatePct: last ? (last.capRatePct ?? last.ratePct) : 4.06
-  });
-  if (state.horizon < year + 10) state.horizon = year + 10;
-  update();
-});
-$("reset").addEventListener("click", () => {
-  state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-  update();
-});
-
-/* ================= tiles ================= */
-function renderTiles(model) {
-  const tiles = $("tiles"); tiles.textContent = "";
-  const mk = (label, value, sub, subClass) => {
-    const t = document.createElement("div"); t.className = "tile";
-    const l = document.createElement("div"); l.className = "t-label"; l.textContent = label;
-    const v = document.createElement("div"); v.className = "t-value"; v.textContent = value;
-    t.append(l, v);
-    if (sub) { const s = document.createElement("div"); s.className = "t-sub" + (subClass ? " " + subClass : ""); s.textContent = sub; t.append(s); }
-    tiles.append(t);
+/* ================= tween ================= */
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const tweens = {};
+function tween(key, from, to, draw) {
+  if (tweens[key]) cancelAnimationFrame(tweens[key]);
+  if (REDUCED || !from || from.length !== to.length) { draw(to, true); return; }
+  const t0 = performance.now(), dur = 280;
+  const stepFn = now => {
+    const k = Math.min(1, (now - t0) / dur);
+    const e = 1 - Math.pow(1 - k, 3);
+    draw(to.map((v, i) => from[i] + (v - from[i]) * e), k >= 1);
+    if (k < 1) tweens[key] = requestAnimationFrame(stepFn);
   };
-  if (!model) { mk("No grants", "—", "Add a grant to begin"); return; }
-
-  const now = model.snapshot(TODAY);
-  let cashIn = 0;
-  for (const [y, c] of model.cash) {
-    if (y < new Date(TODAY).getUTCFullYear()) cashIn += c.purchase + c.interest + c.payoff;
-    else if (y === new Date(TODAY).getUTCFullYear()) cashIn += c.purchase; // assume this year's Dec interest not yet paid
-  }
-  const endT = dUTC(model.y1, 11, 31);
-  const end = model.snapshot(endT);
-
-  mk("Net if you left today", fmtFull(now.net),
-     fmtShares(now.vestedSh) + " of " + fmtShares(now.totalSh) + " shares vested");
-  mk("Loan payoff today", fmtFull(now.payoff), "principal + accrued interest");
-  mk("Cash in so far", fmtFull(cashIn), "down payments + interest paid");
-  mk("Net at end of " + model.y1, fmtFull(end.net),
-     "at " + state.growth + "%/yr price growth", end.net > cashIn ? "pos" : "");
+  tweens[key] = requestAnimationFrame(stepFn);
 }
 
-/* ================= svg chart helpers ================= */
+/* ================= svg & chart helpers ================= */
 const SVG = "http://www.w3.org/2000/svg";
 function sv(tag, attrs, parent) {
   const n = document.createElementNS(SVG, tag);
@@ -717,6 +681,10 @@ function niceTicks(max, n) {
   for (let v = 0; v <= max + 1e-9; v += step) ticks.push(v);
   if (ticks[ticks.length - 1] < max) ticks.push(ticks[ticks.length - 1] + step);
   return ticks;
+}
+function seriesHex(varRef) {
+  const name = varRef.startsWith("var(") ? varRef.slice(4, -1) : varRef;
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || varRef;
 }
 function makeTooltip(container) {
   let tt = container.parentElement.querySelector(".tooltip");
@@ -755,31 +723,322 @@ function legendInto(el, items) {
     k.append(sw, t); el.append(k);
   }
 }
+function roundedTopRect(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h);
+  if (r <= 0) return `M${x} ${y}h${w}v${h}h${-w}Z`;
+  return `M${x} ${y + r}a${r} ${r} 0 0 1 ${r} ${-r}h${w - 2 * r}a${r} ${r} 0 0 1 ${r} ${r}v${h - r}h${-w}Z`;
+}
+const shortYear = (y, band) => band < 38 ? "’" + String(y).slice(2) : String(y);
 
-/* ================= chart 1: position lines ================= */
+/* ================= controls ================= */
+const $ = id => document.getElementById(id);
+const VEST_COLORS = ["var(--vest-1)", "var(--vest-2)", "var(--vest-3)", "var(--vest-4)", "var(--vest-5)", "var(--vest-6)"];
+function vestColorIdx(i, count) {
+  const start = Math.max(0, Math.min(2, 4 - count));
+  return Math.min(start + i, VEST_COLORS.length - 1);
+}
+function grantColor(g) {
+  const sorted = state.grants.slice().sort((a, b) => a.year - b.year);
+  return VEST_COLORS[vestColorIdx(sorted.findIndex(x => x.id === g.id), sorted.length)];
+}
+
+function numInput(labelText, value, attrs, onChange) {
+  const wrap = document.createElement("div"); wrap.className = "field";
+  const label = document.createElement("label"); label.textContent = labelText;
+  const input = document.createElement("input"); input.type = "number";
+  Object.assign(input, attrs); input.value = value;
+  const uid = "f" + Math.random().toString(36).slice(2, 8);
+  input.id = uid; label.htmlFor = uid;
+  input.addEventListener("change", () => { onChange(parseFloat(input.value) || 0); update(); });
+  wrap.append(label, input);
+  return wrap;
+}
+function selectInput(labelText, value, options, onChange) {
+  const wrap = document.createElement("div"); wrap.className = "field";
+  const label = document.createElement("label"); label.textContent = labelText;
+  const sel = document.createElement("select");
+  for (const [val, text] of options) {
+    const o = document.createElement("option"); o.value = val; o.textContent = text;
+    if (val === value) o.selected = true; sel.append(o);
+  }
+  const uid = "f" + Math.random().toString(36).slice(2, 8);
+  sel.id = uid; label.htmlFor = uid;
+  sel.addEventListener("change", () => { onChange(sel.value); update(); });
+  wrap.append(label, sel);
+  return wrap;
+}
+function sect(legendText) {
+  const fs = document.createElement("fieldset"); fs.className = "sect";
+  const lg = document.createElement("legend"); lg.textContent = legendText;
+  fs.append(lg);
+  return fs;
+}
+
+const openGrants = new Set();
+function renderControls() {
+  $("growth-range").value = state.growth;
+  $("growth-num").value = state.growth;
+  $("horizon").value = state.horizon;
+  $("prior-shares").value = state.priorShares || 0;
+  $("compare-on").value = state.compareOn ? "on" : "off";
+  $("compare-field").hidden = !state.compareOn;
+  $("compare-num").value = state.compareGrowth;
+
+  const list = $("grant-list");
+  list.textContent = "";
+  const sorted = state.grants.slice().sort((a, b) => a.year - b.year);
+  for (const g of sorted) {
+    const det = document.createElement("details");
+    det.className = "grant";
+    det.style.setProperty("--gcolor", grantColor(g));
+    if (openGrants.has(g.id)) det.open = true;
+    det.addEventListener("toggle", () => { det.open ? openGrants.add(g.id) : openGrants.delete(g.id); });
+
+    const summary = document.createElement("summary");
+    const h3 = document.createElement("h3"); h3.textContent = g.year + " grant";
+    const gsum = document.createElement("span"); gsum.className = "gsum";
+    gsum.textContent = fmtShares(g.shares) + " sh · " + fmtFull(g.shares * g.price) +
+      (g.financing === "loan" ? " · loan" : " · cash");
+    summary.append(h3, gsum);
+    det.append(summary);
+
+    const body = document.createElement("div"); body.className = "gbody";
+    const stack = document.createElement("div"); stack.className = "stack";
+
+    const row1 = document.createElement("div"); row1.className = "frow3";
+    row1.append(
+      numInput("Year", g.year, { min: 2000, max: 2069, step: 1 }, v => { g.year = Math.round(v); }),
+      numInput("Shares", g.shares, { min: 0, step: 100 }, v => { g.shares = Math.round(v); }),
+      numInput("Price $", g.price, { min: 0, step: 0.01 }, v => { g.price = v; })
+    );
+    stack.append(row1);
+
+    const vestSect = sect("Vesting");
+    const vrow = document.createElement("div"); vrow.className = "frow";
+    vrow.append(
+      numInput("First vest (yrs after)", g.vestStart, { min: 0, max: 10, step: 1 }, v => { g.vestStart = Math.round(v); }),
+      numInput("Equal tranches", g.vestYears, { min: 1, max: 10, step: 1 }, v => { g.vestYears = Math.round(v); })
+    );
+    vestSect.append(vrow);
+    stack.append(vestSect);
+
+    const finSect = sect("Financing");
+    const finStack = document.createElement("div"); finStack.className = "stack";
+    finStack.append(selectInput("Method", g.financing, [
+      ["loan", "Down payment + company loan"],
+      ["cash", "Pay in full out-of-pocket"]
+    ], v => { g.financing = v; }));
+    if (g.financing === "loan") {
+      const row2 = document.createElement("div"); row2.className = "frow3";
+      row2.append(
+        numInput("Down %", g.downPct, { min: 0, max: 100, step: 1 }, v => { g.downPct = v; }),
+        numInput("Rate %", g.ratePct, { min: 0, max: 20, step: 0.01 }, v => { g.ratePct = v; }),
+        numInput("Due (yrs)", g.loanTerm, { min: 1, max: 30, step: 1 }, v => { g.loanTerm = Math.round(v); })
+      );
+      finStack.append(row2);
+      finStack.append(selectInput("Down payment paid by", g.downMethod, [
+        ["cash", "Cash, December of grant year"],
+        ["payroll", "Payroll deduct, 12 months next year"],
+        ["exchange", "Exchange vested shares"]
+      ], v => { g.downMethod = v; }));
+      finStack.append(selectInput("Annual interest", g.interestMode, [
+        ["pay", "Pay in cash each Dec 31"],
+        ["cap", "Capitalize into the loan"]
+      ], v => { g.interestMode = v; }));
+      if (g.interestMode === "cap") {
+        finStack.append(numInput("Capitalized-interest rate % (AFR)", g.capRatePct ?? g.ratePct,
+          { min: 0, max: 20, step: 0.01 }, v => { g.capRatePct = v; }));
+      }
+    }
+    finSect.append(finStack);
+    stack.append(finSect);
+
+    const btns = document.createElement("div");
+    btns.style.cssText = "display:flex; gap:8px; margin-top:2px";
+    const dup = document.createElement("button");
+    dup.type = "button"; dup.className = "small"; dup.textContent = "Duplicate for next year";
+    dup.addEventListener("click", () => { addGrantAfter(g); });
+    const rm = document.createElement("button");
+    rm.type = "button"; rm.className = "small ghost"; rm.textContent = "Remove";
+    rm.addEventListener("click", () => { state.grants = state.grants.filter(x => x.id !== g.id); update(); });
+    btns.append(dup, rm);
+    stack.append(btns);
+
+    body.append(stack); det.append(body); list.append(det);
+  }
+}
+
+function renderPriceEditor(model) {
+  const grid = $("pp-grid");
+  grid.textContent = "";
+  if (!model) return;
+  for (let y = model.y0; y <= model.y1; y++) {
+    const cell = document.createElement("div"); cell.className = "pp-cell";
+    const isAnchor = model.priceAt.anchors.has(y);
+    if (isAnchor) cell.classList.add("anchor");
+    const label = document.createElement("label"); label.textContent = y;
+    const input = document.createElement("input");
+    input.type = "number"; input.min = "0"; input.step = "0.01";
+    input.value = model.priceAt(y).toFixed(2);
+    input.setAttribute("aria-label", "Price for " + y);
+    input.addEventListener("change", () => {
+      const v = parseFloat(input.value);
+      if (v > 0) state.priceOverrides[y] = +v.toFixed(2);
+      else delete state.priceOverrides[y];
+      update();
+    });
+    cell.append(label, input);
+    grid.append(cell);
+  }
+}
+
+function addGrantAfter(template) {
+  const sorted = state.grants.slice().sort((a, b) => a.year - b.year);
+  const last = template || sorted[sorted.length - 1];
+  const year = last ? last.year + 1 : new Date().getFullYear();
+  const price = last ? +(last.price * (1 + state.growth / 100)).toFixed(2) : 5.00;
+  const g = { ...GRANT_DEFAULTS, ...(last ? { ...last } : {}), id: Date.now(), year, price };
+  delete g.idOld;
+  state.grants.push(g);
+  if (state.horizon < year + (g.loanTerm || 9) + 1) state.horizon = year + (g.loanTerm || 9) + 1;
+  openGrants.clear(); openGrants.add(g.id);
+  update();
+}
+
+$("growth-range").addEventListener("input", e => { state.growth = parseFloat(e.target.value); $("growth-num").value = state.growth; update(false); });
+$("growth-range").addEventListener("change", () => update());
+$("growth-num").addEventListener("change", e => { state.growth = parseFloat(e.target.value) || 0; update(); });
+$("horizon").addEventListener("change", e => { state.horizon = Math.round(parseFloat(e.target.value) || 2036); update(); });
+$("prior-shares").addEventListener("change", e => { state.priorShares = Math.max(0, Math.round(parseFloat(e.target.value) || 0)); update(); });
+$("compare-on").addEventListener("change", e => { state.compareOn = e.target.value === "on"; update(); });
+$("compare-num").addEventListener("change", e => { state.compareGrowth = parseFloat(e.target.value) || 0; update(); });
+$("pp-clear").addEventListener("click", () => { state.priceOverrides = {}; update(); });
+$("add-grant").addEventListener("click", () => addGrantAfter(null));
+$("reset").addEventListener("click", () => {
+  state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  openGrants.clear();
+  update();
+});
+
+/* ================= seal & tiles ================= */
+function renderSeal(model) {
+  const seal = $("seal");
+  seal.textContent = "";
+  if (!model) return;
+  const totalSh = model.grants.reduce((s, g) => s + g.shares, 0);
+  const totalCost = model.grants.reduce((s, g) => s + g.shares * g.price, 0);
+  const lines = [
+    ["Grants", String(model.grants.length)],
+    ["Shares", fmtShares(totalSh)],
+    ["Total cost", fmtFull(totalCost)]
+  ];
+  for (const [k, v] of lines) {
+    const div = document.createElement("div");
+    const b = document.createElement("b"); b.textContent = v;
+    div.append(k + " ", b);
+    seal.append(div);
+  }
+}
+
+function sparkline(values, w, h, hexLine, hexDot) {
+  const svg = sv("svg", { class: "spark", width: w, height: h, viewBox: `0 0 ${w} ${h}`, "aria-hidden": "true" });
+  const lo = Math.min(...values), hi = Math.max(...values);
+  const span = hi - lo || 1;
+  const pts = values.map((v, i) => [
+    2 + (w - 8) * (i / (values.length - 1)),
+    2 + (h - 6) * (1 - (v - lo) / span)
+  ]);
+  sv("path", { d: pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(""),
+    fill: "none", stroke: hexLine, "stroke-width": 1.5, "stroke-linejoin": "round" }, svg);
+  const last = pts[pts.length - 1];
+  sv("circle", { cx: last[0], cy: last[1], r: 2.5, fill: hexDot }, svg);
+  return svg;
+}
+
+function renderTiles(model) {
+  const tiles = $("tiles"); tiles.textContent = "";
+  const mk = (label, value, sub, subClass) => {
+    const t = document.createElement("div"); t.className = "tile";
+    const l = document.createElement("div"); l.className = "t-label"; l.textContent = label;
+    const v = document.createElement("div"); v.className = "t-value"; v.textContent = value;
+    t.append(l, v);
+    if (sub) { const s = document.createElement("div"); s.className = "t-sub" + (subClass ? " " + subClass : ""); s.textContent = sub; t.append(s); }
+    tiles.append(t);
+    return t;
+  };
+  if (!model) { mk("No grants", "—", "Add a grant to begin"); return; }
+
+  const now = model.snapshot(TODAY);
+  const thisYear = new Date(TODAY).getUTCFullYear();
+  let cashIn = 0;
+  for (const [y, c] of model.cash) {
+    if (y < thisYear) cashIn += c.purchase + c.interest + c.payoff;
+    else if (y === thisYear) cashIn += c.purchase;
+  }
+  const end = model.snapshot(dUTC(model.y1, 11, 31));
+  /* out-of-pocket through the horizon, excluding balloons (the loan is already
+     netted out of walk-away value; balloons can be paid from share proceeds) */
+  let pocket = 0;
+  for (const [y, c] of model.cash) if (y <= model.y1) pocket += c.purchase + c.interest;
+
+  const t1 = mk("Net if you left today", fmtFull(now.net),
+    fmtShares(now.vestedSh) + " of " + fmtShares(now.totalSh) + " shares vested");
+  const nets = model.months.filter((d, i) => i % Math.ceil(model.months.length / 40) === 0).map(d => d.net);
+  t1.append(sparkline(nets, 84, 30, seriesHex("var(--spark)"), seriesHex("var(--accent)")));
+
+  mk("Loan payoff today", fmtFull(now.payoff), "principal + accrued interest");
+  mk("Cash in so far", fmtFull(cashIn), "down payments + interest paid");
+  const mult = pocket > 0 ? (end.net / pocket) : 0;
+  mk("Net at end of " + model.y1, fmtFull(end.net),
+    (mult > 0 ? mult.toFixed(1) + "× your down + interest, " : "") + "at " + state.growth + "%/yr",
+    end.net > pocket ? "pos" : "");
+}
+
+/* ================= chart 1: position over time ================= */
+let heroPrev = null;
 function renderPositionChart(model) {
   const host = $("chart-pos");
-  host.textContent = "";
-  legendInto($("legend-pos"), [
+  const legendItems = [
     { label: "Gross share value", color: "var(--s-value)", line: true },
     { label: "Loan payoff", color: "var(--s-loan)", line: true },
     { label: "Net if you left", color: "var(--s-net)", line: true }
-  ]);
-  if (!model) return;
+  ];
+  if (model && model.priceAtB) legendItems.push(
+    { label: "Net at " + state.compareGrowth + "% growth", color: "var(--s-net-alt)", line: true });
+  legendInto($("legend-pos"), legendItems);
+  if (!model) { host.textContent = ""; heroPrev = null; return; }
 
-  const W = Math.max(host.clientWidth || 800, 420), H = 320;
-  const M = { t: 14, r: 120, b: 26, l: 8 };
   const data = model.months;
-  const maxV = Math.max(...data.map(d => Math.max(d.gross, d.payoff)), 1);
+  const hasB = !!model.priceAtB;
+  const flat = [];
+  for (const d of data) flat.push(d.gross, d.payoff, d.net, hasB ? d.netB : 0);
+  const from = heroPrev && heroPrev.length === flat.length ? heroPrev : null;
+  heroPrev = flat;
+  tween("hero", from, flat, (vals, final) => drawHero(host, model, vals, final));
+}
+
+function drawHero(host, model, flat, final) {
+  host.textContent = "";
+  const data = model.months, n = data.length, hasB = !!model.priceAtB;
+  const G = i => flat[i * 4], P = i => flat[i * 4 + 1], N = i => flat[i * 4 + 2], NB = i => flat[i * 4 + 3];
+
+  const W = Math.max(host.clientWidth || 840, 420), H = 360;
+  const M = { t: 18, r: 118, b: 30, l: 8 };
+  let maxV = 1;
+  for (let i = 0; i < n; i++) maxV = Math.max(maxV, G(i), P(i), hasB ? NB(i) : 0);
   const ticks = niceTicks(maxV, 5);
   const yMax = ticks[ticks.length - 1];
-  const iw = W - M.l - M.r, ih = H - M.t - M.b;
   const yTickW = 8 + Math.max(...ticks.map(v => fmtCompact(v).length)) * 7;
-  const px = i => M.l + yTickW + (iw - yTickW) * (i / (data.length - 1));
+  const iw = W - M.l - M.r - yTickW, ih = H - M.t - M.b;
+  const px = i => M.l + yTickW + iw * (i / (n - 1));
   const py = v => M.t + ih * (1 - v / yMax);
+  const tToX = t => {
+    const t0 = data[0].t, t1 = data[n - 1].t;
+    return M.l + yTickW + iw * Math.min(1, Math.max(0, (t - t0) / (t1 - t0)));
+  };
 
   const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", tabindex: "0",
-    "aria-label": "Line chart of gross share value, loan payoff, and net walk-away value over time" }, host);
+    "aria-label": "Gross share value, loan payoff, and net walk-away value over time" }, host);
 
   for (const t of ticks) {
     sv("line", { x1: M.l + yTickW, x2: W - M.r, y1: py(t), y2: py(t),
@@ -789,64 +1048,106 @@ function renderPositionChart(model) {
   }
   const yearIdx = [];
   data.forEach((d, i) => { if (d.m === 0) yearIdx.push(i); });
+  const yearStep = Math.ceil(yearIdx.length / 10);
   for (const i of yearIdx) {
-    if ((data[i].y - model.y0) % Math.ceil(yearIdx.length / 10) !== 0) continue;
-    sv("text", { x: px(i), y: H - 8, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" }, svg)
+    if ((data[i].y - model.y0) % yearStep !== 0) continue;
+    sv("text", { x: px(i), y: H - 10, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" }, svg)
       .textContent = data[i].y;
+  }
+
+  /* vest ticks along the baseline; balloon diamonds on the loan line */
+  for (const vd of model.vestDates) {
+    const x = tToX(vd);
+    if (x <= M.l + yTickW || x >= W - M.r) continue;
+    sv("line", { x1: x, x2: x, y1: py(0) - 5, y2: py(0), stroke: "var(--muted)", "stroke-width": 1.4 }, svg);
   }
 
   /* today marker */
   const ti = data.findIndex(d => d.t >= TODAY);
-  if (ti > 0 && ti < data.length - 1) {
-    sv("line", { x1: px(ti), x2: px(ti), y1: M.t, y2: M.t + ih, stroke: "var(--baseline)",
-      "stroke-width": 1, "stroke-dasharray": "none" }, svg);
-    sv("text", { x: px(ti), y: M.t - 3, "text-anchor": "middle", "font-size": 10.5, fill: "var(--muted)" }, svg)
+  if (ti > 0 && ti < n - 1) {
+    sv("line", { x1: px(ti), x2: px(ti), y1: M.t, y2: M.t + ih, stroke: "var(--baseline)", "stroke-width": 1 }, svg);
+    sv("text", { x: px(ti), y: M.t - 5, "text-anchor": "middle", "font-size": 10.5, fill: "var(--muted)" }, svg)
       .textContent = "today";
   }
 
-  const series = [
-    { key: "gross", name: "Gross share value", color: "var(--s-value)" },
-    { key: "payoff", name: "Loan payoff", color: "var(--s-loan)" },
-    { key: "net", name: "Net if you left", color: "var(--s-net)" }
-  ];
-  for (const s of series) {
-    const dPath = data.map((d, i) => (i ? "L" : "M") + px(i).toFixed(1) + " " + py(d[s.key]).toFixed(1)).join("");
-    sv("path", { d: dPath, fill: "none", stroke: s.color, "stroke-width": 2,
-      "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+  /* departure marker */
+  if (departIdx >= 0 && departIdx < n) {
+    const x = px(departIdx);
+    sv("line", { x1: x, x2: x, y1: M.t, y2: M.t + ih, stroke: "var(--accent)", "stroke-width": 1.5,
+      opacity: 0.85 }, svg);
+    sv("path", { d: `M${x - 5} ${M.t - 2}h10l-5 7Z`, fill: "var(--accent)" }, svg);
   }
 
-  /* direct end labels with collision nudge + leader lines */
-  const ends = series.map(s => ({ s, y: py(data[data.length - 1][s.key]), v: data[data.length - 1][s.key] }))
-    .sort((a, b) => a.y - b.y);
+  /* area washes for gross & net, then lines */
+  const base = py(0);
+  const areaPath = get => {
+    let d = "M" + px(0).toFixed(1) + " " + base.toFixed(1);
+    for (let i = 0; i < n; i++) d += "L" + px(i).toFixed(1) + " " + py(get(i)).toFixed(1);
+    return d + "L" + px(n - 1).toFixed(1) + " " + base.toFixed(1) + "Z";
+  };
+  sv("path", { d: areaPath(G), fill: "var(--s-value)", opacity: 0.08 }, svg);
+  sv("path", { d: areaPath(N), fill: "var(--s-net)", opacity: 0.10 }, svg);
+
+  const linePath = get => {
+    let d = "";
+    for (let i = 0; i < n; i++) d += (i ? "L" : "M") + px(i).toFixed(1) + " " + py(get(i)).toFixed(1);
+    return d;
+  };
+  if (hasB) sv("path", { d: linePath(NB), fill: "none", stroke: "var(--s-net-alt)", "stroke-width": 2,
+    "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+  const series = [
+    { get: G, name: "Gross share value", color: "var(--s-value)" },
+    { get: P, name: "Loan payoff", color: "var(--s-loan)" },
+    { get: N, name: "Net if you left", color: "var(--s-net)" }
+  ];
+  for (const s of series)
+    sv("path", { d: linePath(s.get), fill: "none", stroke: s.color, "stroke-width": 2,
+      "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+
+  for (const bd of model.balloonDates) {
+    const x = tToX(bd);
+    if (x <= M.l + yTickW || x >= W - M.r) continue;
+    let bi = data.findIndex(d => d.t >= bd);
+    if (bi < 0) bi = n - 1;
+    const y = py(P(Math.max(0, bi - 1)));
+    sv("path", { d: `M${x} ${y - 5}l5 5l-5 5l-5 -5Z`, fill: "var(--s-loan)",
+      stroke: "var(--surface)", "stroke-width": 2 }, svg);
+  }
+
+  /* direct end labels with collision nudge + leaders */
+  const endSeries = hasB
+    ? series.concat([{ get: NB, name: "Net at alt growth", color: "var(--s-net-alt)" }]) : series;
+  const ends = endSeries.map(s => ({ s, v: s.get(n - 1), y: py(s.get(n - 1)) })).sort((a, b) => a.y - b.y);
   for (let i = 1; i < ends.length; i++)
     if (ends[i].y - ends[i - 1].y < 15) ends[i].y = ends[i - 1].y + 15;
   for (const e of ends) {
-    const x0 = px(data.length - 1), yLine = py(e.v);
+    const x0 = px(n - 1), yLine = py(e.v);
     if (Math.abs(e.y - yLine) > 2)
       sv("line", { x1: x0 + 2, x2: x0 + 10, y1: yLine, y2: e.y, stroke: "var(--baseline)", "stroke-width": 1 }, svg);
     sv("circle", { cx: x0, cy: yLine, r: 4, fill: e.s.color, stroke: "var(--surface)", "stroke-width": 2 }, svg);
-    const g = sv("text", { x: x0 + 13, y: e.y + 4, "font-size": 11.5, fill: "var(--ink)",
-      "font-weight": 600, style: "font-variant-numeric:tabular-nums" }, svg);
-    g.textContent = fmtCompact(e.v);
+    sv("text", { x: x0 + 13, y: e.y + 4, "font-size": 11.5, fill: "var(--ink)", "font-weight": 600,
+      style: "font-variant-numeric:tabular-nums" }, svg).textContent = fmtCompact(e.v);
   }
 
-  /* crosshair + tooltip */
+  if (!final) return;
+
+  /* crosshair + tooltip (final frame only) */
   const tt = makeTooltip(host);
   const cross = sv("line", { y1: M.t, y2: M.t + ih, stroke: "var(--baseline)", "stroke-width": 1, visibility: "hidden" }, svg);
-  const dots = series.map(s => sv("circle", { r: 4.5, fill: s.color, stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" }, svg));
+  const hoverSeries = hasB ? series.concat([{ get: NB, name: "Net at " + state.compareGrowth + "%", color: "var(--s-net-alt)" }]) : series;
+  const dots = hoverSeries.map(s => sv("circle", { r: 4.5, fill: s.color, stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" }, svg));
   let focusIdx = -1;
   const showAt = i => {
     focusIdx = i;
     const d = data[i], x = px(i);
     cross.setAttribute("x1", x); cross.setAttribute("x2", x);
     cross.setAttribute("visibility", "visible");
-    series.forEach((s, k) => {
-      dots[k].setAttribute("cx", x); dots[k].setAttribute("cy", py(d[s.key]));
+    hoverSeries.forEach((s, k) => {
+      dots[k].setAttribute("cx", x); dots[k].setAttribute("cy", py(s.get(i)));
       dots[k].setAttribute("visibility", "visible");
     });
-    const label = new Date(d.t).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
-    ttRows(tt, label + " · price $" + d.price.toFixed(2),
-      series.map(s => ({ color: seriesHex(s.color), name: s.name, value: fmtFull(d[s.key]) })));
+    ttRows(tt, fmtMonth(d.t) + " · price $" + d.price.toFixed(2),
+      hoverSeries.map(s => ({ color: seriesHex(s.color), name: s.name, value: fmtFull(s.get(i)) })));
     const rect = svg.getBoundingClientRect();
     positionTooltip(tt, host, (x / W) * rect.width, (py(Math.max(d.gross, d.payoff)) / H) * rect.height);
   };
@@ -854,28 +1155,60 @@ function renderPositionChart(model) {
   svg.addEventListener("pointermove", ev => {
     const rect = svg.getBoundingClientRect();
     const xu = (ev.clientX - rect.left) / rect.width * W;
-    let i = Math.round((xu - (M.l + yTickW)) / (iw - yTickW) * (data.length - 1));
-    i = Math.max(0, Math.min(data.length - 1, i));
-    showAt(i);
+    let i = Math.round((xu - (M.l + yTickW)) / iw * (n - 1));
+    showAt(Math.max(0, Math.min(n - 1, i)));
   });
   svg.addEventListener("pointerleave", hide);
   svg.addEventListener("keydown", ev => {
     if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
       ev.preventDefault();
       const step = ev.key === "ArrowRight" ? 1 : -1;
-      showAt(Math.max(0, Math.min(data.length - 1, (focusIdx < 0 ? Math.max(ti, 0) : focusIdx) + step)));
+      showAt(Math.max(0, Math.min(n - 1, (focusIdx < 0 ? Math.max(ti, 0) : focusIdx) + step)));
     } else if (ev.key === "Escape") hide();
   });
   svg.addEventListener("blur", hide);
 }
 
-function seriesHex(varRef) {
-  const name = varRef.startsWith("var(") ? varRef.slice(4, -1) : varRef;
-  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  return v || varRef;
-}
+/* ================= departure scrubber ================= */
+let departIdx = -1;
+function renderDepart(model, keepIdx) {
+  const wrapEl = $("depart");
+  if (!model) { wrapEl.hidden = true; return; }
+  wrapEl.hidden = false;
+  const n = model.months.length;
+  const range = $("d-range");
+  range.max = n - 1;
+  if (!keepIdx || departIdx < 0 || departIdx >= n) {
+    let ti = model.months.findIndex(d => d.t >= TODAY);
+    departIdx = ti < 0 ? n - 1 : ti;
+  }
+  range.value = departIdx;
+  const d = model.months[departIdx];
+  $("d-date").textContent = fmtDate(d.t);
 
-/* ================= chart 2: vesting stacked columns ================= */
+  const stats = $("d-stats"); stats.textContent = "";
+  const p = d.price;
+  const vestedVal = d.vestedSh * p;
+  const unvestedSh = d.totalSh - d.vestedSh;
+  const mkStat = (label, value, note, cls) => {
+    const el = document.createElement("div"); el.className = "dstat";
+    const l = document.createElement("div"); l.className = "ds-label"; l.textContent = label;
+    const v = document.createElement("div"); v.className = "ds-value" + (cls ? " " + cls : ""); v.textContent = value;
+    el.append(l, v);
+    if (note) { const nt = document.createElement("div"); nt.className = "ds-note"; nt.textContent = note; el.append(nt); }
+    stats.append(el);
+  };
+  mkStat("Vested shares redeem", fmtFull(vestedVal), fmtShares(d.vestedSh) + " sh × $" + p.toFixed(2));
+  mkStat("Unvested at cost", fmtFull(d.gross - vestedVal), fmtShares(unvestedSh) + " sh at purchase price");
+  mkStat("Loan payoff", fmtFull(-d.payoff), "offset from proceeds", "neg");
+  mkStat("You'd walk away with", fmtFull(d.net), null, d.net >= 0 ? "" : "neg");
+}
+$("d-range").addEventListener("input", () => {
+  departIdx = +$("d-range").value;
+  if (model) { renderDepart(model, true); renderPositionChart(model); }
+});
+
+/* ================= chart 2: vesting ================= */
 function renderVestChart(model) {
   const host = $("chart-vest");
   host.textContent = "";
@@ -885,15 +1218,18 @@ function renderVestChart(model) {
   legendInto(legend, grants.length > 1
     ? grants.map((g, i) => ({ label: g.year + " grant", color: VEST_COLORS[vestColorIdx(i, grants.length)] }))
     : []);
+  $("vest-sub").textContent = grants.length > 1
+    ? "Each grant's schedule, stacked by calendar year."
+    : "Vesting on September 30 each year — " + (grants[0].vestYears || 4) + " equal tranches.";
 
   const years = model.vestYears;
-  if (!years.length) return;
-  const W = Math.max(host.clientWidth || 800, 420), H = 240;
+  if (!years.length) { host.append(Object.assign(document.createElement("div"), { className: "empty", textContent: "No vesting events in range." })); return; }
+  const W = Math.max(host.clientWidth || 840, 420), H = 250;
   const M = { t: 26, r: 10, b: 26, l: 8 };
   const maxV = Math.max(...years.map(y => y.total));
   const ticks = niceTicks(maxV, 4);
   const yMax = ticks[ticks.length - 1];
-  const yTickW = 8 + Math.max(...ticks.map(v => String(v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0) + "K" : v).length)) * 7 + 6;
+  const yTickW = 8 + Math.max(...ticks.map(v => fmtKShares(v).length)) * 7 + 6;
   const iw = W - M.l - M.r - yTickW, ih = H - M.t - M.b;
   const py = v => M.t + ih * (1 - v / yMax);
   const band = iw / years.length;
@@ -905,8 +1241,7 @@ function renderVestChart(model) {
     sv("line", { x1: M.l + yTickW, x2: W - M.r, y1: py(t), y2: py(t),
       stroke: t === 0 ? "var(--baseline)" : "var(--grid)", "stroke-width": 1 }, svg);
     sv("text", { x: M.l + yTickW - 6, y: py(t) + 4, "text-anchor": "end", "font-size": 11,
-      fill: "var(--muted)", style: "font-variant-numeric:tabular-nums" }, svg)
-      .textContent = t >= 1000 ? (t / 1000).toFixed(t % 1000 ? 1 : 0) + "K" : t;
+      fill: "var(--muted)", style: "font-variant-numeric:tabular-nums" }, svg).textContent = fmtKShares(t);
   }
 
   const tt = makeTooltip(host);
@@ -917,11 +1252,11 @@ function renderVestChart(model) {
       const gi = vestColorIdx(grants.findIndex(g => g.id === p.grant.id), grants.length);
       const y1 = py(acc + p.shares), y0 = py(acc);
       const topmost = pi === yr.parts.length - 1;
-      const h = Math.max(y0 - y1 - (topmost ? 0 : 2), 1);   /* 2px surface gap between segments */
+      const h = Math.max(y0 - y1 - (topmost ? 0 : 2), 1);
       const seg = sv("path", {
         d: roundedTopRect(x, y1, bw, h, topmost ? 4 : 0),
-        fill: VEST_COLORS[gi], tabindex: "0",
-        role: "img", "aria-label": p.grant.year + " grant, " + fmtShares(p.shares) + " shares vest in " + yr.year
+        fill: VEST_COLORS[gi], tabindex: "0", role: "img",
+        "aria-label": p.grant.year + " grant, " + fmtShares(p.shares) + " shares vest in " + yr.year
       }, svg);
       const show = () => {
         seg.setAttribute("opacity", "0.82");
@@ -937,40 +1272,55 @@ function renderVestChart(model) {
       acc += p.shares;
     });
     sv("text", { x: x + bw / 2, y: py(acc) - 6, "text-anchor": "middle", "font-size": 11,
-      fill: "var(--ink-2)", style: "font-variant-numeric:tabular-nums" }, svg)
-      .textContent = fmtShares(yr.total);
+      fill: "var(--ink-2)", style: "font-variant-numeric:tabular-nums" }, svg).textContent = fmtShares(yr.total);
     sv("text", { x: x + bw / 2, y: H - 8, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" }, svg)
-      .textContent = yr.year;
+      .textContent = shortYear(yr.year, band);
   });
 }
 
-function roundedTopRect(x, y, w, h, r) {
-  r = Math.min(r, w / 2, h);
-  if (r <= 0) return `M${x} ${y}h${w}v${h}h${-w}Z`;
-  return `M${x} ${y + r}a${r} ${r} 0 0 1 ${r} ${-r}h${w - 2 * r}a${r} ${r} 0 0 1 ${r} ${r}v${h - r}h${-w}Z`;
-}
-
-/* ================= chart 3: cash-flow stacked columns ================= */
+/* ================= chart 3: cash flow ================= */
+let cashPrev = null;
 function renderCashChart(model) {
-  const host = $("chart-cash");
-  host.textContent = "";
   const CATS = [
     { key: "interest", label: "Interest paid", color: "var(--cf-interest)" },
     { key: "purchase", label: "Purchase / down payment", color: "var(--cf-purchase)" },
     { key: "payoff", label: "Loan balloon", color: "var(--cf-payoff)" }
   ];
   legendInto($("legend-cash"), CATS.map(c => ({ label: c.label, color: c.color })));
-  if (!model) return;
+  const host = $("chart-cash");
+  if (!model) { host.textContent = ""; cashPrev = null; return; }
 
   const years = [...model.cash.keys()].sort((a, b) => a - b);
-  if (!years.length) return;
+  if (!years.length) { host.textContent = ""; return; }
   const full = [];
   for (let y = years[0]; y <= years[years.length - 1]; y++)
     full.push({ year: y, ...(model.cash.get(y) || { purchase: 0, interest: 0, payoff: 0 }) });
 
-  const W = Math.max(host.clientWidth || 800, 420), H = 250;
+  const note = [];
+  if (model.totalExchanged > 0)
+    note.push("Share-exchange down payments consumed " + fmtShares(model.totalExchanged) +
+      " vested shares (" + fmtShares(model.priorConsumed) + " prior" +
+      (model.totalExchanged > model.priorConsumed ? ", rest from modeled grants" : "") + ")" +
+      (model.exchangeShort > 0 ? "; " + fmtShares(model.exchangeShort) + " sh short — remainder paid in cash" : "") + ".");
+  note.push("Interest shown is cash paid each December 31; capitalized interest rolls into the balloon. Balloons can also be paid by redeeming shares.");
+  if (model.grants.some(g => g.financing === "loan" && g.downMethod === "payroll"))
+    note.push("Payroll-deduct down payments land in the following year's paychecks; the IRS treats total × rate as taxable income that year.");
+  $("cash-note").textContent = note.join(" ");
+
+  const flat = [];
+  for (const d of full) flat.push(d.interest, d.purchase, d.payoff);
+  const from = cashPrev && cashPrev.length === flat.length ? cashPrev : null;
+  cashPrev = flat;
+  tween("cash", from, flat, (vals, final) => drawCash(host, model, full, CATS, vals, final));
+}
+
+function drawCash(host, model, full, CATS, flat, final) {
+  host.textContent = "";
+  const W = Math.max(host.clientWidth || 840, 420), H = 250;
   const M = { t: 26, r: 10, b: 26, l: 8 };
-  const maxV = Math.max(...full.map(d => d.purchase + d.interest + d.payoff), 1);
+  const val = (di, ci) => flat[di * 3 + ci];
+  let maxV = 1;
+  full.forEach((d, di) => { maxV = Math.max(maxV, val(di, 0) + val(di, 1) + val(di, 2)); });
   const ticks = niceTicks(maxV, 4);
   const yMax = ticks[ticks.length - 1];
   const yTickW = 8 + Math.max(...ticks.map(v => fmtCompact(v).length)) * 7;
@@ -980,7 +1330,7 @@ function renderCashChart(model) {
   const bw = Math.min(24, band * 0.6);
 
   const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
-    "aria-label": "Stacked columns of annual out-of-pocket cash: interest, purchases and down payments, and loan balloons" }, host);
+    "aria-label": "Stacked columns of annual out-of-pocket cash" }, host);
   for (const t of ticks) {
     sv("line", { x1: M.l + yTickW, x2: W - M.r, y1: py(t), y2: py(t),
       stroke: t === 0 ? "var(--baseline)" : "var(--grid)", "stroke-width": 1 }, svg);
@@ -988,47 +1338,43 @@ function renderCashChart(model) {
       fill: "var(--muted)", style: "font-variant-numeric:tabular-nums" }, svg).textContent = fmtCompact(t);
   }
 
-  const tt = makeTooltip(host);
+  const tt = final ? makeTooltip(host) : null;
   full.forEach((d, di) => {
     const x = M.l + yTickW + band * di + (band - bw) / 2;
-    const total = d.interest + d.purchase + d.payoff;
-    if (total <= 0) {
-      sv("text", { x: x + bw / 2, y: H - 8, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" }, svg)
-        .textContent = shortYear(d.year, band);
-      return;
-    }
+    const parts = CATS.map((c, ci) => ({ c, v: val(di, ci) })).filter(p => p.v > 0.5);
+    const total = parts.reduce((s, p) => s + p.v, 0);
+    sv("text", { x: x + bw / 2, y: H - 8, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" }, svg)
+      .textContent = shortYear(d.year, band);
+    if (!parts.length) return;
     let acc = 0;
-    const parts = CATS.map(c => ({ c, v: d[c.key] })).filter(p => p.v > 0);
     parts.forEach((p, pi) => {
       const y1 = py(acc + p.v), y0 = py(acc);
       const topmost = pi === parts.length - 1;
       const h = Math.max(y0 - y1 - (topmost ? 0 : 2), 1);
       const seg = sv("path", {
         d: roundedTopRect(x, y1, bw, h, topmost ? 4 : 0),
-        fill: p.c.color, tabindex: "0", role: "img",
+        fill: p.c.color, tabindex: final ? "0" : "-1", role: "img",
         "aria-label": p.c.label + " " + fmtFull(p.v) + " in " + d.year
       }, svg);
-      const show = () => {
-        seg.setAttribute("opacity", "0.82");
-        ttRows(tt, String(d.year),
-          parts.map(q => ({ color: seriesHex(q.c.color), name: q.c.label, value: fmtFull(q.v) }))
-            .concat([{ color: "transparent", name: "total", value: fmtFull(total) }]));
-        const rect = svg.getBoundingClientRect();
-        positionTooltip(tt, host, ((x + bw / 2) / W) * rect.width, (y1 / H) * rect.height);
-      };
-      const hideT = () => { seg.removeAttribute("opacity"); tt.style.display = "none"; };
-      seg.addEventListener("pointerenter", show); seg.addEventListener("pointerleave", hideT);
-      seg.addEventListener("focus", show); seg.addEventListener("blur", hideT);
+      if (final) {
+        const show = () => {
+          seg.setAttribute("opacity", "0.82");
+          ttRows(tt, String(d.year),
+            parts.map(q => ({ color: seriesHex(q.c.color), name: q.c.label, value: fmtFull(q.v) }))
+              .concat([{ color: "transparent", name: "total", value: fmtFull(total) }]));
+          const rect = svg.getBoundingClientRect();
+          positionTooltip(tt, host, ((x + bw / 2) / W) * rect.width, (y1 / H) * rect.height);
+        };
+        const hideT = () => { seg.removeAttribute("opacity"); tt.style.display = "none"; };
+        seg.addEventListener("pointerenter", show); seg.addEventListener("pointerleave", hideT);
+        seg.addEventListener("focus", show); seg.addEventListener("blur", hideT);
+      }
       acc += p.v;
     });
     sv("text", { x: x + bw / 2, y: py(total) - 6, "text-anchor": "middle", "font-size": 11,
-      fill: "var(--ink-2)", style: "font-variant-numeric:tabular-nums" }, svg)
-      .textContent = fmtCompact(total);
-    sv("text", { x: x + bw / 2, y: H - 8, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" }, svg)
-      .textContent = shortYear(d.year, band);
+      fill: "var(--ink-2)", style: "font-variant-numeric:tabular-nums" }, svg).textContent = fmtCompact(total);
   });
 }
-const shortYear = (y, band) => band < 38 ? "’" + String(y).slice(2) : String(y);
 
 /* ================= detail table ================= */
 function renderTable(model) {
@@ -1037,14 +1383,15 @@ function renderTable(model) {
   const tbl = document.createElement("table");
   const thead = document.createElement("thead");
   const hr = document.createElement("tr");
-  for (const h of ["Year", "Price", "Vested shares", "Gross value", "Loan payoff", "Cash out", "Net if you left"]) {
-    const th = document.createElement("th"); th.textContent = h; hr.append(th);
-  }
+  const heads = ["Year", "Price", "Vested shares", "Gross value", "Loan payoff", "Cash out", "Net if you left"];
+  if (model.priceAtB) heads.push("Net at " + state.compareGrowth + "%");
+  for (const h of heads) { const th = document.createElement("th"); th.textContent = h; hr.append(th); }
   thead.append(hr); tbl.append(thead);
   const tbody = document.createElement("tbody");
   const thisYear = new Date(TODAY).getUTCFullYear();
   for (let y = model.y0; y <= model.y1; y++) {
-    const snap = model.snapshot(dUTC(y, 11, 31));
+    const t = dUTC(y, 11, 31);
+    const snap = model.snapshot(t);
     const c = model.cash.get(y) || { purchase: 0, interest: 0, payoff: 0 };
     const out = c.purchase + c.interest + c.payoff;
     const tr = document.createElement("tr");
@@ -1053,9 +1400,10 @@ function renderTable(model) {
       String(y), "$" + snap.price.toFixed(2),
       fmtShares(snap.vestedSh) + " / " + fmtShares(snap.totalSh),
       fmtFull(snap.gross), fmtFull(snap.payoff),
-      out > 0 ? fmtFull(out) : "—",
+      out > 0.5 ? fmtFull(out) : "—",
       fmtFull(snap.net)
     ];
+    if (model.priceAtB) cells.push(fmtFull(model.snapshot(t, model.priceAtB).net));
     cells.forEach((txt, i) => {
       const td = document.createElement("td"); td.textContent = txt;
       if (i === 4 && snap.payoff > 0) td.className = "neg";
@@ -1069,11 +1417,13 @@ function renderTable(model) {
 /* ================= update loop ================= */
 let model = null;
 function update(rebuildControls = true) {
-  state.grants = state.grants.filter(g => g);
   saveState();
   if (rebuildControls) renderControls();
   model = buildModel();
+  renderSeal(model);
+  renderPriceEditor(model);
   renderTiles(model);
+  renderDepart(model, true);
   renderPositionChart(model);
   renderVestChart(model);
   renderCashChart(model);
@@ -1083,9 +1433,11 @@ function update(rebuildControls = true) {
 let resizeTimer = null;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { renderPositionChart(model); renderVestChart(model); renderCashChart(model); }, 120);
+  resizeTimer = setTimeout(() => { heroPrev = null; cashPrev = null;
+    renderPositionChart(model); renderVestChart(model); renderCashChart(model); }, 120);
 });
-new MutationObserver(() => { renderPositionChart(model); renderVestChart(model); renderCashChart(model); })
+new MutationObserver(() => { heroPrev = null; cashPrev = null;
+  renderPositionChart(model); renderVestChart(model); renderCashChart(model); renderTiles(model); })
   .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
 update();
